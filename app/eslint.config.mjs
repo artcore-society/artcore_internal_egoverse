@@ -21,14 +21,14 @@ export default defineConfigWithVueTs(
 			// Enforce single quotes
 			'quotes': ['error', 'single'],
 
-			// Enforce semicolons
-			'semi': ['error', 'always'],
-
 			// Enforce indentation with tabs
 			'indent': ['error', 'tab', { SwitchCase: 1 }],
 
 			// Allow mixed spaces and tabs (disable warning)
 			'no-mixed-spaces-and-tabs': 0,
+
+			// Enforce spacing inside curly braces in import statements
+			'object-curly-spacing': ['error', 'always'],
 
 			// Vue-specific rules
 			'vue/attribute-hyphenation': ['error', 'always'],
