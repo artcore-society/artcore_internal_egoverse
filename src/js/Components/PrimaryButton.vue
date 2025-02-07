@@ -3,16 +3,16 @@ import { defineProps, defineEmits } from 'vue';
 
 // Define emits
 const emit = defineEmits<{
-  (click: []): void;
+  (e: 'click'): void
 }>();
 
 // Define props
-const props = defineProps<{
+defineProps<{
   disabled?: boolean;
   downloadFile?: boolean;
   downloadName?: string;
   method?: string;
-  href?: string | null;
+  href?: string;
 }>();
 </script>
 
