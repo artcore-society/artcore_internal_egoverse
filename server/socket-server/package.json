@@ -1,0 +1,22 @@
+{
+  "name": "socket-server",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "socket": "tsx watch src/main.ts"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "typescript": "~5.7.2",
+    "vite": "^6.1.0"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1",
+    "tsx": "^4.19.2"
+  }
+}
