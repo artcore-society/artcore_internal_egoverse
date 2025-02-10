@@ -1,7 +1,7 @@
 import { Scene } from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { IScene } from '../Interfaces/IScene.ts';
 import { IAvatarLobby } from '../Interfaces/IAvatarLobby.ts';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import ExperienceCamera from './ExperienceCamera.ts';
 import Avatar from './Avatar.ts';
 

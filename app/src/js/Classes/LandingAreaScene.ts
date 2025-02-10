@@ -1,6 +1,7 @@
 import { AmbientLight, DirectionalLight, HemisphereLight, OrthographicCamera } from 'three';
 import ExperienceScene from './ExperienceScene';
 import Avatar from './Avatar.ts';
+import { AvatarType } from '../Enums/AvatarType.ts';
 
 export class LandingAreaScene extends ExperienceScene {
 	constructor(canvas: HTMLCanvasElement) {
@@ -10,16 +11,19 @@ export class LandingAreaScene extends ExperienceScene {
 	}
 
 	init() {
-		// Set render action
-		this.setUpdateAction(() => {
-
-		});
-
 		// Setup landing area lighting
 		this.setupLighting();
 
 		// Set current player
-		this.currentPlayer = new Avatar(this.scene);
+		this.currentPlayer = new Avatar(this.scene, this.camera, AvatarType.CURRENT_PLAYER);
+
+		// Set render action
+		this.setUpdateAction((delta) => {
+			if(this.currentPlayer) {
+				// Update avatar
+				this.currentPlayer.update(delta);
+			}
+		});
 	}
 
 	setupLighting() {
