@@ -1,11 +1,11 @@
 import { AvatarType } from '../Enums/AvatarType.ts';
 import { IAvatarLobby } from '../Interfaces/IAvatarLobby.ts';
-import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
+import { IThreeScene } from '../Interfaces/IThreeScene.ts';
 import { AmbientLight, DirectionalLight, HemisphereLight, Object3D, OrthographicCamera, Scene } from 'three';
 import ExperienceCamera from './ExperienceCamera.ts';
 import Avatar from './Avatar.ts';
 
-export default abstract class ExperienceScene implements IExperienceScene, IAvatarLobby {
+export default abstract class ExperienceScene implements IThreeScene, IAvatarLobby {
 	public readonly scene: Scene;
 	public readonly camera: ExperienceCamera;
 	public cameraParent: Object3D;

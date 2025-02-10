@@ -1,15 +1,15 @@
 import { Clock } from 'three';
 import { SceneKey } from '../Enums/SceneKey';
-import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
+import { IThreeScene } from '../Interfaces/IThreeScene.ts';
 import ExperienceRenderer from './ExperienceRenderer.ts';
 
 export default class ThreeManager {
 	private readonly canvas: HTMLCanvasElement;
 	private readonly clock: Clock;
 	private readonly renderer: ExperienceRenderer;
-	private readonly scenes: Map<SceneKey, IExperienceScene>;
+	private readonly scenes: Map<SceneKey, IThreeScene>;
 	private animateFrameId: number | null = null;
-	private activeScene: IExperienceScene | null = null;
+	private activeScene: IThreeScene | null = null;
 
 	constructor(canvas: HTMLCanvasElement) {
 		this.canvas = canvas;
@@ -27,7 +27,7 @@ export default class ThreeManager {
 		this.animate();
 	}
 
-	addScene(key: SceneKey, scene: IExperienceScene): void {
+	addScene(key: SceneKey, scene: IThreeScene): void {
 		this.scenes.set(key, scene);
 	}
 

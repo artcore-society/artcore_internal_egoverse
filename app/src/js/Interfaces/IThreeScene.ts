@@ -1,7 +1,7 @@
 import { Object3D, Scene } from 'three';
 import ExperienceCamera from '../Classes/ExperienceCamera.ts';
 
-export interface IExperienceScene {
+export interface IThreeScene {
     scene: Scene;
     camera: ExperienceCamera;
     cameraParent: Object3D;
