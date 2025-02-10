@@ -1,6 +1,7 @@
 import { Clock } from 'three';
-import { SceneKey } from '../Enums/SceneKey';
 import { IScene } from '../Interfaces/IScene.ts';
+import { SceneKey } from '../Enums/SceneKey';
+import { CameraControls } from './CameraControls.ts';
 import ExperienceRenderer from './ExperienceRenderer.ts';
 
 export default class ThreeManager {
@@ -15,7 +16,7 @@ export default class ThreeManager {
 		this.canvas = canvas;
 		this.clock = new Clock();
 		this.scenes = new Map();
-		this.renderer = new ExperienceRenderer(canvas);
+		this.renderer = new ExperienceRenderer(this.canvas);
 
 		// Start animation loop
 		this.animate();

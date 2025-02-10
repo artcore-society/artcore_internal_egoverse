@@ -9,11 +9,6 @@ export class MeetingRoomScene extends ExperienceScene {
 	}
 
 	init() {
-		// Set render action
-		this.setUpdateAction(() => {
-
-		});
-
 		const geometry = new BoxGeometry( 1, 2, 1 );
 		const material = new MeshBasicMaterial( { color: 'red' } );
 		const cube = new Mesh( geometry, material );
