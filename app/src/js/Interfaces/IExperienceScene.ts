@@ -6,13 +6,11 @@ export interface IExperienceScene {
     scene: Scene;
     camera: ExperienceCamera;
     controls: OrbitControls;
-    renderAction: ((delta: number) => void) | null;
+    updateAction: ((delta: number) => void) | null;
 
-    setRenderAction(callback: (delta: number) => void): void;
+    setUpdateAction(callback: (delta: number) => void): void;
     setSceneSize(): void;
     resize(): void;
-    render(delta: number): void;
+    update(delta: number): void;
     destroy(): void;
-    pause(): void;
-    resume(): void;
 }

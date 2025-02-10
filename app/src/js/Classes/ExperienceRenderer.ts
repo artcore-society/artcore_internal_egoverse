@@ -7,5 +7,8 @@ export default class ExperienceRenderer extends WebGLRenderer {
 			antialias: true,
 			alpha: true
 		});
+
+		// Set renderer size
+		this.setSize(window.innerWidth, window.innerHeight);
 	}
 }

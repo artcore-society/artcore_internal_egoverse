@@ -10,7 +10,7 @@ export class LandingAreaScene extends ExperienceScene {
 
 	init() {
 		// Set render action
-		this.setRenderAction(() => {
+		this.setUpdateAction(() => {
 			console.log('rendering LANDING AREA');
 		});
 

@@ -7,21 +7,22 @@ export default abstract class ExperienceScene implements IExperienceScene {
 	public readonly scene: Scene;
 	public readonly camera: ExperienceCamera;
 	public readonly controls: OrbitControls;
-	public renderAction: ((delta: number) => void) | null;
-	private isPaused: boolean = false;
+	public updateAction: ((delta: number) => void) | null;
 
 	protected constructor(canvas: HTMLCanvasElement) {
 		this.scene = new Scene();
 		this.camera = new ExperienceCamera(this.scene, canvas);
 		this.controls = new OrbitControls(this.camera, canvas);
-		this.renderAction = null;
+		this.updateAction = null;
 
 		// Set scene size
 		this.setSceneSize();
 	}
 
-	setRenderAction(callback: (delta: number) => void): void {
-		this.renderAction = callback;
+	abstract init(): void
+
+	setUpdateAction(callback: (delta: number) => void): void {
+		this.updateAction = callback;
 	}
 
 	setSceneSize() {
@@ -35,29 +36,17 @@ export default abstract class ExperienceScene implements IExperienceScene {
 		this.setSceneSize();
 	}
 
-	render(delta: number): void {
-		if (this.isPaused) {
-			return;
-		}
-
+	update(delta: number): void {
 		// Update controls
 		this.controls.update();
 
-		if (this.renderAction && !this.isPaused) {
+		if (this.updateAction) {
 			// Call render action if not paused
-			this.renderAction(delta);
+			this.updateAction(delta);
 		}
 	}
 
 	destroy(): void {
 		// Dispose any resources tied to the scene
-	}
-
-	pause(): void {
-		this.isPaused = true;
-	}
-
-	resume(): void {
-		this.isPaused = false;
 	}
 }

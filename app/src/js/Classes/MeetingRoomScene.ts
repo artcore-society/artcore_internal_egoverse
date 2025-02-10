@@ -10,7 +10,7 @@ export class MeetingRoomScene extends ExperienceScene {
 
 	init() {
 		// Set render action
-		this.setRenderAction(() => {
+		this.setUpdateAction(() => {
 			console.log('rendering MEETING ROOM');
 		});
 

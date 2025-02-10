@@ -32,19 +32,8 @@ export default class ThreeManager {
 			return;
 		}
 
-		// Deactivate previous scene (if any)
-		if (this.activeScene) {
-			this.activeScene.pause();
-		}
-
 		// Set new active scene
 		this.activeScene = this.scenes.get(key) || null;
-
-		// Activate new scene
-		if (this.activeScene) {
-			this.activeScene.resize();
-			this.activeScene.resume();
-		}
 	}
 
 	private animate(): void {
@@ -53,7 +42,11 @@ export default class ThreeManager {
 
 		// Only update and render the active scene
 		if (this.activeScene) {
-			this.activeScene.render(delta);
+			// Update the scene
+			this.activeScene.update(delta);
+
+			// Render the renderer
+			this.renderer.render(this.activeScene.scene, this.activeScene.camera);
 		}
 
 		// Request new frame
