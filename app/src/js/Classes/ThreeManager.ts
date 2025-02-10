@@ -10,10 +10,6 @@ export default class ThreeManager {
 	private activeScene: IExperienceScene | null = null;
 
 	constructor(canvas: HTMLCanvasElement) {
-		if (!canvas || !(canvas  instanceof HTMLCanvasElement)) {
-			throw new Error('A valid canvas must be provided!');
-		}
-
 		this.canvas = canvas;
 		this.clock = new Clock();
 		this.scenes = new Map();
