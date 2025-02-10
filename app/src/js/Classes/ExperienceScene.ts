@@ -1,33 +1,35 @@
-import { IScene } from '../Interfaces/IScene.ts';
 import { AvatarType } from '../Enums/AvatarType.ts';
 import { IAvatarLobby } from '../Interfaces/IAvatarLobby.ts';
+import { CameraControls } from './CameraControls.ts';
+import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { AmbientLight, DirectionalLight, HemisphereLight, OrthographicCamera, Scene } from 'three';
 import ExperienceCamera from './ExperienceCamera.ts';
 import Avatar from './Avatar.ts';
 
-export default abstract class ExperienceScene implements IScene, IAvatarLobby {
+export default abstract class ExperienceScene implements IExperienceScene, IAvatarLobby {
 	public readonly scene: Scene;
+	public readonly controls: CameraControls;
 	public readonly camera: ExperienceCamera;
 	public updateAction: ((delta: number) => void) | null;
-	public currentPlayer: Avatar | null = null;
-	public visitors: Avatar[] | null = null;
+	public playerAvatar: Avatar | null = null;
+	public visitorAvatars: Avatar[] | null = null;
 
 	protected constructor(canvas: HTMLCanvasElement) {
 		this.scene = new Scene();
 		this.camera = new ExperienceCamera(this.scene, canvas);
 		this.updateAction = null;
 
-		// Set scene size
-		this.setSceneSize();
-
 		// Set current player
-		this.currentPlayer = new Avatar(this.scene, this.camera, AvatarType.CURRENT_PLAYER);
+		this.playerAvatar = new Avatar(this.scene, this.camera, AvatarType.CURRENT_PLAYER);
 
+		// Create camera controls
+		this.controls = new CameraControls(this.playerAvatar, canvas);
+		
 		// Set render action
 		this.setUpdateAction((delta) => {
-			if(this.currentPlayer) {
+			if(this.playerAvatar) {
 				// Update avatar
-				this.currentPlayer.update(delta);
+				this.playerAvatar.update(delta);
 			}
 		});
 
@@ -35,7 +37,7 @@ export default abstract class ExperienceScene implements IScene, IAvatarLobby {
 		this.setupLighting();
 	}
 
-	setupLighting(): void {
+	private setupLighting(): void {
 		// Add ambient light
 		const ambientLight = new AmbientLight(0xffffff, 5);
 		this.scene.add(ambientLight);
@@ -54,29 +56,18 @@ export default abstract class ExperienceScene implements IScene, IAvatarLobby {
 		this.scene.add(dirLight);
 	}
 
-	setUpdateAction(callback: (delta: number) => void): void {
+	private setUpdateAction(callback: (delta: number) => void): void {
 		this.updateAction = callback;
 	}
 
-	setSceneSize() {
-		// Set correct aspect
-		this.camera.aspect = window.innerWidth / window.innerHeight;
-		this.camera.updateProjectionMatrix();
-	}
-
-	resize(): void {
-		// Set new scene size
-		this.setSceneSize();
-	}
-
-	update(delta: number): void {
+	public update(delta: number): void {
 		if (this.updateAction) {
 			// Call render action if not paused
 			this.updateAction(delta);
 		}
 	}
 
-	destroy(): void {
+	public destroy(): void {
 		// Dispose any resources tied to the scene
 	}
 }

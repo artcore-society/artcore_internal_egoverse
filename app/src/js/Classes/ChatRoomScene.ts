@@ -9,11 +9,6 @@ export class ChatRoomScene extends ExperienceScene {
 	}
 
 	init() {
-		// Set render action
-		this.setUpdateAction(() => {
-
-		});
-
 		const geometry = new BoxGeometry( 2, 1, 1 );
 		const material = new MeshBasicMaterial( { color: 'blue' } );
 		const cube = new Mesh( geometry, material );
