@@ -16,6 +16,6 @@ export class LandingAreaScene extends ExperienceScene {
 	}
 
 	update(delta: number): void {
-		console.log('updating LANDING AREA', delta);
+
 	}
 }

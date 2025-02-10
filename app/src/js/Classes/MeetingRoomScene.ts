@@ -1,5 +1,5 @@
-import ExperienceScene from './ExperienceScene';
 import { BoxGeometry, Mesh, MeshBasicMaterial } from 'three';
+import ExperienceScene from './ExperienceScene';
 
 export class MeetingRoomScene extends ExperienceScene {
 	constructor(canvas: HTMLCanvasElement) {
@@ -16,6 +16,6 @@ export class MeetingRoomScene extends ExperienceScene {
 	}
 
 	update(delta: number): void {
-		console.log('updating MEETING ROOM', delta);
+
 	}
 }

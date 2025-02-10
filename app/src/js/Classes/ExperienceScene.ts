@@ -1,4 +1,3 @@
-// ExperienceScene.ts
 import { Scene } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { IExperienceScene } from '../Interfaces/IExperienceScene';
