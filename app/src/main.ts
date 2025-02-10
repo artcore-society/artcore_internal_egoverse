@@ -1,6 +1,6 @@
 
 import { createApp } from 'vue';
-import './styles/app.scss';
+import './styles/app.css';
 import router from './js/Router';
 import App from './js/Layouts/AppLayout.vue';
 

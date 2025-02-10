@@ -1,0 +1,6 @@
+/* Importing Tailwind CSS */
+@import "tailwindcss";
+
+/* Importing custom styles */
+@import "./global/transitions.css";
+@import "./global/fonts.css";
