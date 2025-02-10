@@ -44,6 +44,8 @@ export default abstract class ExperienceScene implements IExperienceScene, IAvat
 		this.setupLighting();
 	}
 
+	abstract init(): void
+
 	public setupLighting(): void {
 		// Add ambient light
 		const ambientLight = new AmbientLight(0xffffff, 5);
