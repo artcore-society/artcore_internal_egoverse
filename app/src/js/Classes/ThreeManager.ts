@@ -1,124 +1,66 @@
-import { ref, Ref } from 'vue';
-import { Clock, DefaultLoadingManager, LoadingManager, Scene } from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import ExperienceRenderer from './ExperienceRenderer.ts';
-import ExperienceCamera from './ExperienceCamera.ts';
+import { Clock } from 'three';
+import { SceneKey } from '../Enums/SceneKey.ts';
+import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 
 export default class ThreeManager {
-	protected readonly scene: Scene;
-	protected readonly canvas: HTMLCanvasElement;
-	protected readonly camera: ExperienceCamera;
-	protected readonly renderer: ExperienceRenderer;
-	protected readonly controls: OrbitControls;
-	protected readonly clock: Clock;
-	protected readonly dracoLoader: DRACOLoader;
-	protected readonly gltfLoader: GLTFLoader;
-	protected readonly loaderManager: LoadingManager;
-	protected isSceneReady: Ref;
-	protected renderAction: ((delta: number) => void) | null;
-	protected animateFrameId: number | null;
+	private readonly canvas: HTMLCanvasElement;
+	private readonly clock: Clock;
+	private readonly scenes: Map<SceneKey, IExperienceScene>;
+	private animateFrameId: number | null = null;
 
 	constructor(canvasId: string) {
-		// Get canvas
+		// Get the canvas element
 		const element = document.getElementById(canvasId);
-
-		// Check element type
-		if(!element || !(element instanceof HTMLCanvasElement)) {
+		if (!element || !(element instanceof HTMLCanvasElement)) {
 			throw new Error('Invalid element. Must be a canvas!');
 		}
 
-		this.scene = new Scene();
 		this.canvas = element;
-		this.camera = new ExperienceCamera(this.scene, this.canvas);
-		this.renderer = new ExperienceRenderer(this.canvas);
-		this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-		this.renderAction = null;
-		this.isSceneReady = ref(false);
 		this.clock = new Clock();
-		this.gltfLoader = new GLTFLoader();
-		this.dracoLoader = new DRACOLoader();
-		this.gltfLoader.setDRACOLoader(this.dracoLoader);
-		this.animateFrameId = null;
-		this.loaderManager = DefaultLoadingManager;
+		this.scenes = new Map();
 
-		// Init
-		this.init();
+		// Start animation loop
+		this.animate();
 	}
 
-	init() {
-		// Set scene size
-		this.setSceneSize();
-
-		// Handle scene loading
-		this.handleSceneLoading();
+	addScene(key: SceneKey, scene: IExperienceScene): void {
+		this.scenes.set(key, scene);
 	}
 
-	setSceneSize(): void {
-		// Set correct aspect
-		this.camera.aspect = window.innerWidth / window.innerHeight;
-		this.camera.updateProjectionMatrix();
-
-		// Set canvas size again
-		this.renderer.setSize(window.innerWidth, window.innerHeight);
+	setActiveScene(key: SceneKey): void {
+		if (!this.scenes.has(key)) {
+			console.warn(`Scene "${key}" not found.`);
+			return;
+		}
 	}
 
-	handleSceneLoading(): void {
-		// On load
-		this.loaderManager.onLoad = () => {
-			// Set ready state
-			this.isSceneReady.value = true;
-		};
+	getScenes(): Map<SceneKey, IExperienceScene> {
+		return this.scenes;
 	}
 
-	animate(): void {
-		// Render the frame
-		this.render();
+	private animate(): void {
+		// Get delta time
+		const delta = this.clock.getDelta();
 
-		// Request a new frame
+		// Update and render all scenes
+		this.scenes.forEach((scene) => {
+			scene.update(delta);
+			scene.render(delta);
+		});
+
+		// Request new frame
 		this.animateFrameId = requestAnimationFrame(this.animate.bind(this));
 	}
 
-	setRenderAction(callback: () => void): void {
-		if (callback) {
-			// Set render action
-			this.renderAction = callback;
-		}
-	}
-
-	render(): void {
-		// Get delta
-		const delta = this.clock.getDelta();
-
-		if (this.controls) {
-			// Update controls
-			this.controls.update();
-		}
-
-		if (this.renderAction) {
-			// Call render action
-			this.renderAction(delta);
-		}
-
-		// Render
-		this.renderer.render(this.scene, this.camera);
-	}
-
 	destroy(): void {
-		// Cancel the animation frame
 		if (this.animateFrameId) {
+			// Cancel next frame
 			cancelAnimationFrame(this.animateFrameId);
 		}
 
-		// Dispose of renderer
-		if (this.renderer) {
-			this.renderer.dispose();
-		}
-	}
-
-	resize(): void {
-		// Set new scene size
-		this.setSceneSize();
+		this.scenes.forEach((scene) => {
+			// Destroy all scenes
+			scene.destroy()
+		});
 	}
 }
