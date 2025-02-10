@@ -1,21 +1,20 @@
 import { Clock } from 'three';
-import { SceneKey } from '../Enums/SceneKey.ts';
-import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
+import { SceneKey } from '../Enums/SceneKey';
+import { IExperienceScene } from '../Interfaces/IExperienceScene';
 
 export default class ThreeManager {
 	private readonly canvas: HTMLCanvasElement;
 	private readonly clock: Clock;
 	private readonly scenes: Map<SceneKey, IExperienceScene>;
 	private animateFrameId: number | null = null;
+	private activeScene: IExperienceScene | null = null;
 
-	constructor(canvasId: string) {
-		// Get the canvas element
-		const element = document.getElementById(canvasId);
-		if (!element || !(element instanceof HTMLCanvasElement)) {
-			throw new Error('Invalid element. Must be a canvas!');
+	constructor(canvas: HTMLCanvasElement) {
+		if (!canvas || !(canvas  instanceof HTMLCanvasElement)) {
+			throw new Error('A valid canvas must be provided!');
 		}
 
-		this.canvas = element;
+		this.canvas = canvas;
 		this.clock = new Clock();
 		this.scenes = new Map();
 
@@ -32,6 +31,14 @@ export default class ThreeManager {
 			console.warn(`Scene "${key}" not found.`);
 			return;
 		}
+
+		// Deactivate previous scene (if any)
+		if (this.activeScene) {
+			this.activeScene.destroy();
+		}
+
+		// Set new active scene
+		this.activeScene = this.scenes.get(key) || null;
 	}
 
 	getScenes(): Map<SceneKey, IExperienceScene> {
@@ -42,11 +49,11 @@ export default class ThreeManager {
 		// Get delta time
 		const delta = this.clock.getDelta();
 
-		// Update and render all scenes
-		this.scenes.forEach((scene) => {
-			scene.update(delta);
-			scene.render(delta);
-		});
+		// Only update and render the active scene
+		if (this.activeScene) {
+			this.activeScene.update(delta);
+			this.activeScene.render(delta);
+		}
 
 		// Request new frame
 		this.animateFrameId = requestAnimationFrame(this.animate.bind(this));
@@ -58,9 +65,14 @@ export default class ThreeManager {
 			cancelAnimationFrame(this.animateFrameId);
 		}
 
+		// Destroy the active scene
+		if (this.activeScene) {
+			this.activeScene.destroy();
+		}
+
+		// Destroy all scenes in the map
 		this.scenes.forEach((scene) => {
-			// Destroy all scenes
-			scene.destroy()
+			scene.destroy();
 		});
 	}
 }
