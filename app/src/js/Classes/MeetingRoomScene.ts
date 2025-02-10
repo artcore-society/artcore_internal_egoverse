@@ -11,7 +11,7 @@ export class MeetingRoomScene extends ExperienceScene {
 	init() {
 		// Set render action
 		this.setUpdateAction(() => {
-			console.log('rendering MEETING ROOM');
+
 		});
 
 		const geometry = new BoxGeometry( 1, 2, 1 );

@@ -1,7 +1,8 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { TextureLoader } from 'three/src/loaders/TextureLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
+import { Mesh, Object3D } from 'three';
 
 export class ThreeLoaders {
 	private static textureLoader: TextureLoader = new TextureLoader();
@@ -14,9 +15,24 @@ export class ThreeLoaders {
 		this.gltfLoader.setDRACOLoader(this.dracoLoader);
 	}
 
-	static loadGLTF(url: string): Promise<THREE.Group> {
+	static loadGLTF(url: string): Promise<GLTF> {
 		return new Promise((resolve, reject) => {
-			this.gltfLoader.load(url, (gltf) => resolve(gltf.scene), undefined, reject);
+			this.gltfLoader.load(url, (gltf) => {
+				const model = gltf.scene;
+
+				// Cast shadow when necessary
+				model.traverse((item: Object3D) => {
+					const mesh = item as Mesh;
+					if (mesh.isMesh) {
+						mesh.receiveShadow = true;
+						mesh.castShadow = true;
+					}
+				});
+
+
+				// Resolve the model
+				resolve(gltf);
+			}, undefined, reject);
 		});
 	}
 

@@ -11,7 +11,7 @@ export class ChatRoomScene extends ExperienceScene {
 	init() {
 		// Set render action
 		this.setUpdateAction(() => {
-			console.log('rendering CHAT ROOM');
+
 		});
 
 		const geometry = new BoxGeometry( 2, 1, 1 );
