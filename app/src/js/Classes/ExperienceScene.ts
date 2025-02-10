@@ -5,14 +5,14 @@ import { IExperienceScene } from '../Interfaces/IExperienceScene';
 import ExperienceCamera from './ExperienceCamera.ts';
 import ExperienceRenderer from './ExperienceRenderer.ts';
 
-export default class ExperienceScene implements IExperienceScene {
+export default abstract class ExperienceScene implements IExperienceScene {
 	public readonly scene: Scene;
 	public readonly camera: ExperienceCamera;
 	public readonly renderer: ExperienceRenderer;
 	public readonly controls: OrbitControls;
 	public renderAction: ((delta: number) => void) | null;
 
-	constructor(canvas: HTMLCanvasElement) {
+	protected constructor(canvas: HTMLCanvasElement) {
 		this.scene = new Scene();
 		this.camera = new ExperienceCamera(this.scene, canvas);
 		this.renderer = new ExperienceRenderer(canvas);
@@ -42,7 +42,5 @@ export default class ExperienceScene implements IExperienceScene {
 		this.renderer.dispose();
 	}
 
-	update(delta: number): void {
-		// Default update logic (if any)
-	}
+	abstract update(delta: number): void
 }
