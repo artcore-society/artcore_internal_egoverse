@@ -10,8 +10,6 @@ export interface IExperienceScene {
 
     setupLighting(): void;
     setUpdateAction(callback: (delta: number) => void): void;
-    setSceneSize(): void;
-    resize(): void;
     update(delta: number): void;
     destroy(): void;
 }

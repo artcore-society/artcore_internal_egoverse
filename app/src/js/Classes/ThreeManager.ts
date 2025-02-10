@@ -2,7 +2,6 @@ import { Clock } from 'three';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { SceneKey } from '../Enums/SceneKey';
 import ExperienceRenderer from './ExperienceRenderer.ts';
-import ExperienceScene from './ExperienceScene.ts';
 
 export default class ThreeManager {
 	private readonly canvas: HTMLCanvasElement;

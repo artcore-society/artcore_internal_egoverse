@@ -37,7 +37,7 @@ export default abstract class ExperienceScene implements IExperienceScene, IAvat
 		this.setupLighting();
 	}
 
-	private setupLighting(): void {
+	public setupLighting(): void {
 		// Add ambient light
 		const ambientLight = new AmbientLight(0xffffff, 5);
 		this.scene.add(ambientLight);
@@ -56,7 +56,7 @@ export default abstract class ExperienceScene implements IExperienceScene, IAvat
 		this.scene.add(dirLight);
 	}
 
-	private setUpdateAction(callback: (delta: number) => void): void {
+	public setUpdateAction(callback: (delta: number) => void): void {
 		this.updateAction = callback;
 	}
 
