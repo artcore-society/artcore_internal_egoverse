@@ -1,13 +1,14 @@
 import { AvatarType } from '../Enums/AvatarType.ts';
 import { IAvatarLobby } from '../Interfaces/IAvatarLobby.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
-import { AmbientLight, DirectionalLight, HemisphereLight, OrthographicCamera, Scene } from 'three';
+import { AmbientLight, DirectionalLight, HemisphereLight, Object3D, OrthographicCamera, Scene } from 'three';
 import ExperienceCamera from './ExperienceCamera.ts';
 import Avatar from './Avatar.ts';
 
 export default abstract class ExperienceScene implements IExperienceScene, IAvatarLobby {
 	public readonly scene: Scene;
 	public readonly camera: ExperienceCamera;
+	public cameraParent: Object3D;
 	public updateAction: ((delta: number) => void) | null;
 	public playerAvatar: Avatar | null = null;
 	public visitorAvatars: Avatar[] | null = null;
@@ -15,10 +16,21 @@ export default abstract class ExperienceScene implements IExperienceScene, IAvat
 	protected constructor(canvas: HTMLCanvasElement) {
 		this.scene = new Scene();
 		this.camera = new ExperienceCamera(this.scene, canvas);
+		this.cameraParent = new Object3D();
 		this.updateAction = null;
 
 		// Set current player
 		this.playerAvatar = new Avatar(this, this.camera, AvatarType.CURRENT_PLAYER);
+
+		// Setup camera parent
+		this.cameraParent.rotation.order = 'YXZ';
+		this.cameraParent.rotation.x = -0.3;
+
+		// Add paren to scene
+		this.scene.add(this.cameraParent);
+
+		// Add camera to parent object
+		this.cameraParent.add(this.camera);
 
 		// Set render action
 		this.setUpdateAction((delta) => {
