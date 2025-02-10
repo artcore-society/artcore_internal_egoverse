@@ -1,10 +1,8 @@
 import { Scene } from 'three';
-import { CameraControls } from '../Classes/CameraControls.ts';
 import ExperienceCamera from '../Classes/ExperienceCamera.ts';
 
 export interface IExperienceScene {
     scene: Scene;
-    controls: CameraControls
     camera: ExperienceCamera;
     updateAction: ((delta: number) => void) | null;
 

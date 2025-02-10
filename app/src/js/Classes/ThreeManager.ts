@@ -1,6 +1,6 @@
 import { Clock } from 'three';
-import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { SceneKey } from '../Enums/SceneKey';
+import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import ExperienceRenderer from './ExperienceRenderer.ts';
 
 export default class ThreeManager {

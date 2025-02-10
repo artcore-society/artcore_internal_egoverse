@@ -1,9 +1,10 @@
-import { AnimationAction, AnimationMixer, Object3D, Scene } from 'three';
 import { AvatarType } from '../Enums/AvatarType.ts';
+import { IExperienceScene } from './IExperienceScene.ts';
+import { AnimationAction, AnimationMixer, Object3D } from 'three';
 
 export interface IAvatar {
-    scene: Scene;
-    avatarType: AvatarType;
+    experienceScene: IExperienceScene;
+    type: AvatarType;
     model: Object3D | null;
     mixer: AnimationMixer;
     animationsMap: Map<string, AnimationAction | null>;

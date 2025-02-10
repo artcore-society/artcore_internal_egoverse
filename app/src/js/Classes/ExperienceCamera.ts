@@ -5,7 +5,7 @@ export default class ExperienceCamera extends PerspectiveCamera {
 		super(75, canvas.offsetWidth / canvas.offsetHeight, 0.1, 2000);
 
 		// Set camera position
-		this.position.set(0, 1.5, 3);
+		this.position.set(0, 1, 2);
 
 		// Update camera projection matrix
 		this.updateProjectionMatrix();

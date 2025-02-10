@@ -2,25 +2,24 @@ import { IAvatar } from '../Interfaces/IAvatar.ts';
 import { AvatarType } from '../Enums/AvatarType.ts';
 import { ThreeLoaders } from './ThreeLoaders.ts';
 import { AnimationName } from '../Enums/AnimationName.ts';
-import { AnimationAction, AnimationClip, AnimationMixer, Mesh, Object3D, Scene } from 'three';
+import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
+import { AnimationAction, AnimationClip, AnimationMixer, Mesh, Object3D } from 'three';
 import AvatarControls from './AvatarControls.ts';
 import ExperienceCamera from './ExperienceCamera.ts';
 
-export default class Avatar extends Mesh implements IAvatar {
-	public scene: Scene;
+export default class Avatar implements IAvatar {
+	public experienceScene: IExperienceScene;
 	public camera: ExperienceCamera;
-	public readonly avatarType: AvatarType = AvatarType.VISITOR
-	private controls: AvatarControls | null = null;
+	public readonly type: AvatarType = AvatarType.VISITOR
+	private avatarControls: AvatarControls | null = null;
 	public model: Object3D | null = null;
-	public mixer: AnimationMixer = new AnimationMixer(new Mesh()); // Will be overwritten with actual mixer
+	public mixer: AnimationMixer = new AnimationMixer(new Mesh());
 	public animationsMap: Map<AnimationName, AnimationAction> = new Map();
 
-	constructor(scene: Scene, camera: ExperienceCamera, type: AvatarType = AvatarType.VISITOR) {
-		super();
-
-		this.scene = scene;
+	constructor(experienceScene: IExperienceScene, camera: ExperienceCamera, type: AvatarType = AvatarType.VISITOR) {
+		this.experienceScene = experienceScene;
 		this.camera = camera;
-		this.avatarType = type;
+		this.type = type;
 
 		// Initiate avatar
 		this.init();
@@ -31,10 +30,10 @@ export default class Avatar extends Mesh implements IAvatar {
 		await this.load();
 
 		// Setup avatar controls
-		this.controls = new AvatarControls(this);
+		this.avatarControls = new AvatarControls(this);
 
 		// Make sure controls are connected
-		this.controls.connect();
+		this.avatarControls.connect();
 	}
 
 	async load() {
@@ -59,14 +58,14 @@ export default class Avatar extends Mesh implements IAvatar {
 			throw new Error('Something went wrong loading the avatar model');
 		}
 
-		// Add avatar to scene
-		this.scene.add(this.model);
+		// Add avatar to experienceScene
+		this.experienceScene.scene.add(this.model);
 	}
 
 	update(delta: number): void {
-		if(this.controls) {
+		if(this.avatarControls) {
 			// Update controls
-			this.controls.update(delta, this.controls.keysPressed);
+			this.avatarControls.update(delta, this.avatarControls.keysPressed);
 		}
 
 		// Update the mixer
@@ -78,12 +77,12 @@ export default class Avatar extends Mesh implements IAvatar {
 			return;
 		}
 
-		if(this.controls) {
+		if(this.avatarControls) {
 			// Disconnect avatar controls
-			this.controls.disconnect();
+			this.avatarControls.disconnect();
 		}
 
-		// Remove model from scene
-		this.scene.remove(this.model);
+		// Remove model from experienceScene
+		this.experienceScene.scene.remove(this.model);
 	}
 }

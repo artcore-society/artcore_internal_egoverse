@@ -1,6 +1,5 @@
 import { AvatarType } from '../Enums/AvatarType.ts';
 import { IAvatarLobby } from '../Interfaces/IAvatarLobby.ts';
-import { CameraControls } from './CameraControls.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { AmbientLight, DirectionalLight, HemisphereLight, OrthographicCamera, Scene } from 'three';
 import ExperienceCamera from './ExperienceCamera.ts';
@@ -8,7 +7,6 @@ import Avatar from './Avatar.ts';
 
 export default abstract class ExperienceScene implements IExperienceScene, IAvatarLobby {
 	public readonly scene: Scene;
-	public readonly controls: CameraControls;
 	public readonly camera: ExperienceCamera;
 	public updateAction: ((delta: number) => void) | null;
 	public playerAvatar: Avatar | null = null;
@@ -20,11 +18,8 @@ export default abstract class ExperienceScene implements IExperienceScene, IAvat
 		this.updateAction = null;
 
 		// Set current player
-		this.playerAvatar = new Avatar(this.scene, this.camera, AvatarType.CURRENT_PLAYER);
+		this.playerAvatar = new Avatar(this, this.camera, AvatarType.CURRENT_PLAYER);
 
-		// Create camera controls
-		this.controls = new CameraControls(this.playerAvatar, canvas);
-		
 		// Set render action
 		this.setUpdateAction((delta) => {
 			if(this.playerAvatar) {

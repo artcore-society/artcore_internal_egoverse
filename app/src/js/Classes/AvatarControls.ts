@@ -1,12 +1,12 @@
+import { AvatarType } from '../Enums/AvatarType.ts';
 import { KeyboardKey } from '../Enums/KeyboardKey.ts';
 import { AnimationName } from '../Enums/AnimationName.ts';
 import { IAvatarControls } from '../Interfaces/IAvatarControls.ts';
 import { Quaternion, Vector3 } from 'three';
 import Avatar from './Avatar.ts';
-import { AvatarType } from '../Enums/AvatarType.ts';
 
 export default class AvatarControls implements IAvatarControls {
-	private avatar: Avatar;
+	private readonly avatar: Avatar;
 	private currentAction: AnimationName = AnimationName.HAPPY_IDLE;
 	private walkDirection: Vector3 = new Vector3();
 	private rotateAngle: Vector3 = new Vector3(0, 1, 0);
@@ -64,6 +64,10 @@ export default class AvatarControls implements IAvatarControls {
 	}
 
 	update(delta: number, keysPressed: { [key in KeyboardKey]: boolean }) {
+		if(!this.avatar.model) {
+			return;
+		}
+
 		// Check direction
 		const directionPressed = this.directions.some((key) => keysPressed[key]);
 
@@ -74,7 +78,7 @@ export default class AvatarControls implements IAvatarControls {
 		const isJumpKeyPressed = keysPressed[KeyboardKey.Space];
 
 		// Determine the animation
-		let play: AnimationName | null = null;
+		let play: AnimationName | null;
 		if (directionPressed && isRunKeyPressed) {
 			play = AnimationName.RUNNING;
 
@@ -138,37 +142,32 @@ export default class AvatarControls implements IAvatarControls {
             this.currentAction === AnimationName.WALKING ||
             this.currentAction === AnimationName.RUNNING_JUMP
 		) {
-			// Calculate towards camera direction
-			const angleYCameraDirection = this.avatar.camera.rotation.y;
+			// Calculate camera Y angle
+			const angleYCameraAngle = this.directionOffset(keysPressed);
 
-			// Diagonal movement angle offset
-			const directionOffset = this.directionOffset(keysPressed);
-
-			// Rotate avatar
-			this.rotateQuaternion.setFromAxisAngle(this.rotateAngle, angleYCameraDirection + directionOffset);
-			this.avatar.quaternion.rotateTowards(this.rotateQuaternion, 0.2);
+			// Rotate avatar model
+			this.rotateQuaternion.setFromAxisAngle(this.rotateAngle, angleYCameraAngle);
+			this.avatar.model?.quaternion.rotateTowards(this.rotateQuaternion, 0.05);
 
 			// Calculate direction
 			if (this.avatar.type !== AvatarType.VISITOR) {
 				this.avatar.camera.getWorldDirection(this.walkDirection);
-			} else {
-				this.walkDirection = new Vector3(this.avatar.camera.vector.x, 0, this.avatar.camera.vector.z);
 			}
 
 			this.walkDirection.y = 0;
 			this.walkDirection.normalize();
-			this.walkDirection.applyAxisAngle(this.rotateAngle, directionOffset);
+			this.walkDirection.applyAxisAngle(this.rotateAngle, angleYCameraAngle);
 
 			// Run/walk velocity
 			let velocity = 0;
 			switch (this.currentAction) {
-				case 'Running':
+				case AnimationName.RUNNING:
 					velocity = this.runVelocity;
 					break;
-				case 'Running Jump':
+				case AnimationName.RUNNING_JUMP:
 					velocity = this.runVelocity;
 					break;
-				case 'Walking':
+				case AnimationName.WALKING:
 					velocity = this.walkVelocity;
 					break;
 			}
@@ -178,8 +177,14 @@ export default class AvatarControls implements IAvatarControls {
 			const moveZ = this.walkDirection.z * velocity * delta;
 
 			// Update avatar position
-			this.avatar.position.x -= moveX;
-			this.avatar.position.z -= moveZ;
+			this.avatar.model.position.x += moveX;
+			this.avatar.model.position.z += moveZ;
+
+			if(this.avatar.type === AvatarType.CURRENT_PLAYER) {
+				// Sync camera with current player avatar
+				// this.avatar.camera.position.x = this.avatar.model.position.x;
+				// this.avatar.camera.position.z = this.avatar.model.position.z;
+			}
 		}
 	}
 
