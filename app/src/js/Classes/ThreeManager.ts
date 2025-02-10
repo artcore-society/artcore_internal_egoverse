@@ -3,7 +3,9 @@ import { SceneKey } from '../Enums/SceneKey';
 import { IExperienceScene } from '../Interfaces/IExperienceScene';
 import ExperienceRenderer from './ExperienceRenderer.ts';
 
-export default class ThreeManager {
+export class ThreeManager {
+	static instance: ThreeManager;
+
 	private readonly canvas: HTMLCanvasElement;
 	private readonly clock: Clock;
 	private readonly renderer: ExperienceRenderer;
@@ -19,6 +21,22 @@ export default class ThreeManager {
 
 		// Start animation loop
 		this.animate();
+	}
+
+	static setup(canvas: HTMLCanvasElement): void {
+		if (ThreeManager.instance) {
+			throw new Error('ThreeManager is already setup!');
+		}
+
+		ThreeManager.instance = new ThreeManager(canvas);
+	}
+
+	static getInstance() {
+		if (!ThreeManager.instance) {
+			throw new Error('Call ThreeManager setup() first!');
+		}
+
+		return ThreeManager.instance;
 	}
 
 	addScene(key: SceneKey, scene: IExperienceScene): void {
@@ -72,4 +90,8 @@ export default class ThreeManager {
 		// Dispose of the renderer
 		this.renderer.dispose();
 	}
+}
+
+export function useThreeManager() {
+	return ThreeManager.getInstance();
 }

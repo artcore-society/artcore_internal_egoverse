@@ -5,7 +5,7 @@ import { SceneKey } from '../Enums/SceneKey';
 import { LandingAreaScene } from '../Classes/LandingAreaScene';
 import { MeetingRoomScene } from '../Classes/MeetingRoomScene';
 import { ChatRoomScene } from '../Classes/ChatRoomScene';
-import ThreeManager from '../Classes/ThreeManager';
+import { ThreeManager, useThreeManager } from '../Classes/ThreeManager';
 import PrimaryButton from './PrimaryButton.vue';
 
 // Socket setup
@@ -30,8 +30,11 @@ function transitionToScene(sceneKey: SceneKey) {
 // Lifecycle hooks
 onMounted(() => {
 	if (canvas.value) {
-		// Create manage instance
-		threeManager = new ThreeManager(canvas.value);
+		// Call initial setup
+		ThreeManager.setup(canvas.value);
+
+		// Get singleton instance
+		threeManager = useThreeManager();
 
 		// Add all scenes to ThreeManager
 		threeManager.addScene(SceneKey.LANDING_AREA, new LandingAreaScene(canvas.value));
