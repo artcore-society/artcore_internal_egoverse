@@ -18,27 +18,44 @@ export default abstract class ExperienceScene implements IExperienceScene {
 		this.renderer = new ExperienceRenderer(canvas);
 		this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 		this.renderAction = null;
+
+		// Set scene size
+		this.setSceneSize();
 	}
 
 	setRenderAction(callback: (delta: number) => void): void {
 		this.renderAction = callback;
 	}
 
-	resize(): void {
+	setSceneSize() {
+		// Set correct aspect
 		this.camera.aspect = window.innerWidth / window.innerHeight;
 		this.camera.updateProjectionMatrix();
+
+		// Set canvas size again
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
 	}
 
+	resize(): void {
+		// Set new scene size
+		this.setSceneSize();
+	}
+
 	render(delta: number): void {
+		// Update controls
 		this.controls.update();
+
 		if (this.renderAction) {
+			// Call render action
 			this.renderAction(delta);
 		}
+
+		// Render
 		this.renderer.render(this.scene, this.camera);
 	}
 
 	destroy(): void {
+		// Dispose the renderer
 		this.renderer.dispose();
 	}
 

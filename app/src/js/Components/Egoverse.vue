@@ -6,6 +6,7 @@ import { LandingAreaScene } from '../Classes/LandingAreaScene';
 import { MeetingRoomScene } from '../Classes/MeetingRoomScene';
 import { ChatRoomScene } from '../Classes/ChatRoomScene';
 import ThreeManager from '../Classes/ThreeManager';
+import PrimaryButton from './PrimaryButton.vue';
 
 // Socket setup
 const socket = io('ws://localhost:3000');
@@ -20,7 +21,11 @@ socket.on('disconnect', () => {
 
 // Set variables
 const canvas = ref<HTMLCanvasElement | null>(null);
-let threeManager: ThreeManager | null = null; // ThreeManager instance
+let threeManager: ThreeManager | null = null;
+
+function transitionToScene(sceneKey: SceneKey) {
+	threeManager?.setActiveScene(sceneKey);
+}
 
 // Lifecycle hooks
 onMounted(() => {
@@ -46,5 +51,28 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  <div class="absolute top-5 left-5 z-10 flex justify-center items-center gap-2">
+    <PrimaryButton
+        @click="transitionToScene(SceneKey.LANDING_AREA)"
+        class="px-4 py-2 bg-green-500 text-white rounded-lg"
+    >
+      Landing Area
+    </PrimaryButton>
+
+    <PrimaryButton
+        @click="transitionToScene(SceneKey.MEETING_ROOM)"
+        class="px-4 py-2 bg-red-500 text-white rounded-lg"
+    >
+      Meeting Room
+    </PrimaryButton>
+
+    <PrimaryButton
+        @click="transitionToScene(SceneKey.CHAT_ROOM)"
+        class="px-4 py-2 bg-blue-500 text-white rounded-lg"
+    >
+      Chat Room
+    </PrimaryButton>
+  </div>
+
   <canvas ref="canvas" class="h-full w-full"/>
 </template>

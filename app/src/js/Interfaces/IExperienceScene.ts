@@ -11,6 +11,7 @@ export interface IExperienceScene {
     renderAction: ((delta: number) => void) | null;
 
     setRenderAction(callback: (delta: number) => void): void;
+    setSceneSize(): void;
     resize(): void;
     render(delta: number): void;
     destroy(): void;

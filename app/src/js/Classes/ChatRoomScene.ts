@@ -1,13 +1,21 @@
 import ExperienceScene from './ExperienceScene';
+import { BoxGeometry, Mesh, MeshBasicMaterial } from 'three';
 
 export class ChatRoomScene extends ExperienceScene {
 	constructor(canvas: HTMLCanvasElement) {
 		super(canvas);
-		// Custom initialization for the landing area
+
+		this.init();
+	}
+
+	init() {
+		const geometry = new BoxGeometry( 1, 1, 1 );
+		const material = new MeshBasicMaterial( { color: 'blue' } );
+		const cube = new Mesh( geometry, material );
+		this.scene.add( cube );
 	}
 
 	update(delta: number): void {
-		console.log('Updating Landing Area Scene', delta);
-		// Add any scene-specific update logic here
+		console.log('updating CHAT ROOM', delta);
 	}
 }

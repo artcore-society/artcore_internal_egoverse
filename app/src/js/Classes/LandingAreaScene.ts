@@ -1,13 +1,21 @@
+import { BoxGeometry, MeshBasicMaterial, Mesh } from 'three';
 import ExperienceScene from './ExperienceScene';
 
 export class LandingAreaScene extends ExperienceScene {
 	constructor(canvas: HTMLCanvasElement) {
 		super(canvas);
-		// Custom initialization for the landing area
+
+		this.init();
+	}
+	
+	init() {
+		const geometry = new BoxGeometry( 1, 1, 1 );
+		const material = new MeshBasicMaterial( { color: 'green' } );
+		const cube = new Mesh( geometry, material );
+		this.scene.add( cube );
 	}
 
 	update(delta: number): void {
-		console.log('Updating Landing Area Scene', delta);
-		// Add any scene-specific update logic here
+		console.log('updating LANDING AREA', delta);
 	}
 }
