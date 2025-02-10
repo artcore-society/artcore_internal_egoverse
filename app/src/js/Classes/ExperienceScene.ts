@@ -2,20 +2,18 @@ import { Scene } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { IExperienceScene } from '../Interfaces/IExperienceScene';
 import ExperienceCamera from './ExperienceCamera.ts';
-import ExperienceRenderer from './ExperienceRenderer.ts';
 
 export default abstract class ExperienceScene implements IExperienceScene {
 	public readonly scene: Scene;
 	public readonly camera: ExperienceCamera;
-	public readonly renderer: ExperienceRenderer;
 	public readonly controls: OrbitControls;
 	public renderAction: ((delta: number) => void) | null;
+	private isPaused: boolean = false;
 
 	protected constructor(canvas: HTMLCanvasElement) {
 		this.scene = new Scene();
 		this.camera = new ExperienceCamera(this.scene, canvas);
-		this.renderer = new ExperienceRenderer(canvas);
-		this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+		this.controls = new OrbitControls(this.camera, canvas);
 		this.renderAction = null;
 
 		// Set scene size
@@ -30,9 +28,6 @@ export default abstract class ExperienceScene implements IExperienceScene {
 		// Set correct aspect
 		this.camera.aspect = window.innerWidth / window.innerHeight;
 		this.camera.updateProjectionMatrix();
-
-		// Set canvas size again
-		this.renderer.setSize(window.innerWidth, window.innerHeight);
 	}
 
 	resize(): void {
@@ -41,22 +36,28 @@ export default abstract class ExperienceScene implements IExperienceScene {
 	}
 
 	render(delta: number): void {
+		if (this.isPaused) {
+			return;
+		}
+
 		// Update controls
 		this.controls.update();
 
-		if (this.renderAction) {
-			// Call render action
+		if (this.renderAction && !this.isPaused) {
+			// Call render action if not paused
 			this.renderAction(delta);
 		}
-
-		// Render
-		this.renderer.render(this.scene, this.camera);
 	}
 
 	destroy(): void {
-		// Dispose the renderer
-		this.renderer.dispose();
+		// Dispose any resources tied to the scene
 	}
 
-	abstract update(delta: number): void
+	pause(): void {
+		this.isPaused = true;
+	}
+
+	resume(): void {
+		this.isPaused = false;
+	}
 }

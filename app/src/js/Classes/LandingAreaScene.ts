@@ -7,15 +7,16 @@ export class LandingAreaScene extends ExperienceScene {
 
 		this.init();
 	}
-	
+
 	init() {
+		// Set render action
+		this.setRenderAction(() => {
+			console.log('rendering LANDING AREA');
+		});
+
 		const geometry = new BoxGeometry( 1, 1, 1 );
 		const material = new MeshBasicMaterial( { color: 'green' } );
 		const cube = new Mesh( geometry, material );
 		this.scene.add( cube );
-	}
-
-	update(delta: number): void {
-
 	}
 }

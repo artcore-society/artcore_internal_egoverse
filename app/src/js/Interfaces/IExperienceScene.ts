@@ -1,12 +1,10 @@
 import { Scene } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import ExperienceCamera from '../Classes/ExperienceCamera.ts';
-import ExperienceRenderer from '../Classes/ExperienceRenderer.ts';
 
 export interface IExperienceScene {
     scene: Scene;
     camera: ExperienceCamera;
-    renderer: ExperienceRenderer;
     controls: OrbitControls;
     renderAction: ((delta: number) => void) | null;
 
@@ -15,5 +13,6 @@ export interface IExperienceScene {
     resize(): void;
     render(delta: number): void;
     destroy(): void;
-    update(delta: number): void;
+    pause(): void;
+    resume(): void;
 }

@@ -9,13 +9,14 @@ export class MeetingRoomScene extends ExperienceScene {
 	}
 
 	init() {
-		const geometry = new BoxGeometry( 1, 1, 1 );
+		// Set render action
+		this.setRenderAction(() => {
+			console.log('rendering MEETING ROOM');
+		});
+
+		const geometry = new BoxGeometry( 1, 2, 1 );
 		const material = new MeshBasicMaterial( { color: 'red' } );
 		const cube = new Mesh( geometry, material );
 		this.scene.add( cube );
-	}
-
-	update(delta: number): void {
-
 	}
 }
