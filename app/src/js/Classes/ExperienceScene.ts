@@ -1,13 +1,17 @@
 import { Scene } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { IExperienceScene } from '../Interfaces/IExperienceScene';
+import { IScene } from '../Interfaces/IScene.ts';
+import { IAvatarLobby } from '../Interfaces/IAvatarLobby.ts';
 import ExperienceCamera from './ExperienceCamera.ts';
+import Avatar from './Avatar.ts';
 
-export default abstract class ExperienceScene implements IExperienceScene {
+export default abstract class ExperienceScene implements IScene, IAvatarLobby {
 	public readonly scene: Scene;
 	public readonly camera: ExperienceCamera;
 	public readonly controls: OrbitControls;
 	public updateAction: ((delta: number) => void) | null;
+	public currentPlayer: Avatar | null = null;
+	public visitors: Avatar[] | null = null;
 
 	protected constructor(canvas: HTMLCanvasElement) {
 		this.scene = new Scene();

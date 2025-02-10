@@ -1,6 +1,6 @@
+import { AmbientLight, DirectionalLight, HemisphereLight, OrthographicCamera } from 'three';
 import ExperienceScene from './ExperienceScene';
 import Avatar from './Avatar.ts';
-import { AmbientLight, DirectionalLight, HemisphereLight, OrthographicCamera } from 'three';
 
 export class LandingAreaScene extends ExperienceScene {
 	constructor(canvas: HTMLCanvasElement) {
@@ -18,8 +18,8 @@ export class LandingAreaScene extends ExperienceScene {
 		// Setup landing area lighting
 		this.setupLighting();
 
-
-		const player = new Avatar(this.scene);
+		// Set current player
+		this.currentPlayer = new Avatar(this.scene);
 	}
 
 	setupLighting() {

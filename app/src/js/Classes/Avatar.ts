@@ -40,10 +40,25 @@ export default class Avatar extends Mesh implements IAvatar {
 				this.animationsMap.set(animation.name, this.mixer.clipAction(animation));
 			});
 		} catch (error) {
-			throw new Error(error);
+			console.error(error);
+			throw new Error('Something went wrong loading the avatar model');
 		}
 
 		// Add avatar to scene
 		this.scene.add(this.model);
+	}
+
+	update(delta: number): void {
+		// Update the mixer
+		this.mixer.update(delta);
+	}
+
+	destroy() {
+		if(!this.model) {
+			return;
+		}
+
+		// Remove model from scene
+		this.scene.remove(this.model);
 	}
 }
