@@ -1,5 +1,6 @@
-import { BoxGeometry, MeshBasicMaterial, Mesh } from 'three';
 import ExperienceScene from './ExperienceScene';
+import Avatar from './Avatar.ts';
+import { AmbientLight } from 'three';
 
 export class LandingAreaScene extends ExperienceScene {
 	constructor(canvas: HTMLCanvasElement) {
@@ -14,9 +15,15 @@ export class LandingAreaScene extends ExperienceScene {
 			console.log('rendering LANDING AREA');
 		});
 
-		const geometry = new BoxGeometry( 1, 1, 1 );
-		const material = new MeshBasicMaterial( { color: 'green' } );
-		const cube = new Mesh( geometry, material );
-		this.scene.add( cube );
+		// Setup landing area lighting
+		this.setupLighting();
+
+
+		const player = new Avatar(this.scene);
+	}
+
+	setupLighting() {
+		const light = new AmbientLight( 0x404040 );
+		this.scene.add( light );
 	}
 }

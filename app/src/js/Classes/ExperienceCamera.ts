@@ -2,10 +2,10 @@ import { PerspectiveCamera, Scene } from 'three';
 
 export default class ExperienceCamera extends PerspectiveCamera {
 	constructor(scene: Scene, canvas: HTMLCanvasElement) {
-		super(25, canvas.offsetWidth / canvas.offsetHeight, 0.1, 2000);
+		super(75, canvas.offsetWidth / canvas.offsetHeight, 0.1, 2000);
 
 		// Set camera position
-		this.position.set(0, 1, -10);
+		this.position.set(0, 3, 3);
 
 		// Update camera projection matrix
 		this.updateProjectionMatrix();
