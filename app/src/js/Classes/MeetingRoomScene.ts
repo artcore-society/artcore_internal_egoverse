@@ -7,13 +7,8 @@ export class MeetingRoomScene extends ExperienceScene {
 		this.init();
 	}
 
-	async init() {
+	init() {
 		// Setup floor
-		 await this.setupFloor(
-			'/assets/textures/deck/wood_floor_deck_diff_2k.jpg',
-			'/assets/textures/deck/wood_floor_deck_nor_gl_2k.exr',
-			'/assets/textures/deck/wood_floor_deck_rough_2k.exr',
-			'/assets/textures/deck/wood_floor_deck_disp_2k.png'
-		);
+		this.setupFloor('red');
 	}
 }

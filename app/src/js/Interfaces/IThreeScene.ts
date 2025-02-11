@@ -7,7 +7,7 @@ export interface IThreeScene {
     cameraParent: Object3D;
     updateAction: ((delta: number) => void) | null;
 
-    setupFloor(diffusePath: string, normalPath: string, roughnessPath: string, displacementPath: string): Promise<void>;
+    setupFloor(color: string): void;
     update(delta: number): void;
     destroy(): void;
 }
