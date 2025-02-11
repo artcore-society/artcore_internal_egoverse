@@ -81,6 +81,10 @@ export default class ExperienceManager {
 		ExperienceSocket.on(SocketEvent.CLIENT_UPDATE_PLAYER, (data: {id: string, delta: number, keysPressed: { [key in KeyboardKey]: boolean }}) => {
 			// Update avatar
 			if (this.activeScene && this.activeScene.visitorAvatars) {
+				// Update the mixer of the visitor avatar
+				this.activeScene.visitorAvatars[data.id]?.mixer?.update(data.delta);
+
+				// Update the controls of the visitor avatar
 				this.activeScene.visitorAvatars[data.id]?.controls?.update(data.delta, data.keysPressed);
 			}
 		});
