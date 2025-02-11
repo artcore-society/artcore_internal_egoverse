@@ -7,6 +7,9 @@ import { MeetingRoomScene } from '../Classes/MeetingRoomScene';
 import { ChatRoomScene } from '../Classes/ChatRoomScene';
 import ThreeManager from '../Classes/ThreeManager';
 import PrimaryButton from './PrimaryButton.vue';
+import Loader from './Loader.vue';
+import { EventService } from '../Services/EventService.ts';
+import { CustomEventKey } from '../Enums/CustomEventKey.ts';
 
 // Socket setup
 const socket = io('ws://localhost:3000');
@@ -20,6 +23,7 @@ socket.on('disconnect', () => {
 });
 
 // Set variables
+const isReady = ref<boolean>(false);
 const canvas = ref<HTMLCanvasElement | null>(null);
 let threeManager: ThreeManager | null = null;
 
@@ -40,6 +44,12 @@ onMounted(() => {
 
 		// Initially set the default active scene
 		threeManager.setActiveScene(SceneKey.LANDING_AREA);
+
+		// Listen for ready event
+		EventService.listen(CustomEventKey.READY, () => {
+			// Set ready state
+			isReady.value = true;
+		});
 	}
 });
 
@@ -52,6 +62,8 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="absolute top-5 left-5 z-10 flex justify-center items-center gap-2">
+    <Loader v-if="!isReady"/>
+
     <PrimaryButton
         @click="transitionToScene(SceneKey.LANDING_AREA)"
         class="px-4 py-2 bg-green-500 text-white rounded-lg"

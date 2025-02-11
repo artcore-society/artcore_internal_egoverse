@@ -6,6 +6,7 @@ import { IThreeScene } from '../Interfaces/IThreeScene.ts';
 import { AnimationAction, AnimationClip, AnimationMixer, Mesh, Object3D } from 'three';
 import AvatarControls from './AvatarControls.ts';
 import ExperienceCamera from './ExperienceCamera.ts';
+import ExperienceScene from './ExperienceScene.ts';
 
 export default class Avatar implements IAvatar {
 	public experienceScene: IThreeScene;
@@ -16,7 +17,7 @@ export default class Avatar implements IAvatar {
 	public mixer: AnimationMixer = new AnimationMixer(new Mesh());
 	public animationsMap: Map<AnimationName, AnimationAction> = new Map();
 
-	constructor(experienceScene: IThreeScene, camera: ExperienceCamera, type: AvatarType = AvatarType.VISITOR) {
+	constructor(experienceScene: ExperienceScene, camera: ExperienceCamera, type: AvatarType = AvatarType.VISITOR) {
 		this.experienceScene = experienceScene;
 		this.camera = camera;
 		this.type = type;

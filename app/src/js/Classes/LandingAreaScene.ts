@@ -1,4 +1,3 @@
-import { BoxGeometry, Mesh, MeshBasicMaterial } from 'three';
 import ExperienceScene from './ExperienceScene';
 
 export class LandingAreaScene extends ExperienceScene {
@@ -8,12 +7,13 @@ export class LandingAreaScene extends ExperienceScene {
 		this.init();
 	}
 
-	init() {
-		const geometry = new BoxGeometry( 1, 1, 1 );
-		const material = new MeshBasicMaterial( { color: 'green' } );
-		const cube = new Mesh( geometry, material );
-		cube.position.x = -5;
-		cube.position.z = -5;
-		this.scene.add( cube );
+	async init() {
+		// Setup floor
+		await this.setupFloor(
+			'/assets/textures/floor/wood_floor_diff_2k.jpg',
+			'/assets/textures/floor/wood_floor_nor_gl_2k.exr',
+			'/assets/textures/floor/wood_floor_rough_2k.exr',
+			'/assets/textures/floor/wood_floor_disp_2k.png'
+		);
 	}
 }

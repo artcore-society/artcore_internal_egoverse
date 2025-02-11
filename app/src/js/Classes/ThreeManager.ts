@@ -1,7 +1,9 @@
-import { Clock } from 'three';
+import { Clock, DefaultLoadingManager, LoadingManager } from 'three';
 import { SceneKey } from '../Enums/SceneKey';
 import { IThreeScene } from '../Interfaces/IThreeScene.ts';
 import ExperienceRenderer from './ExperienceRenderer.ts';
+import { EventService } from '../Services/EventService.ts';
+import { CustomEventKey } from '../Enums/CustomEventKey.ts';
 
 export default class ThreeManager {
 	private readonly canvas: HTMLCanvasElement;
@@ -10,12 +12,14 @@ export default class ThreeManager {
 	private readonly scenes: Map<SceneKey, IThreeScene>;
 	private animateFrameId: number | null = null;
 	private activeScene: IThreeScene | null = null;
+	private loaderManager: LoadingManager;
 
 	constructor(canvas: HTMLCanvasElement) {
 		this.canvas = canvas;
 		this.clock = new Clock();
 		this.scenes = new Map();
 		this.renderer = new ExperienceRenderer(this.canvas);
+		this.loaderManager = DefaultLoadingManager;
 
 		// Set scene size
 		this.setSceneSize();
@@ -23,8 +27,8 @@ export default class ThreeManager {
 		// Add event listeners
 		this.addEventListeners();
 
-		// Start animation loop
-		this.animate();
+		// Handle scene loading
+		this.handleSceneLoading();
 	}
 
 	addScene(key: SceneKey, scene: IThreeScene): void {
@@ -48,6 +52,17 @@ export default class ThreeManager {
 
 	private removeEventListeners() {
 		window.removeEventListener('resize', () => this.resize());
+	}
+
+	private handleSceneLoading() {
+		// On load
+		this.loaderManager.onLoad = () => {
+			// Start animation loop
+			this.animate();
+
+			// Dispatch is ready event
+			EventService.dispatch(CustomEventKey.READY);
+		};
 	}
 
 	private animate(): void {
