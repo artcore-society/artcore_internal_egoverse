@@ -23,7 +23,7 @@ io.on('connection', async (socket) => {
 
     // Register user specific event
     socket.on('client-spawn-player', (data) => {
-        io.to(data.userid).emit('client-spawn-player', data.player);
+        io.to(data.userId).emit('client-spawn-player', data.visitorId);
     });
 
     // Send player data to everyone but yourself

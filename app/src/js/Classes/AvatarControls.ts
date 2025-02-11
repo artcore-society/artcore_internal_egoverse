@@ -149,9 +149,12 @@ export default class AvatarControls implements IAvatarControls {
 			this.rotateQuaternion.setFromAxisAngle(this.rotateAngle, angleYCameraAngle);
 			this.avatar.model?.quaternion.rotateTowards(this.rotateQuaternion, 0.05);
 
-			// Calculate direction
-			if (this.avatar.type !== AvatarType.VISITOR) {
+			if(this.avatar.type !== AvatarType.VISITOR) {
+				// Calculate direction
 				this.avatar.camera.getWorldDirection(this.walkDirection);
+			} else {
+				const visitorWorldDirection = this.avatar.camera.getWorldDirection(new Vector3());
+				this.walkDirection = new Vector3(visitorWorldDirection.x, 0, visitorWorldDirection.z);
 			}
 
 			this.walkDirection.y = 0;

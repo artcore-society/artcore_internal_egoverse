@@ -2,22 +2,22 @@ import { IAvatar } from '../Interfaces/IAvatar.ts';
 import { AvatarType } from '../Enums/AvatarType.ts';
 import { ThreeLoaders } from './ThreeLoaders.ts';
 import { AnimationName } from '../Enums/AnimationName.ts';
-import { IThreeScene } from '../Interfaces/IThreeScene.ts';
+import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { AnimationAction, AnimationClip, AnimationMixer, Mesh, Object3D } from 'three';
 import AvatarControls from './AvatarControls.ts';
 import ExperienceCamera from './ExperienceCamera.ts';
 import ExperienceScene from './ExperienceScene.ts';
 
 export default class Avatar implements IAvatar {
-	public experienceScene: IThreeScene;
+	public experienceScene: IExperienceScene;
 	public camera: ExperienceCamera;
 	public readonly type: AvatarType = AvatarType.VISITOR
-	private avatarControls: AvatarControls | null = null;
+	public controls: AvatarControls | null = null;
 	public model: Object3D | null = null;
 	public mixer: AnimationMixer = new AnimationMixer(new Mesh());
 	public animationsMap: Map<AnimationName, AnimationAction> = new Map();
 
-	constructor(experienceScene: ExperienceScene, camera: ExperienceCamera, type: AvatarType = AvatarType.VISITOR) {
+	constructor(experienceScene: ExperienceScene, camera: ExperienceCamera, type: AvatarType) {
 		this.experienceScene = experienceScene;
 		this.camera = camera;
 		this.type = type;
@@ -31,10 +31,10 @@ export default class Avatar implements IAvatar {
 		await this.load();
 
 		// Setup avatar controls
-		this.avatarControls = new AvatarControls(this);
+		this.controls = new AvatarControls(this);
 
 		// Make sure controls are connected
-		this.avatarControls.connect();
+		this.controls.connect();
 	}
 
 	async load() {
@@ -64,9 +64,9 @@ export default class Avatar implements IAvatar {
 	}
 
 	update(delta: number): void {
-		if(this.avatarControls) {
+		if(this.controls) {
 			// Update controls
-			this.avatarControls.update(delta, this.avatarControls.keysPressed);
+			this.controls.update(delta, this.controls.keysPressed);
 		}
 
 		// Update the mixer
@@ -78,9 +78,9 @@ export default class Avatar implements IAvatar {
 			return;
 		}
 
-		if(this.avatarControls) {
+		if(this.controls) {
 			// Disconnect avatar controls
-			this.avatarControls.disconnect();
+			this.controls.disconnect();
 		}
 
 		// Remove model from experienceScene

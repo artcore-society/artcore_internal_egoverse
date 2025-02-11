@@ -1,62 +1,55 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
-import { io } from 'socket.io-client';
 import { SceneKey } from '../Enums/SceneKey';
+import { io, Socket } from 'socket.io-client';
+import { EventService } from '../Services/EventService.ts';
+import { ChatRoomScene } from '../Classes/ChatRoomScene';
+import { CustomEventKey } from '../Enums/CustomEventKey.ts';
 import { LandingAreaScene } from '../Classes/LandingAreaScene';
 import { MeetingRoomScene } from '../Classes/MeetingRoomScene';
-import { ChatRoomScene } from '../Classes/ChatRoomScene';
-import ThreeManager from '../Classes/ThreeManager';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import ExperienceManager from '../Classes/ExperienceManager.ts';
 import PrimaryButton from './PrimaryButton.vue';
 import Loader from './Loader.vue';
-import { EventService } from '../Services/EventService.ts';
-import { CustomEventKey } from '../Enums/CustomEventKey.ts';
-
-// Socket setup
-const socket = io('ws://localhost:3000');
-
-socket.on('connect', () => {
-	console.log('Connected with socket id:', socket.id);
-});
-
-socket.on('disconnect', () => {
-	console.log('Disconnected from socket id:', socket.id);
-});
 
 // Set variables
 const isReady = ref<boolean>(false);
 const canvas = ref<HTMLCanvasElement | null>(null);
-let threeManager: ThreeManager | null = null;
 
 function transitionToScene(sceneKey: SceneKey) {
-	threeManager?.setActiveScene(sceneKey);
+	ExperienceManager.instance.setActiveScene(sceneKey);
+}
+
+function setReadyState() {
+	// Set ready state
+	isReady.value = true;
 }
 
 // Lifecycle hooks
 onMounted(() => {
 	if (canvas.value) {
-		// Get singleton instance
-		threeManager = new ThreeManager(canvas.value);
+		// Initialize the experience manager
+		ExperienceManager.instance.init(canvas.value);
 
 		// Add all scenes to ThreeManager
-		threeManager.addScene(SceneKey.LANDING_AREA, new LandingAreaScene(canvas.value));
-		threeManager.addScene(SceneKey.MEETING_ROOM, new MeetingRoomScene(canvas.value));
-		threeManager.addScene(SceneKey.CHAT_ROOM, new ChatRoomScene(canvas.value));
+		ExperienceManager.instance.addScene(SceneKey.LANDING_AREA, new LandingAreaScene(canvas.value));
+		ExperienceManager.instance.addScene(SceneKey.MEETING_ROOM, new MeetingRoomScene(canvas.value));
+		ExperienceManager.instance.addScene(SceneKey.CHAT_ROOM, new ChatRoomScene(canvas.value));
 
 		// Initially set the default active scene
-		threeManager.setActiveScene(SceneKey.LANDING_AREA);
+		ExperienceManager.instance.setActiveScene(SceneKey.LANDING_AREA);
 
 		// Listen for ready event
-		EventService.listen(CustomEventKey.READY, () => {
-			// Set ready state
-			isReady.value = true;
-		});
+		EventService.listen(CustomEventKey.READY, setReadyState);
 	}
 });
 
 onBeforeUnmount(() => {
-	if (threeManager) {
-		threeManager.destroy();
+	if (ExperienceManager.instance) {
+		ExperienceManager.instance.destroy();
 	}
+
+	// Remove listeners
+	EventService.remove(CustomEventKey.READY, setReadyState);
 });
 </script>
 
