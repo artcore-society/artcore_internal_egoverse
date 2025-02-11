@@ -18,17 +18,20 @@ import Avatar from './Avatar.ts';
 import { ExperienceSocket } from './ExperienceSocket.ts';
 import { SocketEvent } from '../Enums/SocketEvent.ts';
 import ExperienceManager from './ExperienceManager.ts';
+import { SceneKey } from '../Enums/SceneKey.ts';
 
 export default abstract class ExperienceScene implements IExperienceScene {
 	public readonly scene: Scene;
+	public sceneKey: SceneKey;
 	public readonly camera: ExperienceCamera;
 	public cameraParent: Object3D;
 	public updateAction: ((delta: number) => void) | null;
 	public playerAvatar: Avatar | null = null;
 	public visitorAvatars: { [key: string]: Avatar } = {};
 
-	protected constructor(canvas: HTMLCanvasElement) {
+	protected constructor(canvas: HTMLCanvasElement, sceneKey: SceneKey) {
 		this.scene = new Scene();
+		this.sceneKey = sceneKey;
 		this.camera = new ExperienceCamera(this.scene, canvas);
 		this.cameraParent = new Object3D();
 		this.updateAction = null;
@@ -57,6 +60,7 @@ export default abstract class ExperienceScene implements IExperienceScene {
 					id: ExperienceManager.instance.userId,
 					delta: delta,
 					keysPressed: this.playerAvatar?.controls?.keysPressed,
+					sceneKey: this.sceneKey
 				});
 			}
 		});
