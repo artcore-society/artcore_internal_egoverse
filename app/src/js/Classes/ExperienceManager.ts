@@ -6,7 +6,6 @@ import { Clock, DefaultLoadingManager, LoadingManager } from 'three';
 import ExperienceRenderer from './ExperienceRenderer.ts';
 import { ExperienceSocket } from './ExperienceSocket.ts';
 import { SocketEvent } from '../Enums/SocketEvent.ts';
-import { KeyboardKey } from '../Enums/KeyboardKey.ts';
 
 export default class ExperienceManager {
 	private static _instance: ExperienceManager | null = null;
@@ -78,7 +77,7 @@ export default class ExperienceManager {
 			this.activeScene?.addVisitor(visitorId);
 		});
 
-		ExperienceSocket.on(SocketEvent.CLIENT_UPDATE_PLAYER, (data: {id: string, delta: number, keysPressed: { [key in KeyboardKey]: boolean}, sceneKey: SceneKey}) => {
+		ExperienceSocket.on(SocketEvent.CLIENT_UPDATE_PLAYER, (data) => {
 			// Update avatar
 			if (this.activeScene && this.activeScene.visitorAvatars && this.activeScene.sceneKey === data.sceneKey) {
 				// Update the mixer of the visitor avatar
