@@ -5,6 +5,7 @@ import AvatarControls from '../Classes/AvatarControls.ts';
 
 export interface IAvatar {
     experienceScene: IExperienceScene;
+    ready: boolean;
     type: AvatarType;
     controls: AvatarControls | null;
     model: Object3D | null;

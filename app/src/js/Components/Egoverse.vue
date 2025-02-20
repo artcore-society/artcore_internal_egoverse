@@ -5,7 +5,7 @@ import { ChatRoomScene } from '../Classes/ChatRoomScene';
 import { CustomEventKey } from '../Enums/CustomEventKey.ts';
 import { LandingAreaScene } from '../Classes/LandingAreaScene';
 import { MeetingRoomScene } from '../Classes/MeetingRoomScene';
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import ExperienceManager from '../Classes/ExperienceManager.ts';
 import PrimaryButton from './PrimaryButton.vue';
 import Loader from './Loader.vue';
@@ -14,11 +14,12 @@ import Loader from './Loader.vue';
 const isReady = ref<boolean>(false);
 const canvas = ref<HTMLCanvasElement | null>(null);
 
-function transitionToScene(sceneKey: SceneKey) {
+// Define functions
+function transitionToScene(sceneKey: SceneKey): void {
 	ExperienceManager.instance.setActiveScene(sceneKey);
 }
 
-function setReadyState() {
+function setReadyState(): void {
 	// Set ready state
 	isReady.value = true;
 }
@@ -59,12 +60,14 @@ onBeforeUnmount(() => {
     <PrimaryButton
         @click="transitionToScene(SceneKey.LANDING_AREA)"
         class="px-4 py-2 bg-green-500 text-white rounded-lg"
+        :disabled="ExperienceManager.instance.isTransitioning.value || ExperienceManager.instance.activeScene?.sceneKey === SceneKey.LANDING_AREA"
     >
       Landing Area
     </PrimaryButton>
 
     <PrimaryButton
         @click="transitionToScene(SceneKey.MEETING_ROOM)"
+        :disabled="ExperienceManager.instance.isTransitioning.value || ExperienceManager.instance.activeScene?.sceneKey === SceneKey.MEETING_ROOM"
         class="px-4 py-2 bg-red-500 text-white rounded-lg"
     >
       Meeting Room
@@ -72,6 +75,7 @@ onBeforeUnmount(() => {
 
     <PrimaryButton
         @click="transitionToScene(SceneKey.CHAT_ROOM)"
+        :disabled="ExperienceManager.instance.isTransitioning.value || ExperienceManager.instance.activeScene?.sceneKey === SceneKey.CHAT_ROOM"
         class="px-4 py-2 bg-blue-500 text-white rounded-lg"
     >
       Chat Room

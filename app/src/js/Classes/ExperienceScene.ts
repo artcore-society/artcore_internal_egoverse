@@ -1,4 +1,7 @@
+import { SceneKey } from '../Enums/SceneKey.ts';
 import { AvatarType } from '../Enums/AvatarType.ts';
+import { SocketEvent } from '../Enums/SocketEvent.ts';
+import { ExperienceSocket } from './ExperienceSocket.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import {
 	AmbientLight,
@@ -15,10 +18,7 @@ import {
 } from 'three';
 import ExperienceCamera from './ExperienceCamera.ts';
 import Avatar from './Avatar.ts';
-import { ExperienceSocket } from './ExperienceSocket.ts';
-import { SocketEvent } from '../Enums/SocketEvent.ts';
 import ExperienceManager from './ExperienceManager.ts';
-import { SceneKey } from '../Enums/SceneKey.ts';
 
 export default abstract class ExperienceScene implements IExperienceScene {
 	public readonly scene: Scene;
@@ -26,7 +26,7 @@ export default abstract class ExperienceScene implements IExperienceScene {
 	public readonly camera: ExperienceCamera;
 	public cameraParent: Object3D;
 	public updateAction: ((delta: number) => void) | null;
-	public playerAvatar: Avatar | null = null;
+	public currentPlayerAvatar: Avatar | null = null;
 	public visitorAvatars: { [key: string]: Avatar } = {};
 
 	protected constructor(canvas: HTMLCanvasElement, sceneKey: SceneKey) {
@@ -35,9 +35,6 @@ export default abstract class ExperienceScene implements IExperienceScene {
 		this.camera = new ExperienceCamera(this.scene, canvas);
 		this.cameraParent = new Object3D();
 		this.updateAction = null;
-
-		// Set current player
-		this.playerAvatar = new Avatar(this, this.camera, AvatarType.CURRENT_PLAYER);
 
 		// Setup camera parent
 		this.cameraParent.rotation.order = 'YXZ';
@@ -51,15 +48,15 @@ export default abstract class ExperienceScene implements IExperienceScene {
 
 		// Set render action
 		this.setUpdateAction((delta) => {
-			if(this.playerAvatar) {
+			if(this.currentPlayerAvatar) {
 				// Update avatar
-				this.playerAvatar.update(delta);
+				this.currentPlayerAvatar.update(delta);
 
 				// Send data to socket server for sync
 				ExperienceSocket.emit(SocketEvent.CLIENT_UPDATE_PLAYER, {
 					id: ExperienceManager.instance.userId,
 					delta: delta,
-					keysPressed: this.playerAvatar?.controls?.keysPressed,
+					keysPressed: this.currentPlayerAvatar?.controls?.keysPressed,
 					sceneKey: this.sceneKey
 				});
 			}
@@ -130,6 +127,25 @@ export default abstract class ExperienceScene implements IExperienceScene {
 
 		// Delete from visitors object
 		delete this.visitorAvatars[userId];
+	}
+
+	addCurrentPlayer() {
+		if(this.currentPlayerAvatar) {
+			return;
+		}
+
+		// Set current player
+		this.currentPlayerAvatar = new Avatar(this, this.camera, AvatarType.CURRENT_PLAYER);
+	}
+
+	removeCurrentPlayer() {
+		if(!this.currentPlayerAvatar) {
+			return;
+		}
+
+		// Destroy the current player avatar
+		this.currentPlayerAvatar.destroy();
+		this.currentPlayerAvatar = null;
 	}
 
 	private setUpdateAction(callback: (delta: number) => void): void {

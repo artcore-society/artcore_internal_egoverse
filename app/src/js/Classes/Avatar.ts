@@ -11,6 +11,7 @@ import ExperienceScene from './ExperienceScene.ts';
 
 export default class Avatar implements IAvatar {
 	public experienceScene: IExperienceScene;
+	public ready: boolean = false;
 	public camera: ExperienceCamera;
 	public readonly type: AvatarType = AvatarType.VISITOR
 	public controls: AvatarControls | null = null;
@@ -18,7 +19,8 @@ export default class Avatar implements IAvatar {
 	public mixer: AnimationMixer = new AnimationMixer(new Mesh());
 	public animationsMap: Map<AnimationName, AnimationAction> = new Map();
 
-	constructor(experienceScene: ExperienceScene, camera: ExperienceCamera, type: AvatarType) {
+
+	constructor (experienceScene: ExperienceScene, camera: ExperienceCamera, type: AvatarType) {
 		this.experienceScene = experienceScene;
 		this.camera = camera;
 		this.type = type;
@@ -72,20 +74,29 @@ export default class Avatar implements IAvatar {
 			x: 1,
 			y: 1,
 			z: 1,
-			delay: 1,
+			delay: 0.4,
 			ease: 'back.out',
 			duration: 1,
+			onComplete: () => {
+				// Set ready state
+				this.ready = true;
+			},
 		});
 	}
 
 	update(delta: number): void {
+		// Update the mixer
+		this.mixer.update(delta);
+
+		if(!this.ready) {
+			// Don't update controls if not ready yet. Mixer is allowed to always update
+			return;
+		}
+
 		if(this.controls) {
 			// Update controls
 			this.controls.update(delta, this.controls.keysPressed);
 		}
-
-		// Update the mixer
-		this.mixer.update(delta);
 	}
 
 	destroy() {

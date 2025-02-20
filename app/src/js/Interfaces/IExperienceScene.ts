@@ -9,12 +9,14 @@ export interface IExperienceScene {
     camera: ExperienceCamera;
     cameraParent: Object3D;
     updateAction: ((delta: number) => void) | null;
-    playerAvatar: Avatar | null;
+    currentPlayerAvatar: Avatar | null;
     visitorAvatars: { [key: string]: Avatar };
 
     setupFloor(color: number): void;
     addVisitor(userId: string): void;
     removeVisitor(userId: string): void;
+    addCurrentPlayer(): void;
+    removeCurrentPlayer(): void;
     update(delta: number): void;
     destroy(): void;
 }

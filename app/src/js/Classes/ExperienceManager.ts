@@ -1,3 +1,5 @@
+import { gsap } from 'gsap';
+import { Ref, ref } from 'vue';
 import { SceneKey } from '../Enums/SceneKey';
 import { EventService } from '../Services/EventService.ts';
 import { CustomEventKey } from '../Enums/CustomEventKey.ts';
@@ -12,6 +14,7 @@ export default class ExperienceManager {
 	private canvas: HTMLCanvasElement | null = null;
 	public clock: Clock;
 	public userId: string | null = null;
+	public isTransitioning: Ref = ref(false);
 	private renderer: ExperienceRenderer | null = null;
 	private scenes: Map<SceneKey, IExperienceScene>;
 	private animateFrameId: number | null = null;
@@ -75,7 +78,8 @@ export default class ExperienceManager {
 				return;
 			}
 
-			// Add visitor for id to target scene
+			// Add current player and visitor for id to target scene
+			targetScene.addCurrentPlayer();
 			targetScene.addVisitor(data.id);
 		});
 
@@ -121,8 +125,54 @@ export default class ExperienceManager {
 			return;
 		}
 
+		if(this.activeScene && this.activeScene.sceneKey === key) {
+			return;
+		}
+
+		if(this.activeScene && this.activeScene.currentPlayerAvatar && this.activeScene.currentPlayerAvatar.model) {
+			// Make sure all tweens are killed first
+			gsap.killTweensOf(this.activeScene.currentPlayerAvatar.model.scale);
+
+			// First remove current player from previous active scene
+			gsap.to(this.activeScene.currentPlayerAvatar.model.scale,{
+				x: 0,
+				y: 0,
+				z: 0,
+				delay: 2,
+				duration: 0.4,
+				ease: 'back.inOut',
+				onStart: () => {
+					// Set ref
+					this.isTransitioning.value = true;
+
+					if(this.activeScene && this.activeScene.currentPlayerAvatar) {
+						// Set avatar ready state
+						this.activeScene.currentPlayerAvatar.ready = false;
+					}
+				},
+				onComplete: () => {
+					// Remove active player from previous scene
+					this.activeScene?.removeCurrentPlayer();
+
+					// Set new active scene
+					this.activeScene = this.scenes.get(key) || null;
+
+					// Add current player to new active scene
+					this.activeScene?.addCurrentPlayer();
+
+					// Set ref
+					this.isTransitioning.value = false;
+				}
+			});
+
+			return;
+		}
+
 		// Set new active scene
 		this.activeScene = this.scenes.get(key) || null;
+
+		// Add current player to new active scene
+		this.activeScene?.addCurrentPlayer();
 	}
 
 	private addEventListeners() {
