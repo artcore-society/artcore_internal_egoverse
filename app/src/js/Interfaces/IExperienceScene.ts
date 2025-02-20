@@ -12,7 +12,7 @@ export interface IExperienceScene {
     playerAvatar: Avatar | null;
     visitorAvatars: { [key: string]: Avatar };
 
-    setupFloor(color: string): void;
+    setupFloor(color: number): void;
     addVisitor(userId: string): void;
     removeVisitor(userId: string): void;
     update(delta: number): void;

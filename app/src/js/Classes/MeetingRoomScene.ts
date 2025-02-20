@@ -10,6 +10,6 @@ export class MeetingRoomScene extends ExperienceScene {
 
 	init() {
 		// Setup floor
-		this.setupFloor('red');
+		this.setupFloor(0xfb2c36);
 	}
 }

@@ -7,7 +7,7 @@ import {
 	Fog,
 	HemisphereLight,
 	Mesh,
-	MeshBasicMaterial,
+	MeshStandardMaterial,
 	Object3D,
 	OrthographicCamera,
 	PlaneGeometry,
@@ -74,15 +74,19 @@ export default abstract class ExperienceScene implements IExperienceScene {
 
 	abstract init(): void
 
-	public setupFloor(color: string): void {
+	public setupFloor(color: number): void {
 		// Create a large plane
 		const geometry = new PlaneGeometry(500, 500, 10, 10);
 
 		// Create material with all maps
-		const material = new MeshBasicMaterial({ color: new Color(color ?? 'blue') });
+		const material = new MeshStandardMaterial({ color: new Color(color ?? 'blue') });
 
 		// Create plane
 		const plane = new Mesh(geometry, material);
+
+		// Setup shadows
+		plane.castShadow = true;
+		plane.receiveShadow = true;
 
 		// Rotate the plane to lay flat (XZ plane)
 		plane.rotation.x = -Math.PI / 2;

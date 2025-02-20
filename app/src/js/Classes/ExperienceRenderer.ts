@@ -12,6 +12,7 @@ export default class ExperienceRenderer extends WebGLRenderer {
 		// Enable shadow map
 		this.shadowMap.enabled = true;
 		this.shadowMap.type = PCFSoftShadowMap;
+		this.setPixelRatio(window.devicePixelRatio);
 
 		// Set renderer size
 		this.setSize(window.innerWidth, window.innerHeight);

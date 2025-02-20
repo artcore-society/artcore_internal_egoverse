@@ -10,6 +10,6 @@ export class LandingAreaScene extends ExperienceScene {
 
 	init() {
 		// Setup floor
-		this.setupFloor('green');
+		this.setupFloor(0x00c951);
 	}
 }

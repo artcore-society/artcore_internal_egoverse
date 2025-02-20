@@ -45,6 +45,10 @@ export default class Avatar implements IAvatar {
 			// Set class model
 			this.model = gltf.scene;
 
+			// Setup shadows
+			this.model.castShadow = true;
+			this.model.receiveShadow = true;
+
 			// Filter out the T pose animation
 			const filteredAnimations = [...gltf.animations.filter((animation: AnimationClip) => animation.name !== 'TPose')];
 

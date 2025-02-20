@@ -10,6 +10,6 @@ export class ChatRoomScene extends ExperienceScene {
 
 	init() {
 		// Setup floor
-		this.setupFloor('blue');
+		this.setupFloor(0x2b7fff);
 	}
 }
