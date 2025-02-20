@@ -47,6 +47,8 @@ export default class ExperienceManager {
 
 		// Handle scene loading
 		this.handleSceneLoading();
+
+		// Setup websocket event listeners
 		this.setupSocketListeners();
 	}
 

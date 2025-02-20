@@ -9,7 +9,6 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import ExperienceManager from '../Classes/ExperienceManager.ts';
 import PrimaryButton from './PrimaryButton.vue';
 import Loader from './Loader.vue';
-import { ExperienceSocket } from '../Classes/ExperienceSocket.ts';
 
 // Set variables
 const isReady = ref<boolean>(false);
