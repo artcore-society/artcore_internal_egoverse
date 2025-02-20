@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { SceneKey } from '../Enums/SceneKey';
-import { io, Socket } from 'socket.io-client';
 import { EventService } from '../Services/EventService.ts';
 import { ChatRoomScene } from '../Classes/ChatRoomScene';
 import { CustomEventKey } from '../Enums/CustomEventKey.ts';
@@ -10,6 +9,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import ExperienceManager from '../Classes/ExperienceManager.ts';
 import PrimaryButton from './PrimaryButton.vue';
 import Loader from './Loader.vue';
+import { ExperienceSocket } from '../Classes/ExperienceSocket.ts';
 
 // Set variables
 const isReady = ref<boolean>(false);

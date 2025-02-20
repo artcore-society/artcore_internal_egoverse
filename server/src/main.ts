@@ -23,7 +23,10 @@ io.on('connection', async (socket) => {
 
     // Register user specific event
     socket.on('client-spawn-player', (data) => {
-        io.to(data.userId).emit('client-spawn-player', data.visitorId);
+        io.to(data.userId).emit('client-spawn-player', {
+            visitorId: data.visitorId,
+            sceneKey: data.sceneKey
+        });
     });
 
     // Send player data to everyone but yourself

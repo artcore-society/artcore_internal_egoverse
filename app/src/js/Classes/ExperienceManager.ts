@@ -62,9 +62,19 @@ export default class ExperienceManager {
 			console.log('User connected!', data);
 			ExperienceSocket.emit(SocketEvent.CLIENT_SPAWN_PLAYER, {
 				userId: data.id,
-				visitorId: ExperienceManager.instance.userId
+				visitorId: ExperienceManager.instance.userId,
+				sceneKey: this.activeScene?.sceneKey
 			});
-			this.activeScene?.addVisitor(data.id);
+
+			// Get target scene
+			const targetScene = this.scenes.get(this.activeScene?.sceneKey) ?? null;
+
+			if(!targetScene) {
+				return;
+			}
+
+			// Add visitor for id to target scene
+			targetScene.addVisitor(data.id);
 		});
 
 		ExperienceSocket.on(SocketEvent.USER_DISCONNECT, (data) => {
@@ -72,9 +82,18 @@ export default class ExperienceManager {
 			this.activeScene?.removeVisitor(data.id);
 		});
 
-		ExperienceSocket.on(SocketEvent.CLIENT_SPAWN_PLAYER, (visitorId) => {
-			console.log('Spawn new player!', visitorId);
-			this.activeScene?.addVisitor(visitorId);
+		ExperienceSocket.on(SocketEvent.CLIENT_SPAWN_PLAYER, (data) => {
+			console.log('Spawn new player!', data);
+
+			// Get target scene
+			const targetScene = this.scenes.get(data.sceneKey) ?? null;
+
+			if(!targetScene) {
+				return;
+			}
+
+			// Add visitor for id to target scene
+			targetScene.addVisitor(data.visitorId);
 		});
 
 		ExperienceSocket.on(SocketEvent.CLIENT_UPDATE_PLAYER, (data) => {
