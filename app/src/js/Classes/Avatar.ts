@@ -1,3 +1,4 @@
+import { gsap } from 'gsap';
 import { IAvatar } from '../Interfaces/IAvatar.ts';
 import { AvatarType } from '../Enums/AvatarType.ts';
 import { ThreeLoaders } from './ThreeLoaders.ts';
@@ -61,6 +62,16 @@ export default class Avatar implements IAvatar {
 
 		// Add avatar to experienceScene
 		this.experienceScene.scene.add(this.model);
+
+		// Animate in character
+		gsap.fromTo(this.model.scale, { x: 0, y: 0, z: 0 }, {
+			x: 1,
+			y: 1,
+			z: 1,
+			delay: 1,
+			ease: 'back.out',
+			duration: 1,
+		});
 	}
 
 	update(delta: number): void {
