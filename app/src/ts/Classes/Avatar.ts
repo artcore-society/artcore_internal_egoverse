@@ -99,6 +99,24 @@ export default class Avatar implements IAvatar {
 		if(this.model) {
 			// Remove model from experienceScene
 			this.experienceScene.scene.remove(this.model);
+
+			// Make sure all tweens are killed first
+			gsap.killTweensOf(this.model.scale);
+
+			// Animate in character
+			gsap.to(this.model.scale, {
+				x: 0,
+				y: 0,
+				z: 0,
+				ease: 'back.out',
+				duration: 1,
+				onComplete: () => {
+					if(this.model) {
+						// Remove model from experienceScene
+						this.experienceScene.scene.remove(this.model);
+					}
+				}
+			});
 		}
 	}
 }

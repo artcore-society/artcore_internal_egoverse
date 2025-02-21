@@ -15,6 +15,8 @@ export interface IExperienceScene {
     setupFloor(color: number): void;
     addVisitor(userId: string): void;
     removeVisitor(userId: string): void;
+    addCurrentPlayer(): void;
+    removeCurrentPlayer(): void;
     update(delta: number): void;
     destroy(): void;
 }

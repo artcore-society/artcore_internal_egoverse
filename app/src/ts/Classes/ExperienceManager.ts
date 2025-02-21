@@ -108,23 +108,22 @@ export default class ExperienceManager {
 
 			if(isCurrentPlayer) {
 				// Current player
-				console.log('current player!')
 				if(
-					this.activeScene &&
-					this.activeScene.currentPlayerAvatar &&
-					this.activeScene.currentPlayerAvatar.model
+					this.activeScene
 				) {
-					// Make sure all tweens are killed first
-					gsap.killTweensOf(this.activeScene.currentPlayerAvatar.model.scale);
+					// Add current player avatar to active scene
+					this.activeScene.addCurrentPlayer();
 
-					// Animate in current player avatar
-					gsap.fromTo(this.activeScene.currentPlayerAvatar.model.scale, { x: 0, y: 0, z: 0 }, {
-						x: 1,
-						y: 1,
-						z: 1,
-						ease: 'back.out',
-						duration: 1,
-					});
+					// Check if current player is present in any other scene and remove if so
+					const otherScenes: Array<IExperienceScene> = [...this.scenes.values()].filter(scene => scene.sceneKey !== data.sceneKey);
+					if(otherScenes && otherScenes.length !== 0) {
+						const otherScenesWhereCurrentPLayerIsStillPresent = otherScenes.filter(scene => scene.currentPlayerAvatar);
+
+						otherScenesWhereCurrentPLayerIsStillPresent.forEach(scene => {
+							// Remove visitor from scene
+							scene.removeCurrentPlayer();
+						});
+					}
 				}
 
 				return;
@@ -144,15 +143,12 @@ export default class ExperienceManager {
 
 			// Check if visitor is present in any other scene and remove if so
 			const otherScenes: Array<IExperienceScene> = [...this.scenes.values()].filter(scene => scene.sceneKey !== data.sceneKey);
-
 			if(otherScenes && otherScenes.length !== 0) {
 				const otherScenesWhereVisitorIsStillPresent = otherScenes.filter(scene => scene.visitorAvatars[data.userId]);
 
 				otherScenesWhereVisitorIsStillPresent.forEach(scene => {
 					// Remove visitor from scene
 					scene.removeVisitor(data.userId);
-
-					console.log('removing visitor from ', scene.sceneKey)
 				});
 			}
 		});

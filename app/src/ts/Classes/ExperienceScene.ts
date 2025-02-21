@@ -37,9 +37,6 @@ export default abstract class ExperienceScene implements IExperienceScene {
 		this.cameraParent = new Object3D();
 		this.updateAction = null;
 
-		// Set current player
-		this.currentPlayerAvatar = new Avatar(this, this.camera, AvatarType.CURRENT_PLAYER);
-
 		// Setup camera parent
 		this.cameraParent.rotation.order = 'YXZ';
 		this.cameraParent.rotation.x = -0.3;
@@ -49,22 +46,6 @@ export default abstract class ExperienceScene implements IExperienceScene {
 
 		// Add camera to parent object
 		this.cameraParent.add(this.camera);
-
-		// Set render action
-		this.setUpdateAction((delta) => {
-			if(this.currentPlayerAvatar) {
-				// Update avatar
-				this.currentPlayerAvatar.update(delta);
-
-				// Send data to socket server for sync
-				ExperienceSocket.emit(SocketEvent.CLIENT_UPDATE_PLAYER, {
-					id: ExperienceManager.instance.userId,
-					delta: delta,
-					keysPressed: this.currentPlayerAvatar?.controls?.keysPressed,
-					sceneKey: this.sceneKey
-				});
-			}
-		});
 
 		// Set scene fog
 		this.scene.fog = new Fog( 0xffffff, 15, 50 );
@@ -113,6 +94,26 @@ export default abstract class ExperienceScene implements IExperienceScene {
 		this.scene.add(dirLight);
 	}
 
+	public addCurrentPlayer() {
+		if(this.currentPlayerAvatar) {
+			console.log('return')
+			return;
+		}
+
+		// Create current player avatar
+		this.currentPlayerAvatar = new Avatar(this, this.camera, AvatarType.CURRENT_PLAYER);
+	}
+	
+	public removeCurrentPlayer() {
+		if(!this.currentPlayerAvatar) {
+			return;
+		}
+
+		// Destroy the current avatar
+		this.currentPlayerAvatar.destroy();
+		this.currentPlayerAvatar = null;
+	}
+
 	public addVisitor(userId: string) {
 		// Create and add avatar of visitor to visitors list
 		this.visitorAvatars[userId] = new Avatar(this, this.camera, AvatarType.VISITOR);
@@ -146,14 +147,18 @@ export default abstract class ExperienceScene implements IExperienceScene {
 		});
 	}
 
-	private setUpdateAction(callback: (delta: number) => void): void {
-		this.updateAction = callback;
-	}
-
 	public update(delta: number): void {
-		if (this.updateAction) {
-			// Call render action if not paused
-			this.updateAction(delta);
+		if(this.currentPlayerAvatar) {
+			// Update avatar
+			this.currentPlayerAvatar.update(delta);
+
+			// Send data to socket server for sync
+			ExperienceSocket.emit(SocketEvent.CLIENT_UPDATE_PLAYER, {
+				id: ExperienceManager.instance.userId,
+				delta: delta,
+				keysPressed: this.currentPlayerAvatar.controls.keysPressed,
+				sceneKey: this.sceneKey
+			});
 		}
 	}
 
