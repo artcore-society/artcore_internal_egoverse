@@ -162,7 +162,9 @@ export default class AvatarControls implements IAvatarControls {
 
 			// Rotate avatar model
 			this.rotateQuaternion.setFromAxisAngle(this.rotateAngle, angleYCameraAngle);
-			this.avatar.model?.quaternion.rotateTowards(this.rotateQuaternion, 0.05);
+
+			// Smoothly rotate avatar model using slerp and apply delta to make it frame independent
+			this.avatar.model?.quaternion.slerp(this.rotateQuaternion, Math.min(3 * delta, 1));
 
 			if(this.avatar.type !== AvatarType.VISITOR) {
 				// Calculate direction
