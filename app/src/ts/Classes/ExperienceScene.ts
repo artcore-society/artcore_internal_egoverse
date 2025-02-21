@@ -147,16 +147,17 @@ export default abstract class ExperienceScene implements IExperienceScene {
 	}
 
 	public update(delta: number): void {
-		if(this.currentPlayerAvatar && this.currentPlayerAvatar.controls) {
+		if(this.currentPlayerAvatar && this.currentPlayerAvatar.controls && this.currentPlayerAvatar.model) {
 			// Update avatar
 			this.currentPlayerAvatar.update(delta);
 
 			// Send data to socket server for sync
 			ExperienceSocket.emit(SocketEvent.CLIENT_UPDATE_PLAYER, {
-				id: ExperienceManager.instance.userId,
+				visitorId: ExperienceManager.instance.userId,
 				delta: delta,
 				keysPressed: this.currentPlayerAvatar.controls.keysPressed,
-				sceneKey: this.sceneKey
+				sceneKey: this.sceneKey,
+				initialPosition: this.currentPlayerAvatar.model.position
 			});
 		}
 	}

@@ -7,6 +7,11 @@ import { ExperienceSocket } from './ExperienceSocket.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { Clock, DefaultLoadingManager, LoadingManager } from 'three';
 import ExperienceRenderer from './ExperienceRenderer.ts';
+import { ISocketInitData } from '../Interfaces/ISocketInitData.ts';
+import { ISocketUserData } from '../Interfaces/ISocketUserData.ts';
+import { ISocketClientUpdatePlayerData } from '../Interfaces/ISocketClientUpdatePlayerData.ts';
+import { ISocketJoinSceneData } from '../Interfaces/ISocketJoinSceneData.ts';
+import { ISocketClientSpawnPlayerData } from '../Interfaces/ISocketClientSpawnPlayerData.ts';
 
 export default class ExperienceManager {
 	private static _instance: ExperienceManager | null = null;
@@ -54,7 +59,7 @@ export default class ExperienceManager {
 	}
 
 	private setupSocketListeners(): void {
-		ExperienceSocket.on(SocketEvent.INIT, (data) => {
+		ExperienceSocket.on<ISocketInitData>(SocketEvent.INIT, (data) => {
 			console.log('Socket init!', data);
 
 			// Set current user id
@@ -64,7 +69,7 @@ export default class ExperienceManager {
 			this.setActiveScene(SceneKey.LANDING_AREA);
 		});
 
-		ExperienceSocket.on(SocketEvent.USER_CONNECT, (data) => {
+		ExperienceSocket.on<ISocketUserData>(SocketEvent.USER_CONNECT, (data) => {
 			console.log('User connected!', data);
 			ExperienceSocket.emit(SocketEvent.CLIENT_SPAWN_PLAYER, {
 				userId: data.id,
@@ -73,12 +78,12 @@ export default class ExperienceManager {
 			});
 		});
 
-		ExperienceSocket.on(SocketEvent.USER_DISCONNECT, (data) => {
+		ExperienceSocket.on<ISocketUserData>(SocketEvent.USER_DISCONNECT, (data) => {
 			console.log('User disconnected!', data);
 			this.activeScene?.removeVisitor(data.id);
 		});
 
-		ExperienceSocket.on(SocketEvent.CLIENT_SPAWN_PLAYER, (data) => {
+		ExperienceSocket.on<ISocketClientSpawnPlayerData>(SocketEvent.CLIENT_SPAWN_PLAYER, (data) => {
 			console.log('Spawn new player!', data);
 
 			// Get target scene
@@ -92,18 +97,21 @@ export default class ExperienceManager {
 			targetScene.addVisitor(data.visitorId);
 		});
 
-		ExperienceSocket.on(SocketEvent.CLIENT_UPDATE_PLAYER, (data) => {
+		ExperienceSocket.on<ISocketClientUpdatePlayerData>(SocketEvent.CLIENT_UPDATE_PLAYER, (data) => {
 			// Update avatar
 			if (this.activeScene && this.activeScene.visitorAvatars && this.activeScene.sceneKey === data.sceneKey) {
+				// Make sure visitor position starts at initial position
+				this.activeScene.visitorAvatars[data.visitorId]?.model?.position.set(data.initialPosition.x, data.initialPosition.y, data.initialPosition.z);
+
 				// Update the mixer of the visitor avatar
-				this.activeScene.visitorAvatars[data.id]?.mixer?.update(data.delta);
+				this.activeScene.visitorAvatars[data.visitorId]?.mixer?.update(data.delta);
 
 				// Update the controls of the visitor avatar
-				this.activeScene.visitorAvatars[data.id]?.controls?.update(data.delta, data.keysPressed);
+				this.activeScene.visitorAvatars[data.visitorId]?.controls?.update(data.delta, data.keysPressed);
 			}
 		});
 
-		ExperienceSocket.on(SocketEvent.JOIN_SCENE, (data) => {
+		ExperienceSocket.on<ISocketJoinSceneData>(SocketEvent.JOIN_SCENE, (data) => {
 			const isCurrentPlayer = data.userId === this.userId;
 
 			if(isCurrentPlayer) {

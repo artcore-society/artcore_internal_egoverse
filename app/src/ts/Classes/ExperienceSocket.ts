@@ -20,7 +20,7 @@ export class ExperienceSocket {
 		return ExperienceSocket._instance;
 	}
 
-	public static on(event: SocketEvent, callback: (data: unknown) => void) {
+	public static on<T>(event: SocketEvent, callback: (data: T) => void) {
 		ExperienceSocket.instance.socket.on(event, callback);
 	}
 
