@@ -17,7 +17,7 @@ export default class Avatar implements IAvatar {
 	public model: Object3D | null = null;
 	public mixer: AnimationMixer = new AnimationMixer(new Mesh());
 	public animationsMap: Map<AnimationName, AnimationAction> = new Map();
-	private spawnPosition: Vector3;
+	public spawnPosition: Vector3;
 
 	constructor (experienceScene: ExperienceScene, camera: ExperienceCamera, type: AvatarType, spawnPosition: Vector3 = new Vector3()) {
 		this.experienceScene = experienceScene;
@@ -32,9 +32,6 @@ export default class Avatar implements IAvatar {
 	async init() {
 		// Load model
 		await this.load();
-
-		// Make sure camera parent position is reset to spawn position
-		this.experienceScene.cameraParent.position.set(this.spawnPosition.x, this.spawnPosition.y, this.spawnPosition.z);
 
 		// Setup avatar controls
 		this.controls = new AvatarControls(this);

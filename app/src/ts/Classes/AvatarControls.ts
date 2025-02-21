@@ -32,6 +32,11 @@ export default class AvatarControls implements IAvatarControls {
 		// Set properties
 		this.avatar = avatar;
 
+		if(this.avatar.type === AvatarType.CURRENT_PLAYER) {
+			// Make sure camera parent position is starts at spawn position
+			this.avatar.experienceScene.cameraParent.position.set(this.avatar.spawnPosition.x, this.avatar.spawnPosition.y, this.avatar.spawnPosition.z);
+		}
+
 		// Call animation when corresponding key is pressed
 		this.avatar.animationsMap.forEach((animation, key) => {
 			if (key === this.currentAction) {
@@ -184,7 +189,6 @@ export default class AvatarControls implements IAvatarControls {
 			this.avatar.model.position.z += moveZ;
 
 			if(this.avatar.type === AvatarType.CURRENT_PLAYER) {
-				console.log('setting model position: ', this.avatar.model.position)
 				// Sync camera with current player avatar
 				this.avatar.experienceScene.cameraParent.position.x = this.avatar.model.position.x;
 				this.avatar.experienceScene.cameraParent.position.z = this.avatar.model.position.z;
