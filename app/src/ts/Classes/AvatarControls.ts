@@ -184,6 +184,7 @@ export default class AvatarControls implements IAvatarControls {
 			this.avatar.model.position.z += moveZ;
 
 			if(this.avatar.type === AvatarType.CURRENT_PLAYER) {
+				console.log('setting model position: ', this.avatar.model.position)
 				// Sync camera with current player avatar
 				this.avatar.experienceScene.cameraParent.position.x = this.avatar.model.position.x;
 				this.avatar.experienceScene.cameraParent.position.z = this.avatar.model.position.z;

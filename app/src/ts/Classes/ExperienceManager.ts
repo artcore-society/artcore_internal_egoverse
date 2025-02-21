@@ -113,17 +113,6 @@ export default class ExperienceManager {
 				) {
 					// Add current player avatar to active scene
 					this.activeScene.addCurrentPlayer();
-
-					// Check if current player is present in any other scene and remove if so
-					const otherScenes: Array<IExperienceScene> = [...this.scenes.values()].filter(scene => scene.sceneKey !== data.sceneKey);
-					if(otherScenes && otherScenes.length !== 0) {
-						const otherScenesWhereCurrentPLayerIsStillPresent = otherScenes.filter(scene => scene.currentPlayerAvatar);
-
-						otherScenesWhereCurrentPLayerIsStillPresent.forEach(scene => {
-							// Remove visitor from scene
-							scene.removeCurrentPlayer();
-						});
-					}
 				}
 
 				return;
@@ -162,6 +151,39 @@ export default class ExperienceManager {
 		// Check if the scene exists
 		if (!this.scenes.has(key)) {
 			console.warn(`Scene "${key}" not found.`);
+			return;
+		}
+
+		if(this.activeScene && this.activeScene.sceneKey === key) {
+			return;
+		}
+
+		if(this.activeScene && this.activeScene.currentPlayerAvatar && this.activeScene.currentPlayerAvatar.model) {
+			// Make sure all tweens are killed first
+			gsap.killTweensOf(this.activeScene.currentPlayerAvatar.model.scale);
+
+			// First remove current player from previous active scene
+			gsap.to(this.activeScene.currentPlayerAvatar.model.scale,{
+				x: 0,
+				y: 0,
+				z: 0,
+				duration: 0.4,
+				ease: 'back.inOut',
+				onComplete: () => {
+					// Remove active player from previous scene
+					this.activeScene?.removeCurrentPlayer();
+
+					// Set new active scene
+					this.activeScene = this.scenes.get(key) || null;
+
+					// Emit join room
+					ExperienceSocket.emit(SocketEvent.JOIN_SCENE, {
+						userId: this.userId,
+						sceneKey: key,
+					});
+				}
+			});
+
 			return;
 		}
 

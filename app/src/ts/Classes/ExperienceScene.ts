@@ -96,7 +96,6 @@ export default abstract class ExperienceScene implements IExperienceScene {
 
 	public addCurrentPlayer() {
 		if(this.currentPlayerAvatar) {
-			console.log('return')
 			return;
 		}
 
@@ -148,7 +147,7 @@ export default abstract class ExperienceScene implements IExperienceScene {
 	}
 
 	public update(delta: number): void {
-		if(this.currentPlayerAvatar) {
+		if(this.currentPlayerAvatar && this.currentPlayerAvatar.controls) {
 			// Update avatar
 			this.currentPlayerAvatar.update(delta);
 

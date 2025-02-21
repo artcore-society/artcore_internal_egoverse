@@ -4,7 +4,7 @@ import { AvatarType } from '../Enums/AvatarType.ts';
 import { ThreeLoaders } from './ThreeLoaders.ts';
 import { AnimationName } from '../Enums/AnimationName.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
-import { AnimationAction, AnimationClip, AnimationMixer, Mesh, Object3D } from 'three';
+import { AnimationAction, AnimationClip, AnimationMixer, Mesh, Object3D, Vector3 } from 'three';
 import AvatarControls from './AvatarControls.ts';
 import ExperienceCamera from './ExperienceCamera.ts';
 import ExperienceScene from './ExperienceScene.ts';
@@ -17,11 +17,13 @@ export default class Avatar implements IAvatar {
 	public model: Object3D | null = null;
 	public mixer: AnimationMixer = new AnimationMixer(new Mesh());
 	public animationsMap: Map<AnimationName, AnimationAction> = new Map();
+	private spawnPosition: Vector3;
 
-	constructor (experienceScene: ExperienceScene, camera: ExperienceCamera, type: AvatarType) {
+	constructor (experienceScene: ExperienceScene, camera: ExperienceCamera, type: AvatarType, spawnPosition: Vector3 = new Vector3()) {
 		this.experienceScene = experienceScene;
 		this.camera = camera;
 		this.type = type;
+		this.spawnPosition = spawnPosition;
 
 		// Initiate avatar
 		this.init();
@@ -30,6 +32,9 @@ export default class Avatar implements IAvatar {
 	async init() {
 		// Load model
 		await this.load();
+
+		// Make sure camera parent position is reset to spawn position
+		this.experienceScene.cameraParent.position.set(this.spawnPosition.x, this.spawnPosition.y, this.spawnPosition.z);
 
 		// Setup avatar controls
 		this.controls = new AvatarControls(this);
@@ -44,6 +49,9 @@ export default class Avatar implements IAvatar {
 
 			// Set class model
 			this.model = gltf.scene;
+
+			// Set spawn position
+			this.model.position.set(this.spawnPosition.x, this.spawnPosition.y, this.spawnPosition.z);
 
 			// Setup shadows
 			this.model.castShadow = true;
