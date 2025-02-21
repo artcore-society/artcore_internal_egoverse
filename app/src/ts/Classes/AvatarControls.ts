@@ -4,6 +4,7 @@ import { AnimationName } from '../Enums/AnimationName.ts';
 import { IAvatarControls } from '../Interfaces/IAvatarControls.ts';
 import { Quaternion, Vector3 } from 'three';
 import Avatar from './Avatar.ts';
+import ExperienceManager from './ExperienceManager.ts';
 
 export default class AvatarControls implements IAvatarControls {
 	private readonly avatar: Avatar;
@@ -47,6 +48,9 @@ export default class AvatarControls implements IAvatarControls {
 	}
 
 	connect() {
+		// Disconnect first to make sure event listeners only exist ones
+		this.disconnect();
+
 		// Add event listeners
 		document.addEventListener('keydown', this.onKeyDown.bind(this));
 		document.addEventListener('keyup', this.onKeyUp.bind(this));
@@ -70,6 +74,12 @@ export default class AvatarControls implements IAvatarControls {
 
 	update(delta: number, keysPressed: { [key in KeyboardKey]: boolean }) {
 		if(!this.avatar.model) {
+			return;
+		}
+
+		// Ensure only one update per frame
+		if (ExperienceManager.instance.activeScene?.sceneKey !== this.avatar.experienceScene.sceneKey) {
+			console.log('update');
 			return;
 		}
 

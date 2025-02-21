@@ -36,8 +36,10 @@ export default class Avatar implements IAvatar {
 		// Setup avatar controls
 		this.controls = new AvatarControls(this);
 
-		// Make sure controls are connected
-		this.controls.connect();
+		if(this.type === AvatarType.CURRENT_PLAYER) {
+			// Make sure controls are connected
+			this.controls.connect();
+		}
 	}
 
 	async load() {
