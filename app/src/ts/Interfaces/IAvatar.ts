@@ -1,6 +1,6 @@
 import { AvatarType } from '../Enums/AvatarType.ts';
 import { IExperienceScene } from './IExperienceScene.ts';
-import { AnimationAction, AnimationMixer, Object3D, Vector3 } from 'three';
+import { AnimationAction, AnimationMixer, Object3D, Quaternion, Vector3 } from 'three';
 import AvatarControls from '../Classes/AvatarControls.ts';
 
 export interface IAvatar {
@@ -11,6 +11,7 @@ export interface IAvatar {
     mixer: AnimationMixer;
     animationsMap: Map<string, AnimationAction | null>;
     spawnPosition: Vector3;
+    spawnRotation: Quaternion;
 
     init(): void;
     load(): void;

@@ -15,7 +15,9 @@ import {
 	Object3D,
 	OrthographicCamera,
 	PlaneGeometry,
-	Scene
+	Quaternion,
+	Scene,
+	Vector3
 } from 'three';
 import ExperienceCamera from './ExperienceCamera.ts';
 import Avatar from './Avatar.ts';
@@ -113,9 +115,9 @@ export default abstract class ExperienceScene implements IExperienceScene {
 		this.currentPlayerAvatar = null;
 	}
 
-	public addVisitor(userId: string) {
+	public addVisitor(userId: string, spawnPosition: Vector3 = new Vector3(), spawnRotation: Quaternion = new Quaternion()) {
 		// Create and add avatar of visitor to visitors list
-		this.visitorAvatars[userId] = new Avatar(this, this.camera, AvatarType.VISITOR);
+		this.visitorAvatars[userId] = new Avatar(this, this.camera, AvatarType.VISITOR, spawnPosition, spawnRotation);
 	}
 
 	public removeVisitor(userId: string) {
@@ -157,8 +159,8 @@ export default abstract class ExperienceScene implements IExperienceScene {
 				delta: delta,
 				keysPressed: this.currentPlayerAvatar.controls.keysPressed,
 				sceneKey: this.sceneKey,
-				initialPosition: this.currentPlayerAvatar.model.position,
-				initialRotation: this.currentPlayerAvatar.model.rotation,
+				spawnPosition: this.currentPlayerAvatar.model.position,
+				spawnRotation: this.currentPlayerAvatar.model.rotation,
 			});
 		}
 	}

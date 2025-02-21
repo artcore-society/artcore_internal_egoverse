@@ -5,7 +5,7 @@ import { EventService } from '../Services/EventService.ts';
 import { CustomEventKey } from '../Enums/CustomEventKey.ts';
 import { ExperienceSocket } from './ExperienceSocket.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
-import { Clock, DefaultLoadingManager, LoadingManager } from 'three';
+import { Clock, DefaultLoadingManager, LoadingManager, Quaternion, Vector3 } from 'three';
 import ExperienceRenderer from './ExperienceRenderer.ts';
 import { ISocketInitData } from '../Interfaces/ISocketInitData.ts';
 import { ISocketUserData } from '../Interfaces/ISocketUserData.ts';
@@ -71,10 +71,13 @@ export default class ExperienceManager {
 
 		ExperienceSocket.on<ISocketUserData>(SocketEvent.USER_CONNECT, (data) => {
 			console.log('User connected!', data);
+
 			ExperienceSocket.emit(SocketEvent.CLIENT_SPAWN_PLAYER, {
 				userId: data.id,
 				visitorId: ExperienceManager.instance.userId,
-				sceneKey: this.activeScene?.sceneKey
+				sceneKey: this.activeScene?.sceneKey,
+				spawnPosition: this.activeScene?.currentPlayerAvatar?.model?.position,
+				spawnRotation: this.activeScene?.currentPlayerAvatar?.model?.quaternion,
 			});
 		});
 
@@ -94,18 +97,16 @@ export default class ExperienceManager {
 			}
 
 			// Add visitor for id to target scene
-			targetScene.addVisitor(data.visitorId);
+			targetScene.addVisitor(
+				data.visitorId,
+				new Vector3(data.spawnPosition.x, data.spawnPosition.y, data.spawnPosition.z), // Convert websocket data to Vector3
+				new Quaternion(...data.spawnRotation) // Convert websocket data to Quaternion
+			);
 		});
 
 		ExperienceSocket.on<ISocketClientUpdatePlayerData>(SocketEvent.CLIENT_UPDATE_PLAYER, (data) => {
 			// Update avatar
 			if (this.activeScene && this.activeScene.visitorAvatars && this.activeScene.sceneKey === data.sceneKey) {
-				// Make sure visitor position starts at initial position
-				this.activeScene.visitorAvatars[data.visitorId]?.model?.position.set(data.initialPosition.x, data.initialPosition.y, data.initialPosition.z);
-
-				// Make sure visitor position starts at initial rotation
-				this.activeScene.visitorAvatars[data.visitorId]?.model?.rotation.set(data.initialRotation.x, data.initialRotation.y, data.initialRotation.z);
-
 				// Update the mixer of the visitor avatar
 				this.activeScene.visitorAvatars[data.visitorId]?.mixer?.update(data.delta);
 
@@ -139,6 +140,7 @@ export default class ExperienceManager {
 			}
 
 			// Add visitor for id to target scene
+			console.log('b')
 			targetScene.addVisitor(data.userId);
 
 			// Check if visitor is present in any other scene and remove if so

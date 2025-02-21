@@ -1,7 +1,7 @@
-import { Object3D, Scene } from 'three';
+import { SceneKey } from '../Enums/SceneKey.ts';
+import { Object3D, Quaternion, Scene, Vector3 } from 'three';
 import ExperienceCamera from '../Classes/ExperienceCamera.ts';
 import Avatar from '../Classes/Avatar.ts';
-import { SceneKey } from '../Enums/SceneKey.ts';
 
 export interface IExperienceScene {
     scene: Scene;
@@ -13,7 +13,7 @@ export interface IExperienceScene {
     visitorAvatars: { [key: string]: Avatar };
 
     setupFloor(color: number): void;
-    addVisitor(userId: string): void;
+    addVisitor(userId: string, spawnPosition?: Vector3, spawnRotation?: Quaternion): void;
     removeVisitor(userId: string): void;
     addCurrentPlayer(): void;
     removeCurrentPlayer(): void;

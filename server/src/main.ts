@@ -26,7 +26,9 @@ io.on('connection', async (socket) => {
     socket.on(SocketEvent.CLIENT_SPAWN_PLAYER, (data) => {
         io.to(data.userId).emit(SocketEvent.CLIENT_SPAWN_PLAYER, {
             visitorId: data.visitorId,
-            sceneKey: data.sceneKey
+            sceneKey: data.sceneKey,
+            spawnPosition: data.spawnPosition,
+            spawnRotation: data.spawnRotation,
         });
     });
 
