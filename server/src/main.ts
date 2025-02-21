@@ -36,7 +36,9 @@ io.on('connection', async (socket) => {
     socket.on(SocketEvent.JOIN_SCENE, (data) => {
         io.emit(SocketEvent.JOIN_SCENE, {
             userId: data.userId,
-            sceneKey: data.sceneKey
+            sceneKey: data.sceneKey,
+            spawnPosition: data.spawnPosition,
+            spawnRotation: data.spawnRotation,
         });
     });
 

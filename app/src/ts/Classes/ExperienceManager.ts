@@ -139,9 +139,14 @@ export default class ExperienceManager {
 				return;
 			}
 
+			console.log('joining room: ', data)
+
 			// Add visitor for id to target scene
-			console.log('b')
-			targetScene.addVisitor(data.userId);
+			targetScene.addVisitor(
+				data.userId,
+				new Vector3(data.spawnPosition.x, data.spawnPosition.y, data.spawnPosition.z), // Convert websocket data to Vector3
+				new Quaternion(...data.spawnRotation) // Convert websocket data to Quaternion
+			);
 
 			// Check if visitor is present in any other scene and remove if so
 			const otherScenes: Array<IExperienceScene> = [...this.scenes.values()].filter(scene => scene.sceneKey !== data.sceneKey);
@@ -193,6 +198,8 @@ export default class ExperienceManager {
 					ExperienceSocket.emit(SocketEvent.JOIN_SCENE, {
 						userId: this.userId,
 						sceneKey: key,
+						spawnPosition: this.activeScene?.currentPlayerAvatar?.model?.position ?? new Vector3(),
+						spawnRotation: this.activeScene?.currentPlayerAvatar?.model?.quaternion ?? new Quaternion(),
 					});
 				}
 			});
@@ -207,6 +214,8 @@ export default class ExperienceManager {
 		ExperienceSocket.emit(SocketEvent.JOIN_SCENE, {
 			userId: this.userId,
 			sceneKey: key,
+			spawnPosition: this.activeScene?.currentPlayerAvatar?.model?.position ?? new Vector3(),
+			spawnRotation: this.activeScene?.currentPlayerAvatar?.model?.quaternion ?? new Quaternion(),
 		});
 	}
 
