@@ -29,6 +29,14 @@ io.on('connection', async (socket) => {
         });
     });
 
+    // Register joining scene event
+    socket.on('join-scene', (data) => {
+        io.emit('join-scene', {
+            userId: data.userId,
+            sceneKey: data.sceneKey
+        });
+    });
+
     // Send player data to everyone but yourself
     socket.on('client-update-player', (data) => {
         socket.broadcast.emit('client-update-player', data);

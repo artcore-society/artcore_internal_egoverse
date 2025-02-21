@@ -1,3 +1,4 @@
+import { gsap } from 'gsap';
 import { SceneKey } from '../Enums/SceneKey.ts';
 import { AvatarType } from '../Enums/AvatarType.ts';
 import { SocketEvent } from '../Enums/SocketEvent.ts';
@@ -35,6 +36,9 @@ export default abstract class ExperienceScene implements IExperienceScene {
 		this.camera = new ExperienceCamera(this.scene, canvas);
 		this.cameraParent = new Object3D();
 		this.updateAction = null;
+
+		// Set current player
+		this.currentPlayerAvatar = new Avatar(this, this.camera, AvatarType.CURRENT_PLAYER);
 
 		// Setup camera parent
 		this.cameraParent.rotation.order = 'YXZ';
@@ -118,34 +122,28 @@ export default abstract class ExperienceScene implements IExperienceScene {
 		// Get the target visitor avatar
 		const targetVisitor = this.visitorAvatars[userId];
 
-		if(!targetVisitor) {
+		if(!targetVisitor || !targetVisitor.model) {
 			return;
 		}
 
-		// Call destroy function
-		targetVisitor.destroy();
+		// Make sure all tweens are killed first
+		gsap.killTweensOf(targetVisitor.model.scale);
 
-		// Delete from visitors object
-		delete this.visitorAvatars[userId];
-	}
+		// Animate in character
+		gsap.to(targetVisitor.model.scale, {
+			x: 0,
+			y: 0,
+			z: 0,
+			ease: 'back.out',
+			duration: 1,
+			onComplete: () => {
+				// Call destroy function
+				targetVisitor.destroy();
 
-	addCurrentPlayer() {
-		if(this.currentPlayerAvatar) {
-			return;
-		}
-
-		// Set current player
-		this.currentPlayerAvatar = new Avatar(this, this.camera, AvatarType.CURRENT_PLAYER);
-	}
-
-	removeCurrentPlayer() {
-		if(!this.currentPlayerAvatar) {
-			return;
-		}
-
-		// Destroy the current player avatar
-		this.currentPlayerAvatar.destroy();
-		this.currentPlayerAvatar = null;
+				// Delete from visitors object
+				delete this.visitorAvatars[userId];
+			}
+		});
 	}
 
 	private setUpdateAction(callback: (delta: number) => void): void {

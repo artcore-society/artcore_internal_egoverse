@@ -1,20 +1,18 @@
 import { gsap } from 'gsap';
-import { Ref, ref } from 'vue';
 import { SceneKey } from '../Enums/SceneKey';
+import { SocketEvent } from '../Enums/SocketEvent.ts';
 import { EventService } from '../Services/EventService.ts';
 import { CustomEventKey } from '../Enums/CustomEventKey.ts';
+import { ExperienceSocket } from './ExperienceSocket.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { Clock, DefaultLoadingManager, LoadingManager } from 'three';
 import ExperienceRenderer from './ExperienceRenderer.ts';
-import { ExperienceSocket } from './ExperienceSocket.ts';
-import { SocketEvent } from '../Enums/SocketEvent.ts';
 
 export default class ExperienceManager {
 	private static _instance: ExperienceManager | null = null;
 	private canvas: HTMLCanvasElement | null = null;
 	public clock: Clock;
 	public userId: string | null = null;
-	public isTransitioning: Ref = ref(false);
 	private renderer: ExperienceRenderer | null = null;
 	private scenes: Map<SceneKey, IExperienceScene>;
 	private animateFrameId: number | null = null;
@@ -61,6 +59,9 @@ export default class ExperienceManager {
 
 			// Set current user id
 			this.userId = data.id;
+
+			// Set the default active scene
+			this.setActiveScene(SceneKey.LANDING_AREA);
 		});
 
 		ExperienceSocket.on(SocketEvent.USER_CONNECT, (data) => {
@@ -70,17 +71,6 @@ export default class ExperienceManager {
 				visitorId: ExperienceManager.instance.userId,
 				sceneKey: this.activeScene?.sceneKey
 			});
-
-			// Get target scene
-			const targetScene = this.scenes.get(this.activeScene?.sceneKey) ?? null;
-
-			if(!targetScene) {
-				return;
-			}
-
-			// Add current player and visitor for id to target scene
-			targetScene.addCurrentPlayer();
-			targetScene.addVisitor(data.id);
 		});
 
 		ExperienceSocket.on(SocketEvent.USER_DISCONNECT, (data) => {
@@ -112,6 +102,60 @@ export default class ExperienceManager {
 				this.activeScene.visitorAvatars[data.id]?.controls?.update(data.delta, data.keysPressed);
 			}
 		});
+
+		ExperienceSocket.on(SocketEvent.JOIN_SCENE, (data) => {
+			const isCurrentPlayer = data.userId === this.userId;
+
+			if(isCurrentPlayer) {
+				// Current player
+				console.log('current player!')
+				if(
+					this.activeScene &&
+					this.activeScene.currentPlayerAvatar &&
+					this.activeScene.currentPlayerAvatar.model
+				) {
+					// Make sure all tweens are killed first
+					gsap.killTweensOf(this.activeScene.currentPlayerAvatar.model.scale);
+
+					// Animate in current player avatar
+					gsap.fromTo(this.activeScene.currentPlayerAvatar.model.scale, { x: 0, y: 0, z: 0 }, {
+						x: 1,
+						y: 1,
+						z: 1,
+						ease: 'back.out',
+						duration: 1,
+					});
+				}
+
+				return;
+			}
+
+			// Visitor
+
+			// Get target scene
+			const targetScene = this.scenes.get(data.sceneKey) ?? null;
+
+			if(!targetScene) {
+				return;
+			}
+
+			// Add visitor for id to target scene
+			targetScene.addVisitor(data.userId);
+
+			// Check if visitor is present in any other scene and remove if so
+			const otherScenes: Array<IExperienceScene> = [...this.scenes.values()].filter(scene => scene.sceneKey !== data.sceneKey);
+
+			if(otherScenes && otherScenes.length !== 0) {
+				const otherScenesWhereVisitorIsStillPresent = otherScenes.filter(scene => scene.visitorAvatars[data.userId]);
+
+				otherScenesWhereVisitorIsStillPresent.forEach(scene => {
+					// Remove visitor from scene
+					scene.removeVisitor(data.userId);
+
+					console.log('removing visitor from ', scene.sceneKey)
+				});
+			}
+		});
 	}
 
 	addScene(key: SceneKey, scene: IExperienceScene): void {
@@ -125,54 +169,14 @@ export default class ExperienceManager {
 			return;
 		}
 
-		if(this.activeScene && this.activeScene.sceneKey === key) {
-			return;
-		}
-
-		if(this.activeScene && this.activeScene.currentPlayerAvatar && this.activeScene.currentPlayerAvatar.model) {
-			// Make sure all tweens are killed first
-			gsap.killTweensOf(this.activeScene.currentPlayerAvatar.model.scale);
-
-			// First remove current player from previous active scene
-			gsap.to(this.activeScene.currentPlayerAvatar.model.scale,{
-				x: 0,
-				y: 0,
-				z: 0,
-				delay: 2,
-				duration: 0.4,
-				ease: 'back.inOut',
-				onStart: () => {
-					// Set ref
-					this.isTransitioning.value = true;
-
-					if(this.activeScene && this.activeScene.currentPlayerAvatar) {
-						// Set avatar ready state
-						this.activeScene.currentPlayerAvatar.ready = false;
-					}
-				},
-				onComplete: () => {
-					// Remove active player from previous scene
-					this.activeScene?.removeCurrentPlayer();
-
-					// Set new active scene
-					this.activeScene = this.scenes.get(key) || null;
-
-					// Add current player to new active scene
-					this.activeScene?.addCurrentPlayer();
-
-					// Set ref
-					this.isTransitioning.value = false;
-				}
-			});
-
-			return;
-		}
-
 		// Set new active scene
 		this.activeScene = this.scenes.get(key) || null;
 
-		// Add current player to new active scene
-		this.activeScene?.addCurrentPlayer();
+		// Emit join room
+		ExperienceSocket.emit(SocketEvent.JOIN_SCENE, {
+			userId: this.userId,
+			sceneKey: key,
+		});
 	}
 
 	private addEventListeners() {

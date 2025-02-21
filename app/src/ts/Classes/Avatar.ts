@@ -11,14 +11,12 @@ import ExperienceScene from './ExperienceScene.ts';
 
 export default class Avatar implements IAvatar {
 	public experienceScene: IExperienceScene;
-	public ready: boolean = false;
 	public camera: ExperienceCamera;
 	public readonly type: AvatarType = AvatarType.VISITOR
 	public controls: AvatarControls | null = null;
 	public model: Object3D | null = null;
 	public mixer: AnimationMixer = new AnimationMixer(new Mesh());
 	public animationsMap: Map<AnimationName, AnimationAction> = new Map();
-
 
 	constructor (experienceScene: ExperienceScene, camera: ExperienceCamera, type: AvatarType) {
 		this.experienceScene = experienceScene;
@@ -61,37 +59,30 @@ export default class Avatar implements IAvatar {
 			filteredAnimations.forEach((animation: AnimationClip) => {
 				this.animationsMap.set(animation.name as AnimationName, this.mixer.clipAction(animation));
 			});
+
+			// Add avatar to experienceScene
+			this.experienceScene.scene.add(this.model);
+
+			// Make sure all tweens are killed first
+			gsap.killTweensOf(this.model.scale);
+
+			// Animate in character
+			gsap.fromTo(this.model.scale, { x: 0, y: 0, z: 0 }, {
+				x: 1,
+				y: 1,
+				z: 1,
+				ease: 'back.out',
+				duration: 1,
+			});
 		} catch (error) {
 			console.error(error);
 			throw new Error('Something went wrong loading the avatar model');
 		}
-
-		// Add avatar to experienceScene
-		this.experienceScene.scene.add(this.model);
-
-		// Animate in character
-		gsap.fromTo(this.model.scale, { x: 0, y: 0, z: 0 }, {
-			x: 1,
-			y: 1,
-			z: 1,
-			delay: 0.4,
-			ease: 'back.out',
-			duration: 1,
-			onComplete: () => {
-				// Set ready state
-				this.ready = true;
-			},
-		});
 	}
 
 	update(delta: number): void {
 		// Update the mixer
 		this.mixer.update(delta);
-
-		if(!this.ready) {
-			// Don't update controls if not ready yet. Mixer is allowed to always update
-			return;
-		}
 
 		if(this.controls) {
 			// Update controls
@@ -100,16 +91,14 @@ export default class Avatar implements IAvatar {
 	}
 
 	destroy() {
-		if(!this.model) {
-			return;
-		}
-
 		if(this.controls) {
 			// Disconnect avatar controls
 			this.controls.disconnect();
 		}
 
-		// Remove model from experienceScene
-		this.experienceScene.scene.remove(this.model);
+		if(this.model) {
+			// Remove model from experienceScene
+			this.experienceScene.scene.remove(this.model);
+		}
 	}
 }
