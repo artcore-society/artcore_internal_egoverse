@@ -157,7 +157,8 @@ export default abstract class ExperienceScene implements IExperienceScene {
 				delta: delta,
 				keysPressed: this.currentPlayerAvatar.controls.keysPressed,
 				sceneKey: this.sceneKey,
-				initialPosition: this.currentPlayerAvatar.model.position
+				initialPosition: this.currentPlayerAvatar.model.position,
+				initialRotation: this.currentPlayerAvatar.model.rotation,
 			});
 		}
 	}

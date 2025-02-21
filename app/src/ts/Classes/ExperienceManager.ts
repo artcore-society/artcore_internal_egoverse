@@ -103,6 +103,9 @@ export default class ExperienceManager {
 				// Make sure visitor position starts at initial position
 				this.activeScene.visitorAvatars[data.visitorId]?.model?.position.set(data.initialPosition.x, data.initialPosition.y, data.initialPosition.z);
 
+				// Make sure visitor position starts at initial rotation
+				this.activeScene.visitorAvatars[data.visitorId]?.model?.rotation.set(data.initialRotation.x, data.initialRotation.y, data.initialRotation.z);
+
 				// Update the mixer of the visitor avatar
 				this.activeScene.visitorAvatars[data.visitorId]?.mixer?.update(data.delta);
 
