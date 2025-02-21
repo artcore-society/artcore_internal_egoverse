@@ -139,8 +139,6 @@ export default class ExperienceManager {
 				return;
 			}
 
-			console.log('joining room: ', data)
-
 			// Add visitor for id to target scene
 			targetScene.addVisitor(
 				data.userId,
