@@ -105,13 +105,19 @@ export default class ExperienceManager {
 		});
 
 		ExperienceSocket.on<ISocketClientUpdatePlayerData>(SocketEvent.CLIENT_UPDATE_PLAYER, (data) => {
-			// Update avatar
-			if (this.activeScene && this.activeScene.visitorAvatars && this.activeScene.sceneKey === data.sceneKey) {
+			const targetScene = this.scenes.get(data.sceneKey) ?? null;
+
+			if(!targetScene) {
+				return;
+			}
+
+			// Update avatar in target scene
+			if (targetScene && targetScene.visitorAvatars && targetScene.sceneKey === data.sceneKey) {
 				// Update the mixer of the visitor avatar
-				this.activeScene.visitorAvatars[data.visitorId]?.mixer?.update(data.delta);
+				targetScene.visitorAvatars[data.visitorId]?.mixer?.update(data.delta);
 
 				// Update the controls of the visitor avatar
-				this.activeScene.visitorAvatars[data.visitorId]?.controls?.update(data.delta, data.keysPressed);
+				targetScene.visitorAvatars[data.visitorId]?.controls?.update(data.delta, data.keysPressed);
 			}
 		});
 

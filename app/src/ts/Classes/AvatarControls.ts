@@ -77,12 +77,6 @@ export default class AvatarControls implements IAvatarControls {
 			return;
 		}
 
-		// Ensure only one update per frame
-		if (ExperienceManager.instance.activeScene?.sceneKey !== this.avatar.experienceScene.sceneKey) {
-			console.log('update');
-			return;
-		}
-
 		// Check direction
 		const directionPressed = this.directions.some((key) => keysPressed[key]);
 
