@@ -1,10 +1,17 @@
 import { gsap } from 'gsap';
 import { SceneKey } from '../Enums/SceneKey';
+import { ref, Ref } from 'vue';
 import { SocketEvent } from '../Enums/SocketEvent.ts';
 import { EventService } from '../Services/EventService.ts';
 import { CustomEventKey } from '../Enums/CustomEventKey.ts';
+import { ISocketUserData } from '../Interfaces/ISocketUserData.ts';
+import { ISocketInitData } from '../Interfaces/ISocketInitData.ts';
 import { ExperienceSocket } from './ExperienceSocket.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
+import { ISocketMessageData } from '../Interfaces/ISocketMessageData.ts';
+import { ISocketJoinSceneData } from '../Interfaces/ISocketJoinSceneData.ts';
+import { ISocketClientSpawnPlayerData } from '../Interfaces/ISocketClientSpawnPlayerData.ts';
+import { ISocketClientUpdatePlayerData } from '../Interfaces/ISocketClientUpdatePlayerData.ts';
 import {
 	Clock,
 	DefaultLoadingManager,
@@ -16,14 +23,7 @@ import {
 	Vector3
 } from 'three';
 import ExperienceRenderer from './ExperienceRenderer.ts';
-import { ISocketInitData } from '../Interfaces/ISocketInitData.ts';
-import { ISocketUserData } from '../Interfaces/ISocketUserData.ts';
-import { ISocketClientUpdatePlayerData } from '../Interfaces/ISocketClientUpdatePlayerData.ts';
-import { ISocketJoinSceneData } from '../Interfaces/ISocketJoinSceneData.ts';
-import { ISocketClientSpawnPlayerData } from '../Interfaces/ISocketClientSpawnPlayerData.ts';
 import Avatar from './Avatar.ts';
-import { ref, Ref } from 'vue';
-import { ISocketMessageData } from '../Interfaces/ISocketMessageData.ts';
 
 export default class ExperienceManager {
 	private static _instance: ExperienceManager | null = null;
@@ -39,6 +39,7 @@ export default class ExperienceManager {
 	private pointer: Vector2 | null = null;
 	private hoveredAvatar: Avatar | null = null;
 	public selectedAvatar: Ref<Avatar | null> = ref(null);
+	public incomingVisitorMessageData: Ref<string> | null = ref(null);
 
 	private constructor() {}
 
@@ -142,7 +143,7 @@ export default class ExperienceManager {
 					this.activeScene
 				) {
 					// Add current player avatar to active scene
-					this.activeScene.addCurrentPlayer();
+					this.activeScene.addCurrentPlayer(this.userId);
 				}
 
 				return;
@@ -177,7 +178,10 @@ export default class ExperienceManager {
 		});
 
 		ExperienceSocket.on<ISocketMessageData>(SocketEvent.SEND_MESSAGE, (data) => {
-			console.log('message received', data)
+			console.log('Message received', data)
+
+			// Set ref
+			this.incomingVisitorMessageData.value = data;
 		});
 	}
 
@@ -241,14 +245,14 @@ export default class ExperienceManager {
 
 	private addEventListeners() {
 		window.addEventListener('resize', () => this.resize());
-		window.addEventListener( 'pointermove', (event: PointerEvent) => this.onPointerMove(event));
-		document.body.addEventListener( 'click', () => this.checkIntersectingPlayer());
+		this.canvas.addEventListener( 'pointermove', (event: PointerEvent) => this.onPointerMove(event));
+		this.canvas.addEventListener( 'click', () => this.checkIntersectingPlayer());
 	}
 
 	private removeEventListeners() {
 		window.removeEventListener('resize', () => this.resize());
-		window.removeEventListener( 'pointermove', (event: PointerEvent) => this.onPointerMove(event));
-		document.body.removeEventListener( 'click', () => this.checkIntersectingPlayer());
+		this.canvas.removeEventListener( 'pointermove', (event: PointerEvent) => this.onPointerMove(event));
+		this.canvas.removeEventListener( 'click', () => this.checkIntersectingPlayer());
 	}
 
 	private handleSceneLoading() {

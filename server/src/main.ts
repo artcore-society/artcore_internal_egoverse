@@ -42,8 +42,9 @@ io.on('connection', async (socket) => {
 
     // Register user specific event
     socket.on(SocketEvent.SEND_MESSAGE, (data) => {
-        io.to(data.visitorId).emit(SocketEvent.SEND_MESSAGE, {
+        io.to(data.receiverUserId).emit(SocketEvent.SEND_MESSAGE, {
             message: data.message,
+            senderUserId: data.senderUserId,
         });
     });
 

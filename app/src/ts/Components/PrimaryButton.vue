@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { defineProps, defineEmits } from 'vue';
+import InputField from './InputField.vue';
 
 // Define emits
 const emit = defineEmits<{
@@ -13,6 +14,7 @@ defineProps<{
   downloadName?: string;
   method?: string;
   href?: string;
+  submit?: boolean;
 }>();
 </script>
 
@@ -40,6 +42,8 @@ defineProps<{
 		]"
       @click="emit('click')"
   >
+    <InputField v-if="submit" type="text" class="hidden" />
+
     <slot />
   </button>
 </template>
