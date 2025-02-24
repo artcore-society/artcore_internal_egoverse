@@ -5,30 +5,29 @@ import { EventService } from '../Services/EventService.ts';
 import { CustomEventKey } from '../Enums/CustomEventKey.ts';
 import { ExperienceSocket } from './ExperienceSocket.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
-import { Clock, DefaultLoadingManager, LoadingManager, Quaternion, Vector3 } from 'three';
+import { Clock, DefaultLoadingManager, LoadingManager, Quaternion, Raycaster, Vector2, Vector3 } from 'three';
 import ExperienceRenderer from './ExperienceRenderer.ts';
 import { ISocketInitData } from '../Interfaces/ISocketInitData.ts';
 import { ISocketUserData } from '../Interfaces/ISocketUserData.ts';
 import { ISocketClientUpdatePlayerData } from '../Interfaces/ISocketClientUpdatePlayerData.ts';
 import { ISocketJoinSceneData } from '../Interfaces/ISocketJoinSceneData.ts';
 import { ISocketClientSpawnPlayerData } from '../Interfaces/ISocketClientSpawnPlayerData.ts';
+import { IExtendedObject3D } from '../Interfaces/IExtendedObject3D.ts';
 
 export default class ExperienceManager {
 	private static _instance: ExperienceManager | null = null;
 	private canvas: HTMLCanvasElement | null = null;
-	public clock: Clock;
+	public clock: Clock = new Clock();
 	public userId: string | null = null;
 	private renderer: ExperienceRenderer | null = null;
-	private scenes: Map<SceneKey, IExperienceScene>;
+	private scenes: Map<SceneKey, IExperienceScene> = new Map();
 	private animateFrameId: number | null = null;
 	public activeScene: IExperienceScene | null = null;
-	private loaderManager: LoadingManager;
+	private loaderManager: LoadingManager = DefaultLoadingManager;
+	private raycaster: Raycaster = new Raycaster();
+	private pointer: Vector2 = new Vector2();
 
-	private constructor() {
-		this.clock = new Clock();
-		this.scenes = new Map();
-		this.loaderManager = DefaultLoadingManager;
-	}
+	private constructor() {}
 
 	public static get instance(): ExperienceManager {
 		if (!ExperienceManager._instance) {
@@ -225,10 +224,12 @@ export default class ExperienceManager {
 
 	private addEventListeners() {
 		window.addEventListener('resize', () => this.resize());
+		window.addEventListener( 'pointermove', (event: PointerEvent) => this.onPointerMove(event));
 	}
 
 	private removeEventListeners() {
 		window.removeEventListener('resize', () => this.resize());
+		window.removeEventListener( 'pointermove', (event: PointerEvent) => this.onPointerMove(event));
 	}
 
 	private handleSceneLoading() {
@@ -242,12 +243,54 @@ export default class ExperienceManager {
 		};
 	}
 
+	handleRaycaster() {
+		if (!this.activeScene) {
+			return;
+		}
+
+		// Update the picking ray with the camera and pointer position
+		this.raycaster.setFromCamera(this.pointer, this.activeScene.camera);
+
+		// Calculate objects intersecting the picking ray
+		const intersects = this.raycaster.intersectObjects(this.activeScene.scene.children, true);
+
+		// Find the first intersected object that belongs to an avatar
+		const avatarIntersect = intersects.find((intersect) => {
+			let obj: IExtendedObject3D = intersect.object;
+
+			// Traverse up the parent hierarchy to find the avatar root
+			while (obj) {
+				if (obj.isAvatar) {
+					return true;
+				}
+				obj = obj.parent as IExtendedObject3D;
+			}
+			return false;
+		});
+
+		if (avatarIntersect) {
+			// Get the actual avatar root object
+			let avatarRoot: IExtendedObject3D = avatarIntersect.object;
+			while (avatarRoot && !avatarRoot.isAvatar) {
+				avatarRoot = avatarRoot.parent as IExtendedObject3D;
+			}
+
+			console.log('Intersected an avatar:', avatarRoot);
+			// Handle avatar interaction here
+		}
+	}
+
+
 	private animate(): void {
 		// Get delta time
 		const delta = this.clock.getDelta();
 
 		if (this.activeScene && this.renderer) {
+			// Update the active scene
 			this.activeScene.update(delta);
+
+			// Handle raycaster
+			this.handleRaycaster();
 
 			// Render the renderer
 			this.renderer.render(this.activeScene.scene, this.activeScene.camera);
@@ -272,6 +315,14 @@ export default class ExperienceManager {
 
 	resize(): void {
 		this.updateSceneCamerasAndRenderSize();
+	}
+
+	onPointerMove(event: PointerEvent) {
+		// calculate pointer position in normalized device coordinates
+		// (-1 to +1) for both components
+
+		this.pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+		this.pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 	}
 
 	destroy(): void {

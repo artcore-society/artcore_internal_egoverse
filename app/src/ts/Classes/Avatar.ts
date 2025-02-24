@@ -4,7 +4,8 @@ import { AvatarType } from '../Enums/AvatarType.ts';
 import { ThreeLoaders } from './ThreeLoaders.ts';
 import { AnimationName } from '../Enums/AnimationName.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
-import { AnimationAction, AnimationClip, AnimationMixer, Mesh, Object3D, Vector3, Quaternion } from 'three';
+import { IExtendedObject3D } from '../Interfaces/IExtendedObject3D.ts';
+import { AnimationAction, AnimationClip, AnimationMixer, Mesh, Vector3, Quaternion } from 'three';
 import AvatarControls from './AvatarControls.ts';
 import ExperienceCamera from './ExperienceCamera.ts';
 import ExperienceScene from './ExperienceScene.ts';
@@ -14,7 +15,7 @@ export default class Avatar implements IAvatar {
 	public camera: ExperienceCamera;
 	public readonly type: AvatarType = AvatarType.VISITOR
 	public controls: AvatarControls | null = null;
-	public model: Object3D | null = null;
+	public model: IExtendedObject3D | null = null;
 	public mixer: AnimationMixer = new AnimationMixer(new Mesh());
 	public animationsMap: Map<AnimationName, AnimationAction> = new Map();
 	public spawnPosition: Vector3;
@@ -50,6 +51,9 @@ export default class Avatar implements IAvatar {
 
 			// Set class model
 			this.model = gltf.scene;
+
+			// Custom attribute marking model as avatar
+			this.model.isAvatar = true;
 
 			// Set spawn position and rotation
 			this.model.position.set(this.spawnPosition.x, this.spawnPosition.y, this.spawnPosition.z);
