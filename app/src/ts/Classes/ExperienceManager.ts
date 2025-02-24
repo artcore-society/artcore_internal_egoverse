@@ -5,14 +5,24 @@ import { EventService } from '../Services/EventService.ts';
 import { CustomEventKey } from '../Enums/CustomEventKey.ts';
 import { ExperienceSocket } from './ExperienceSocket.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
-import { Clock, DefaultLoadingManager, LoadingManager, Quaternion, Raycaster, Vector2, Vector3 } from 'three';
+import {
+	Clock,
+	DefaultLoadingManager,
+	LoadingManager,
+	Object3D,
+	Quaternion,
+	Raycaster,
+	Vector2,
+	Vector3
+} from 'three';
 import ExperienceRenderer from './ExperienceRenderer.ts';
 import { ISocketInitData } from '../Interfaces/ISocketInitData.ts';
 import { ISocketUserData } from '../Interfaces/ISocketUserData.ts';
 import { ISocketClientUpdatePlayerData } from '../Interfaces/ISocketClientUpdatePlayerData.ts';
 import { ISocketJoinSceneData } from '../Interfaces/ISocketJoinSceneData.ts';
 import { ISocketClientSpawnPlayerData } from '../Interfaces/ISocketClientSpawnPlayerData.ts';
-import { IExtendedObject3D } from '../Interfaces/IExtendedObject3D.ts';
+import Avatar from './Avatar.ts';
+import { ref, Ref } from 'vue';
 
 export default class ExperienceManager {
 	private static _instance: ExperienceManager | null = null;
@@ -25,7 +35,9 @@ export default class ExperienceManager {
 	public activeScene: IExperienceScene | null = null;
 	private loaderManager: LoadingManager = DefaultLoadingManager;
 	private raycaster: Raycaster = new Raycaster();
-	private pointer: Vector2 = new Vector2();
+	private pointer: Vector2 | null = null;
+	private hoveredAvatar: Avatar | null = null;
+	public selectedAvatar: Ref<Avatar | null> = ref(null);
 
 	private constructor() {}
 
@@ -225,11 +237,13 @@ export default class ExperienceManager {
 	private addEventListeners() {
 		window.addEventListener('resize', () => this.resize());
 		window.addEventListener( 'pointermove', (event: PointerEvent) => this.onPointerMove(event));
+		document.body.addEventListener( 'click', () => this.checkIntersectingPlayer());
 	}
 
 	private removeEventListeners() {
 		window.removeEventListener('resize', () => this.resize());
 		window.removeEventListener( 'pointermove', (event: PointerEvent) => this.onPointerMove(event));
+		document.body.removeEventListener( 'click', () => this.checkIntersectingPlayer());
 	}
 
 	private handleSceneLoading() {
@@ -244,7 +258,7 @@ export default class ExperienceManager {
 	}
 
 	handleRaycaster() {
-		if (!this.activeScene) {
+		if (!this.activeScene || !this.pointer) {
 			return;
 		}
 
@@ -255,29 +269,45 @@ export default class ExperienceManager {
 		const intersects = this.raycaster.intersectObjects(this.activeScene.scene.children, true);
 
 		// Find the first intersected object that belongs to an avatar
-		const avatarIntersect = intersects.find((intersect) => {
-			let obj: IExtendedObject3D = intersect.object;
+		const avatarIntersect = intersects.find(intersect => {
+			let obj = intersect.object;
 
 			// Traverse up the parent hierarchy to find the avatar root
 			while (obj) {
 				if (obj.isAvatar) {
 					return true;
 				}
-				obj = obj.parent as IExtendedObject3D;
+				obj = obj.parent as Object3D;
 			}
 			return false;
 		});
 
 		if (avatarIntersect) {
 			// Get the actual avatar root object
-			let avatarRoot: IExtendedObject3D = avatarIntersect.object;
+			let avatarRoot = avatarIntersect.object;
 			while (avatarRoot && !avatarRoot.isAvatar) {
-				avatarRoot = avatarRoot.parent as IExtendedObject3D;
+				avatarRoot = avatarRoot.parent as Object3D;
 			}
 
-			console.log('Intersected an avatar:', avatarRoot);
-			// Handle avatar interaction here
+			if(this.activeScene?.currentPlayerAvatar?.model && avatarRoot) {
+				// Find the actual class instance
+				this.hoveredAvatar = Object.values(this.activeScene?.visitorAvatars).find((avatar: Avatar) => avatar.model?.uuid === avatarRoot.uuid) ?? null;
+
+				if(this.hoveredAvatar) {
+					if(!document.body.classList.contains('cursor-pointer')) {
+						document.body.classList.add('cursor-pointer');
+					}
+				}
+			}
+
+			return;
 		}
+
+		// Make sure to remove cursor class
+		document.body.classList.remove('cursor-pointer');
+
+		// Reset hovered adn selected avatar when not hovering anymore
+		this.hoveredAvatar = null;
 	}
 
 
@@ -318,11 +348,24 @@ export default class ExperienceManager {
 	}
 
 	onPointerMove(event: PointerEvent) {
+		if(!this.pointer) {
+			this.pointer = new Vector2();
+		}
+
 		// calculate pointer position in normalized device coordinates
 		// (-1 to +1) for both components
 
 		this.pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 		this.pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+	}
+
+	checkIntersectingPlayer() {
+		console.log(this.selectedAvatar.value, this.hoveredAvatar);
+		if (!this.selectedAvatar.value && this.hoveredAvatar) {
+			// Set ref so popup modal opens
+			this.selectedAvatar.value = this.hoveredAvatar;
+			console.log('clicked selected avatar', this.selectedAvatar.value);
+		}
 	}
 
 	destroy(): void {

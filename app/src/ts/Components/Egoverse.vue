@@ -5,15 +5,19 @@ import { ChatRoomScene } from '../Classes/ChatRoomScene';
 import { CustomEventKey } from '../Enums/CustomEventKey.ts';
 import { LandingAreaScene } from '../Classes/LandingAreaScene';
 import { MeetingRoomScene } from '../Classes/MeetingRoomScene';
-import { ComponentPublicInstance, onBeforeUnmount, onMounted, ref } from 'vue';
+import { ComponentPublicInstance, onBeforeUnmount, onMounted, Ref, ref, watch } from 'vue';
 import ExperienceManager from '../Classes/ExperienceManager.ts';
 import PrimaryButton from './PrimaryButton.vue';
 import Loader from './Loader.vue';
+import Modal from './Modal.vue';
+import InputField from './InputField.vue';
 
 // Set variables
-const isReady = ref<boolean>(false);
-const canvas = ref<HTMLCanvasElement | null>(null);
-const areaButtons = ref<Record<SceneKey, HTMLElement>>({} as Record<SceneKey, HTMLElement>);
+const message: Ref<string> = ref(null);
+const isModalVisible: Ref<boolean> = ref(false);
+const isReady: Ref<boolean> = ref(false);
+const canvas: Ref<HTMLCanvasElement | null> = ref(null);
+const areaButtons: Ref<Record<SceneKey, HTMLElement>> = ref({} as Record<SceneKey, HTMLElement>);
 
 // Define functions
 function transitionToScene(sceneKey: SceneKey): void {
@@ -29,6 +33,28 @@ function setReadyState(): void {
 	// Set ready state
 	isReady.value = true;
 }
+
+function close() {
+	// Set ref
+	isModalVisible.value = false;
+	message.value = null;
+
+	// Reset hovered avatar
+	ExperienceManager.instance.selectedAvatar.value = null;
+}
+
+function submit() {
+	// TODO add send message via websockets
+
+	// Close modal
+	close();
+}
+
+// Watch
+watch(ExperienceManager.instance.selectedAvatar, value => {
+	// Set ref
+	isModalVisible.value = !!value;
+});
 
 // Lifecycle hooks
 onMounted(() => {
@@ -59,6 +85,18 @@ onBeforeUnmount(() => {
 <template>
   <div class="absolute top-5 left-5 z-10 flex justify-center items-center gap-2">
     <Loader v-if="!isReady"/>
+
+    <Modal :show="isModalVisible" max-width="md" @close="close">
+      <div class="flex flex-col justify-center items-start gap-4 w-full">
+        <span class="text-2xl">Send message to avatar</span>
+
+        <InputField v-model="message" type="text" class="w-full" />
+
+        <PrimaryButton @click="submit">
+          Submit
+        </PrimaryButton>
+      </div>
+    </Modal>
 
     <PrimaryButton
         @click="transitionToScene(SceneKey.LANDING_AREA)"
