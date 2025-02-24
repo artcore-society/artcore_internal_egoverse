@@ -4,7 +4,6 @@ import { AnimationName } from '../Enums/AnimationName.ts';
 import { IAvatarControls } from '../Interfaces/IAvatarControls.ts';
 import { Quaternion, Vector3 } from 'three';
 import Avatar from './Avatar.ts';
-import ExperienceManager from './ExperienceManager.ts';
 
 export default class AvatarControls implements IAvatarControls {
 	private readonly avatar: Avatar;
