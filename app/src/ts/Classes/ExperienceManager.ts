@@ -40,6 +40,7 @@ export default class ExperienceManager {
 	private hoveredAvatar: Avatar | null = null;
 	public selectedAvatar: Ref<Avatar | null> = ref(null);
 	public incomingVisitorMessageData: Ref<string> | null = ref(null);
+	public isInteractive: boolean = true;
 
 	private constructor() {}
 
@@ -398,5 +399,9 @@ export default class ExperienceManager {
 			// Dispose of the renderer
 			this.renderer.dispose();
 		}
+	}
+
+	setInteractiveState(value: boolean) {
+		this.isInteractive = value;
 	}
 }

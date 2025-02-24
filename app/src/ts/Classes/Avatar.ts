@@ -9,6 +9,7 @@ import { AnimationAction, AnimationClip, AnimationMixer, Mesh, Vector3, Quaterni
 import AvatarControls from './AvatarControls.ts';
 import ExperienceCamera from './ExperienceCamera.ts';
 import ExperienceScene from './ExperienceScene.ts';
+import ExperienceManager from './ExperienceManager.ts';
 
 export default class Avatar implements IAvatar {
 	public experienceScene: IExperienceScene;
@@ -98,7 +99,7 @@ export default class Avatar implements IAvatar {
 		// Update the mixer
 		this.mixer.update(delta);
 
-		if(this.controls) {
+		if(this.controls && ExperienceManager.instance.isInteractive) {
 			// Update controls
 			this.controls.update(delta, this.controls.keysPressed);
 		}

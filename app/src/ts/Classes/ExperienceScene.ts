@@ -157,7 +157,7 @@ export default abstract class ExperienceScene implements IExperienceScene {
 			ExperienceSocket.emit(SocketEvent.CLIENT_UPDATE_PLAYER, {
 				visitorId: ExperienceManager.instance.userId,
 				delta: delta,
-				keysPressed: this.currentPlayerAvatar.controls.keysPressed,
+				keysPressed: ExperienceManager.instance.isInteractive ? this.currentPlayerAvatar.controls.keysPressed : {},
 				sceneKey: this.sceneKey,
 				spawnPosition: this.currentPlayerAvatar.model.position,
 				spawnRotation: this.currentPlayerAvatar.model.rotation,

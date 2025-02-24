@@ -122,6 +122,18 @@ watch(ExperienceManager.instance.incomingVisitorMessageData, (data: ISocketMessa
 	}
 });
 
+watch(isChatModalVisible, (newValue, oldValue) => {
+	if(newValue && newValue !== oldValue) {
+		// Disable interactivity
+		ExperienceManager.instance.setInteractiveState(false);
+
+		return;
+	}
+
+	// Enable interactivity
+	ExperienceManager.instance.setInteractiveState(true);
+})
+
 // Lifecycle hooks
 onMounted(() => {
 	if (canvas.value) {
