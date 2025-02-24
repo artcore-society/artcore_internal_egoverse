@@ -13,13 +13,21 @@ const io = new Server(server, {
     }
 });
 
+const MAX_PLAYERS = 10;
+
 io.on('connection', async (socket) => {
     const sockets = await io.fetchSockets();
+
+    if (sockets.length > MAX_PLAYERS) {
+        socket.emit(SocketEvent.FAILED, { message: "Server is full" });
+        socket.disconnect();
+        return;
+    }
 
     // Send information about other connected users
     io.to(socket.id).emit(SocketEvent.INIT, {
         id: socket.id,
-        users: sockets.map((socket) => socket.id)
+        users: sockets.map((s) => s.id)
     });
 
     // Register user specific event

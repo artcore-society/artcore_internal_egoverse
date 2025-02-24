@@ -5,4 +5,5 @@ export enum SocketEvent {
     CLIENT_SPAWN_PLAYER = 'client-spawn-player',
     CLIENT_UPDATE_PLAYER = 'client-update-player',
     JOIN_SCENE = 'join-scene',
+    FAILED = 'failed'
 }
