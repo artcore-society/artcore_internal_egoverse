@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { SceneKey } from '../Enums/SceneKey';
+import { SocketEvent } from '../Enums/SocketEvent.ts';
 import { EventService } from '../Services/EventService.ts';
 import { ChatRoomScene } from '../Classes/ChatRoomScene';
 import { CustomEventKey } from '../Enums/CustomEventKey.ts';
 import { LandingAreaScene } from '../Classes/LandingAreaScene';
 import { MeetingRoomScene } from '../Classes/MeetingRoomScene';
+import { ExperienceSocket } from '../Classes/ExperienceSocket.ts';
 import { ComponentPublicInstance, onBeforeUnmount, onMounted, Ref, ref, watch } from 'vue';
 import ExperienceManager from '../Classes/ExperienceManager.ts';
 import PrimaryButton from './PrimaryButton.vue';
@@ -44,7 +46,20 @@ function close() {
 }
 
 function submit() {
-	// TODO add send message via websockets
+	if(!ExperienceManager.instance.activeScene || !ExperienceManager.instance.selectedAvatar.value) {
+		return;
+	}
+
+	// Get visitor id to send message to via websockets by retrieving it from visitors list/object (keys are the visitor id's)
+	const visitorId = Object.keys(ExperienceManager.instance.activeScene.visitorAvatars).find(key => {
+		return ExperienceManager.instance.activeScene.visitorAvatars[key].model.uuid === ExperienceManager.instance.selectedAvatar.value.model.uuid;
+	});
+
+	// Send message via websockets
+	ExperienceSocket.emit(SocketEvent.SEND_MESSAGE, {
+		visitorId: visitorId,
+		message: message.value
+	});
 
 	// Close modal
 	close();

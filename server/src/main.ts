@@ -40,6 +40,13 @@ io.on('connection', async (socket) => {
         });
     });
 
+    // Register user specific event
+    socket.on(SocketEvent.SEND_MESSAGE, (data) => {
+        io.to(data.visitorId).emit(SocketEvent.SEND_MESSAGE, {
+            message: data.message,
+        });
+    });
+
     // Register joining scene event
     socket.on(SocketEvent.JOIN_SCENE, (data) => {
         io.emit(SocketEvent.JOIN_SCENE, {

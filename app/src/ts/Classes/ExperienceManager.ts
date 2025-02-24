@@ -23,6 +23,7 @@ import { ISocketJoinSceneData } from '../Interfaces/ISocketJoinSceneData.ts';
 import { ISocketClientSpawnPlayerData } from '../Interfaces/ISocketClientSpawnPlayerData.ts';
 import Avatar from './Avatar.ts';
 import { ref, Ref } from 'vue';
+import { ISocketMessageData } from '../Interfaces/ISocketMessageData.ts';
 
 export default class ExperienceManager {
 	private static _instance: ExperienceManager | null = null;
@@ -173,6 +174,10 @@ export default class ExperienceManager {
 					scene.removeVisitor(data.userId);
 				});
 			}
+		});
+
+		ExperienceSocket.on<ISocketMessageData>(SocketEvent.SEND_MESSAGE, (data) => {
+			console.log('message received', data)
 		});
 	}
 
@@ -360,11 +365,9 @@ export default class ExperienceManager {
 	}
 
 	checkIntersectingPlayer() {
-		console.log(this.selectedAvatar.value, this.hoveredAvatar);
 		if (!this.selectedAvatar.value && this.hoveredAvatar) {
 			// Set ref so popup modal opens
 			this.selectedAvatar.value = this.hoveredAvatar;
-			console.log('clicked selected avatar', this.selectedAvatar.value);
 		}
 	}
 
