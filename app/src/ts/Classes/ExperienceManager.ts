@@ -8,6 +8,7 @@ import { ISocketUserData } from '../Interfaces/ISocketUserData.ts';
 import { ISocketInitData } from '../Interfaces/ISocketInitData.ts';
 import { ExperienceSocket } from './ExperienceSocket.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
+import { IExtendedObject3D } from '../Interfaces/IExtendedObject3D.ts';
 import { ISocketMessageData } from '../Interfaces/ISocketMessageData.ts';
 import { ISocketJoinSceneData } from '../Interfaces/ISocketJoinSceneData.ts';
 import { ISocketClientSpawnPlayerData } from '../Interfaces/ISocketClientSpawnPlayerData.ts';
@@ -39,7 +40,7 @@ export default class ExperienceManager {
 	private pointer: Vector2 | null = null;
 	private hoveredAvatar: Avatar | null = null;
 	public selectedAvatar: Ref<Avatar | null> = ref(null);
-	public incomingVisitorMessageData: Ref<string> | null = ref(null);
+	public incomingVisitorMessageData: Ref<ISocketMessageData | null> = ref(null);
 	public isInteractive: boolean = true;
 
 	private constructor() {}
@@ -144,7 +145,7 @@ export default class ExperienceManager {
 					this.activeScene
 				) {
 					// Add current player avatar to active scene
-					this.activeScene.addCurrentPlayer(this.userId);
+					this.activeScene.addCurrentPlayer();
 				}
 
 				return;
@@ -246,14 +247,20 @@ export default class ExperienceManager {
 
 	private addEventListeners() {
 		window.addEventListener('resize', () => this.resize());
-		this.canvas.addEventListener( 'pointermove', (event: PointerEvent) => this.onPointerMove(event));
-		this.canvas.addEventListener( 'click', () => this.checkIntersectingPlayer());
+
+		if(this.canvas) {
+			this.canvas.addEventListener( 'pointermove', (event: PointerEvent) => this.onPointerMove(event));
+			this.canvas.addEventListener( 'click', () => this.checkIntersectingPlayer());
+		}
 	}
 
 	private removeEventListeners() {
 		window.removeEventListener('resize', () => this.resize());
-		this.canvas.removeEventListener( 'pointermove', (event: PointerEvent) => this.onPointerMove(event));
-		this.canvas.removeEventListener( 'click', () => this.checkIntersectingPlayer());
+
+		if(this.canvas) {
+			this.canvas.removeEventListener( 'pointermove', (event: PointerEvent) => this.onPointerMove(event));
+			this.canvas.removeEventListener( 'click', () => this.checkIntersectingPlayer());
+		}
 	}
 
 	private handleSceneLoading() {
@@ -280,7 +287,7 @@ export default class ExperienceManager {
 
 		// Find the first intersected object that belongs to an avatar
 		const avatarIntersect = intersects.find(intersect => {
-			let obj = intersect.object;
+			let obj: IExtendedObject3D = intersect.object;
 
 			// Traverse up the parent hierarchy to find the avatar root
 			while (obj) {
@@ -294,7 +301,7 @@ export default class ExperienceManager {
 
 		if (avatarIntersect) {
 			// Get the actual avatar root object
-			let avatarRoot = avatarIntersect.object;
+			let avatarRoot: IExtendedObject3D = avatarIntersect.object;
 			while (avatarRoot && !avatarRoot.isAvatar) {
 				avatarRoot = avatarRoot.parent as Object3D;
 			}
