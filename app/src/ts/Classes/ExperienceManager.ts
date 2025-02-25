@@ -31,6 +31,8 @@ export default class ExperienceManager {
 	private canvas: HTMLCanvasElement | null = null;
 	public clock: Clock = new Clock();
 	public userId: string | null = null;
+	public username: string | null = null;
+	public selectedAvatarId: string | null = null;
 	private renderer: ExperienceRenderer | null = null;
 	private scenes: Map<SceneKey, IExperienceScene> = new Map();
 	private animateFrameId: number | null = null;
@@ -52,7 +54,7 @@ export default class ExperienceManager {
 		return ExperienceManager._instance;
 	}
 
-	public init(canvas: HTMLCanvasElement): void {
+	public init(canvas: HTMLCanvasElement, username: string, selectedAvatarId: string): void {
 		if (this.canvas) {
 			// Prevent re-initialization
 			throw new Error('ExperienceManager is already initialized');
@@ -61,6 +63,8 @@ export default class ExperienceManager {
 		// Init...
 		this.canvas = canvas;
 		this.renderer = new ExperienceRenderer(this.canvas);
+		this.username = username;
+		this.selectedAvatarId = selectedAvatarId;
 		this.updateSceneCamerasAndRenderSize();
 
 		// Add event listeners
@@ -89,6 +93,8 @@ export default class ExperienceManager {
 
 			ExperienceSocket.emit(SocketEvent.CLIENT_SPAWN_PLAYER, {
 				userId: data.id,
+				username: data.username,
+				selectedAvatarId: this.selectedAvatarId,
 				visitorId: ExperienceManager.instance.userId,
 				sceneKey: this.activeScene?.sceneKey,
 				spawnPosition: this.activeScene?.currentPlayerAvatar?.model?.position,
@@ -114,6 +120,7 @@ export default class ExperienceManager {
 			// Add visitor for id to target scene
 			targetScene.addVisitor(
 				data.visitorId,
+				data.selectedAvatarId,
 				new Vector3(data.spawnPosition.x, data.spawnPosition.y, data.spawnPosition.z), // Convert websocket data to Vector3
 				new Quaternion(...data.spawnRotation) // Convert websocket data to Quaternion
 			);
@@ -137,15 +144,14 @@ export default class ExperienceManager {
 		});
 
 		ExperienceSocket.on<ISocketJoinSceneData>(SocketEvent.JOIN_SCENE, (data) => {
+			console.log('Joined scene!', data)
 			const isCurrentPlayer = data.userId === this.userId;
 
 			if(isCurrentPlayer) {
 				// Current player
-				if(
-					this.activeScene
-				) {
+				if(this.activeScene && this.selectedAvatarId) {
 					// Add current player avatar to active scene
-					this.activeScene.addCurrentPlayer();
+					this.activeScene.addCurrentPlayer(this.selectedAvatarId);
 				}
 
 				return;
@@ -163,6 +169,7 @@ export default class ExperienceManager {
 			// Add visitor for id to target scene
 			targetScene.addVisitor(
 				data.userId,
+				data.selectedAvatarId,
 				new Vector3(data.spawnPosition.x, data.spawnPosition.y, data.spawnPosition.z), // Convert websocket data to Vector3
 				new Quaternion(...data.spawnRotation) // Convert websocket data to Quaternion
 			);
@@ -223,6 +230,7 @@ export default class ExperienceManager {
 					// Emit join room
 					ExperienceSocket.emit(SocketEvent.JOIN_SCENE, {
 						userId: this.userId,
+						selectedAvatarId: this.selectedAvatarId,
 						sceneKey: key,
 						spawnPosition: this.activeScene?.currentPlayerAvatar?.model?.position ?? new Vector3(),
 						spawnRotation: this.activeScene?.currentPlayerAvatar?.model?.quaternion ?? new Quaternion(),
@@ -239,6 +247,7 @@ export default class ExperienceManager {
 		// Emit join room
 		ExperienceSocket.emit(SocketEvent.JOIN_SCENE, {
 			userId: this.userId,
+			selectedAvatarId: this.selectedAvatarId,
 			sceneKey: key,
 			spawnPosition: this.activeScene?.currentPlayerAvatar?.model?.position ?? new Vector3(),
 			spawnRotation: this.activeScene?.currentPlayerAvatar?.model?.quaternion ?? new Quaternion(),

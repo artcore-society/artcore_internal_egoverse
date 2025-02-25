@@ -37,6 +37,8 @@ io.on('connection', async (socket) => {
             sceneKey: data.sceneKey,
             spawnPosition: data.spawnPosition,
             spawnRotation: data.spawnRotation,
+            username: data.username,
+            selectedAvatarId: data.selectedAvatarId
         });
     });
 
@@ -53,6 +55,7 @@ io.on('connection', async (socket) => {
         io.emit(SocketEvent.JOIN_SCENE, {
             userId: data.userId,
             sceneKey: data.sceneKey,
+            selectedAvatarId: data.selectedAvatarId,
             spawnPosition: data.spawnPosition,
             spawnRotation: data.spawnRotation,
         });
@@ -66,6 +69,8 @@ io.on('connection', async (socket) => {
     // Let everyone know a new user connected (except himself)
     socket.broadcast.emit(SocketEvent.USER_CONNECT, {
         id: socket.id,
+        username: socket.handshake.query.username,
+        selectedAvatarId: socket.handshake.query.selectedAvatarId
     });
 
     // Let everyone know a user disconnected (except himself)

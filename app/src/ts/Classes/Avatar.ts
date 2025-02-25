@@ -12,6 +12,7 @@ import ExperienceScene from './ExperienceScene.ts';
 import ExperienceManager from './ExperienceManager.ts';
 
 export default class Avatar implements IAvatar {
+	public selectedAvatarId: string;
 	public experienceScene: IExperienceScene;
 	public camera: ExperienceCamera;
 	public readonly type: AvatarType = AvatarType.VISITOR
@@ -22,7 +23,8 @@ export default class Avatar implements IAvatar {
 	public spawnPosition: Vector3;
 	public spawnRotation: Quaternion;
 
-	constructor (experienceScene: ExperienceScene, camera: ExperienceCamera, type: AvatarType, spawnPosition: Vector3 = new Vector3(), spawnRotation: Quaternion = new Quaternion()) {
+	constructor (selectedAvatarId: string, experienceScene: ExperienceScene, camera: ExperienceCamera, type: AvatarType, spawnPosition: Vector3 = new Vector3(), spawnRotation: Quaternion = new Quaternion()) {
+		this.selectedAvatarId = selectedAvatarId;
 		this.experienceScene = experienceScene;
 		this.camera = camera;
 		this.type = type;
@@ -48,7 +50,7 @@ export default class Avatar implements IAvatar {
 
 	async load() {
 		try {
-			const gltf = await ThreeLoaders.loadGLTF('/assets/models/avatar/avatar.gltf');
+			const gltf = await ThreeLoaders.loadGLTF(`/assets/models/avatars/${this.selectedAvatarId}/avatar.gltf`);
 
 			// Set class model
 			this.model = gltf.scene;

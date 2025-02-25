@@ -4,6 +4,7 @@ import { AnimationAction, AnimationMixer, Object3D, Quaternion, Vector3 } from '
 import AvatarControls from '../Classes/AvatarControls.ts';
 
 export interface IAvatar {
+    selectedAvatarId: string;
     experienceScene: IExperienceScene;
     type: AvatarType;
     controls: AvatarControls | null;
