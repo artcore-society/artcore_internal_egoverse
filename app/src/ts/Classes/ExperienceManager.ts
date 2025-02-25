@@ -306,7 +306,12 @@ export default class ExperienceManager {
 				avatarRoot = avatarRoot.parent as Object3D;
 			}
 
-			if(this.activeScene?.currentPlayerAvatar?.model && avatarRoot) {
+			if(
+				this.activeScene &&
+				this.activeScene.visitorAvatars &&
+				Object.values(this.activeScene.visitorAvatars).length > 0 &&
+				avatarRoot
+			) {
 				// Find the actual class instance
 				this.hoveredAvatar = Object.values(this.activeScene?.visitorAvatars).find((avatar: Avatar) => avatar.model?.uuid === avatarRoot.uuid) ?? null;
 
