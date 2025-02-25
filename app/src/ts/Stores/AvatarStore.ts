@@ -7,7 +7,8 @@ export const useAvatarStore = defineStore('avatarStore', () => {
 	const selectedAvatarId: Ref<number> = ref(1);
 	const avatars: Ref<Array<{ id: number; asset: string; name: string }>> = ref([
 		{ id: 1, asset: '/assets/images/avatars/1.jpg', name: 'Worker' },
-		{ id: 2, asset: '/assets/images/avatars/2.jpg', name: 'Knight' }
+		{ id: 2, asset: '/assets/images/avatars/2.jpg', name: 'Knight' },
+		{ id: 3, asset: '/assets/images/avatars/3.jpg', name: 'Mouse' }
 	]);
 
 	// Methods
