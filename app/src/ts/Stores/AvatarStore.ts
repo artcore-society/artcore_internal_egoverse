@@ -10,6 +10,7 @@ export const useAvatarStore = defineStore('avatarStore', () => {
 		{ id: 2, asset: '/assets/images/avatars/2.jpg', name: 'Knight' },
 		{ id: 3, asset: '/assets/images/avatars/3.jpg', name: 'Mouse' },
 		{ id: 4, asset: '/assets/images/avatars/4.jpg', name: 'Elvis' },
+		{ id: 5, asset: '/assets/images/avatars/5.jpg', name: 'Doozy' },
 	]);
 
 	// Methods
