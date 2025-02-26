@@ -96,7 +96,7 @@ export default class ExperienceManager {
 
 			ExperienceSocket.emit(SocketEvent.CLIENT_SPAWN_PLAYER, {
 				userId: data.id,
-				username: data.username,
+				username: this.username,
 				selectedAvatarId: this.selectedAvatarId,
 				visitorId: ExperienceManager.instance.userId,
 				sceneKey: this.activeScene?.sceneKey,
@@ -123,6 +123,7 @@ export default class ExperienceManager {
 			// Add visitor for id to target scene
 			targetScene.addVisitor(
 				data.visitorId,
+				data.username,
 				parseInt(data.selectedAvatarId),
 				new Vector3(data.spawnPosition.x, data.spawnPosition.y, data.spawnPosition.z), // Convert websocket data to Vector3
 				new Quaternion(...data.spawnRotation) // Convert websocket data to Quaternion
@@ -154,7 +155,7 @@ export default class ExperienceManager {
 				// Current player
 				if(this.activeScene && this.selectedAvatarId) {
 					// Add current player avatar to active scene
-					this.activeScene.addCurrentPlayer(this.selectedAvatarId);
+					this.activeScene.addCurrentPlayer(data.username, this.selectedAvatarId);
 				}
 
 				return;
@@ -172,6 +173,7 @@ export default class ExperienceManager {
 			// Add visitor for id to target scene
 			targetScene.addVisitor(
 				data.userId,
+				data.username,
 				parseInt(data.selectedAvatarId),
 				new Vector3(data.spawnPosition.x, data.spawnPosition.y, data.spawnPosition.z), // Convert websocket data to Vector3
 				new Quaternion(...data.spawnRotation) // Convert websocket data to Quaternion
@@ -233,6 +235,7 @@ export default class ExperienceManager {
 					// Emit join room
 					ExperienceSocket.emit(SocketEvent.JOIN_SCENE, {
 						userId: this.userId,
+						username: this.username,
 						selectedAvatarId: this.selectedAvatarId,
 						sceneKey: key,
 						spawnPosition: this.activeScene?.currentPlayerAvatar?.model?.position ?? new Vector3(),
@@ -250,6 +253,7 @@ export default class ExperienceManager {
 		// Emit join room
 		ExperienceSocket.emit(SocketEvent.JOIN_SCENE, {
 			userId: this.userId,
+			username: this.username,
 			selectedAvatarId: this.selectedAvatarId,
 			sceneKey: key,
 			spawnPosition: this.activeScene?.currentPlayerAvatar?.model?.position ?? new Vector3(),

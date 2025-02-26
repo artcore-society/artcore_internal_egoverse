@@ -21,7 +21,7 @@ import InputField from './InputField.vue';
 const { username, selectedAvatarId } = useAvatarStore();
 
 // Set variables
-const chats: Ref<Record<string, Array<{ messages: string; avatarType: string }>>> = ref({});
+const chats: Ref<Record<string, Array<{ message: string; avatarType: string; }>>> = ref({});
 const currentPlayerMessage: Ref<string> = ref('');
 const selectedChatUserId: Ref<string | null> = ref(null);
 const isChatModalVisible: Ref<boolean> = ref(false);
@@ -54,7 +54,7 @@ function submitMessage() {
 	if(ExperienceManager.instance.selectedAvatar.value) {
 		// Get visitor id to send message to via websockets by retrieving it from visitors list/object (keys are the visitor id's)
 		visitorId = Object.keys(ExperienceManager.instance.activeScene.visitorAvatars).find(key => {
-			return ExperienceManager.instance.activeScene?.visitorAvatars[key]?.model.uuid === ExperienceManager.instance.selectedAvatar.value.model.uuid;
+			return ExperienceManager.instance.activeScene?.visitorAvatars[key]?.model?.uuid === ExperienceManager.instance.selectedAvatar.value?.model?.uuid;
 		}) ?? null;
 	} else {
 		// User has not selected an avatar and opened the chat via the UI => use the ref
@@ -67,11 +67,13 @@ function submitMessage() {
 			chats.value[visitorId] = [];
 		}
 
-		// Add your message to the chat if it exists with the target visitor
-		chats.value[visitorId].push({
-			message: currentPlayerMessage.value,
-			avatarType: AvatarType.CURRENT_PLAYER
-		});
+		if (visitorId && chats.value && chats.value[visitorId] !== undefined) {
+			// Add your message to the chat if it exists with the target visitor
+			chats.value[visitorId].push({
+				message: currentPlayerMessage.value,
+				avatarType: AvatarType.CURRENT_PLAYER
+			});
+		}
 
 		// Send message to visitor via websocket event
 		ExperienceSocket.emit(SocketEvent.SEND_MESSAGE, {
@@ -200,7 +202,12 @@ onBeforeUnmount(() => {
     <Transition name="fade" mode="out-in" appear>
       <div v-if="Object.keys(chats).length > 0" class="absolute bottom-2 left-2 z-10 flex flex-col gap-4 bg-white p-2 rounded-md">
         <div v-for="(chat, visitorId) in chats" :key="visitorId" class="flex flex-col gap-2 bg-yellow-400 p-2 text-white">
-          <h3 class="text-lg font-bold text-center">{{ visitorId }}</h3>
+          <div
+              v-if="ExperienceManager.instance.activeScene && ExperienceManager.instance.activeScene.visitorAvatars[visitorId]"
+              class="text-lg font-bold text-center"
+          >
+            {{ ExperienceManager.instance.activeScene.visitorAvatars[visitorId].username }}
+          </div>
 
           <div
               v-for="(message, index) in chat.messages"
@@ -228,11 +235,16 @@ onBeforeUnmount(() => {
     <!-- Chat Modal -->
     <Modal :show="isChatModalVisible" max-width="md" @close="closeChatModal">
       <div class="flex flex-col gap-4 w-full">
-        <h2 class="text-2xl font-semibold">Chat with {{ selectedChatUserId }}</h2>
+        <h2
+            v-if="selectedChatUserId && chats[selectedChatUserId] && chats[selectedChatUserId].username"
+            class="text-2xl font-semibold"
+        >
+          Chat with {{ selectedChatUserId && chats[selectedChatUserId].username }}
+        </h2>
 
         <Transition name="fade" mode="out-in" appear>
           <TransitionGroup
-              v-if="chats[selectedChatUserId] && chats[selectedChatUserId].length > 0"
+              v-if="selectedChatUserId && chats[selectedChatUserId]"
               name="list"
               tag="ul"
               class="flex flex-col gap-2"

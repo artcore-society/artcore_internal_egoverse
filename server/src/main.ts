@@ -45,6 +45,7 @@ io.on('connection', async (socket) => {
     // Register user specific event
     socket.on(SocketEvent.SEND_MESSAGE, (data) => {
         io.to(data.receiverUserId).emit(SocketEvent.SEND_MESSAGE, {
+            username: data.username,
             message: data.message,
             senderUserId: data.senderUserId,
         });
@@ -54,6 +55,7 @@ io.on('connection', async (socket) => {
     socket.on(SocketEvent.JOIN_SCENE, (data) => {
         io.emit(SocketEvent.JOIN_SCENE, {
             userId: data.userId,
+            username: data.username,
             sceneKey: data.sceneKey,
             selectedAvatarId: data.selectedAvatarId,
             spawnPosition: data.spawnPosition,
