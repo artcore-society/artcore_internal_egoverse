@@ -1,7 +1,6 @@
 import { gsap } from 'gsap';
 import { IAvatar } from '../Interfaces/IAvatar.ts';
 import { AvatarType } from '../Enums/AvatarType.ts';
-import { ThreeLoaders } from './ThreeLoaders.ts';
 import { AnimationName } from '../Enums/AnimationName.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { IExtendedObject3D } from '../Interfaces/IExtendedObject3D.ts';
@@ -50,24 +49,17 @@ export default class Avatar implements IAvatar {
 
 	async load() {
 		try {
-			const gltf = await ThreeLoaders.loadGLTF(`/assets/models/avatars/${this.selectedAvatarId}/avatar.gltf`);
+			const { model, animations } = await ExperienceManager.instance.fetchOrLoadAvatarCacheEntry(
+				this.selectedAvatarId,
+				this.spawnPosition,
+				this.spawnRotation
+			);
 
-			// Set class model
-			this.model = gltf.scene;
-
-			// Custom attribute marking model as avatar
-			this.model.isAvatar = true;
-
-			// Set spawn position and rotation
-			this.model.position.set(this.spawnPosition.x, this.spawnPosition.y, this.spawnPosition.z);
-			this.model.quaternion.set(this.spawnRotation.x, this.spawnRotation.y, this.spawnRotation.z, this.spawnRotation.w);
-
-			// Setup shadows
-			this.model.castShadow = true;
-			this.model.receiveShadow = true;
+			// Set model
+			this.model = model;
 
 			// Filter out the T pose animation
-			const filteredAnimations = [...gltf.animations.filter((animation: AnimationClip) => animation.name !== 'TPose')];
+			const filteredAnimations = [...animations.filter((animation: AnimationClip) => animation.name !== 'TPose')];
 
 			// Set animation mixer
 			this.mixer = new AnimationMixer(this.model);
@@ -114,9 +106,6 @@ export default class Avatar implements IAvatar {
 		}
 
 		if(this.model) {
-			// Remove model from experienceScene
-			this.experienceScene.scene.remove(this.model);
-
 			// Make sure all tweens are killed first
 			gsap.killTweensOf(this.model.scale);
 

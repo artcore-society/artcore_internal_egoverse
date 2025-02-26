@@ -2,6 +2,7 @@ import { gsap } from 'gsap';
 import { SceneKey } from '../Enums/SceneKey';
 import { ref, Ref } from 'vue';
 import { SocketEvent } from '../Enums/SocketEvent.ts';
+import { ThreeLoaders } from './ThreeLoaders.ts';
 import { EventService } from '../Services/EventService.ts';
 import { CustomEventKey } from '../Enums/CustomEventKey.ts';
 import { ISocketUserData } from '../Interfaces/ISocketUserData.ts';
@@ -25,6 +26,7 @@ import {
 } from 'three';
 import ExperienceRenderer from './ExperienceRenderer.ts';
 import Avatar from './Avatar.ts';
+import { IAvatarCacheEntry } from '../Interfaces/IAvatarCacheEntry.ts';
 
 export default class ExperienceManager {
 	private static _instance: ExperienceManager | null = null;
@@ -44,6 +46,7 @@ export default class ExperienceManager {
 	public selectedAvatar: Ref<Avatar | null> = ref(null);
 	public incomingVisitorMessageData: Ref<ISocketMessageData | null> = ref(null);
 	public isInteractive: boolean = true;
+	private avatarCache: Map<string, IAvatarCacheEntry> = new Map();
 
 	private constructor() {}
 
@@ -341,6 +344,45 @@ export default class ExperienceManager {
 		this.hoveredAvatar = null;
 	}
 
+	public fetchOrLoadAvatarCacheEntry(selectedAvatarId: string, spawnPosition: Vector3, spawnRotation: Quaternion): Promise<IAvatarCacheEntry> {
+		return new Promise(async (resolve, reject) => {
+			if (this.avatarCache.has(selectedAvatarId)) {
+				// Reuse existing model
+				const cachedGltf = this.avatarCache.get(selectedAvatarId)!;
+
+				// Set spawn position and rotation
+				cachedGltf.model.position.copy(spawnPosition);
+				cachedGltf.model.quaternion.copy(spawnRotation);
+
+				// Resolve
+				resolve({ model: cachedGltf.model, animations: cachedGltf.animations });
+
+				return;
+			}
+
+			try {
+				// Load model for first time
+				const gltf = await ThreeLoaders.loadGLTF(`/assets/models/avatars/${selectedAvatarId}/avatar.gltf`);
+				const model: IExtendedObject3D = gltf.scene;
+
+				// Do adjustments
+				model.isAvatar = true;
+				model.position.copy(spawnPosition);
+				model.quaternion.copy(spawnRotation);
+				model.castShadow = true;
+				model.receiveShadow = true;
+
+				// Store in cache
+				this.avatarCache.set(selectedAvatarId, { model: model, animations: gltf.animations });
+
+				// Resolve
+				resolve({ model: model, animations: gltf.animations });
+			} catch (error) {
+				console.error(error);
+				reject(new Error('Error loading avatar model'));
+			}
+		});
+	}
 
 	private animate(): void {
 		// Get delta time
