@@ -167,7 +167,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="relative">
+  <div class="fixed inset-0">
     <!-- Loader for initialization -->
     <div class="absolute top-5 left-5 z-10 flex justify-center items-center gap-2">
       <Loader v-if="!isReady"/>
@@ -175,24 +175,21 @@ onBeforeUnmount(() => {
       <!-- Scene navigation buttons -->
       <PrimaryButton
           @click="transitionToScene(SceneKey.LANDING_AREA)"
-          ref="areaButtons[SceneKey.LANDING_AREA]"
-          class="px-4 py-2 bg-green-500 text-white rounded-lg"
+          :ref="el => areaButtons[SceneKey.LANDING_AREA] = (el as ComponentPublicInstance).$el as HTMLElement"
       >
         Landing Area
       </PrimaryButton>
 
       <PrimaryButton
           @click="transitionToScene(SceneKey.MEETING_ROOM)"
-          ref="areaButtons[SceneKey.MEETING_ROOM]"
-          class="px-4 py-2 bg-red-500 text-white rounded-lg"
+          :ref="el => areaButtons[SceneKey.MEETING_ROOM] = (el as ComponentPublicInstance).$el as HTMLElement"
       >
         Meeting Room
       </PrimaryButton>
 
       <PrimaryButton
           @click="transitionToScene(SceneKey.CHAT_ROOM)"
-          ref="areaButtons[SceneKey.CHAT_ROOM]"
-          class="px-4 py-2 bg-blue-500 text-white rounded-lg"
+          :ref="el => areaButtons[SceneKey.CHAT_ROOM] = (el as ComponentPublicInstance).$el as HTMLElement"
       >
         Chat Room
       </PrimaryButton>
