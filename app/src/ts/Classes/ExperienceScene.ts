@@ -71,8 +71,8 @@ export default abstract class ExperienceScene implements IExperienceScene {
 		const plane = new Mesh(geometry, material);
 
 		// Setup shadows
-		// plane.castShadow = true;
-		// plane.receiveShadow = true;
+		plane.castShadow = true;
+		plane.receiveShadow = true;
 
 		// Rotate the plane to lay flat (XZ plane)
 		plane.rotation.x = -Math.PI / 2;
