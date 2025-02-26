@@ -1,6 +1,13 @@
-/* Importing Tailwind CSS */
-@import "tailwindcss";
+/* Preload fonts */
+@import './global/fonts.css';
+
+/* Load tailwind */
+@import 'tailwindcss';
 
 /* Importing custom styles */
-@import "./global/transitions.css";
-@import "./global/fonts.css";
+@import './global/transitions.css';
+
+/* Define custom tailwind theme */
+@theme {
+  --font-rubik: 'Rubik', serif;
+}

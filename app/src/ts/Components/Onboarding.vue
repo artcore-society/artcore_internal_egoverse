@@ -37,30 +37,38 @@ const confirmUsername = () => {
 </script>
 
 <template>
-  <div class="flex flex-col justify-center items-center gap-4">
-     <span class="text-2xl font-bold">
-      {{ step === 1 ? 'Choose your avatar!' : 'Enter your username' }}
-    </span>
-
+  <div class="h-full w-full flex justify-center items-stretch bg-cyan-400 w-full overflow-hidden rounded-4xl">
     <Transition name="fade" mode="out-in" appear>
-      <div v-if="step === 1" class="flex flex-wrap justify-center items-center gap-2">
-        <AvatarOption
-            v-for="(option, index) in avatarStore.avatars"
-            :key="`option-${index + 1}`"
-            :asset="option.asset"
-            :name="option.name"
-            class="h-40 aspect-square rounded-full overflow-clip border-4 border-blue-400 cursor-pointer"
-            @click="handleAvatarSelection(option.id)"
-        />
+      <div v-if="step === 1" class="flex flex-col justify-center items-center gap-12 ">
+          <span class="text-8xl font-bold text-amber-100">
+            {{ step === 1 ? 'Choose your avatar!' : 'Enter your username' }}
+          </span>
+
+        <div class="flex flex-wrap justify-center items-center gap-2">
+          <AvatarOption
+              v-for="(option, index) in avatarStore.avatars"
+              :key="`option-${index + 1}`"
+              :asset="option.asset"
+              :name="option.name"
+              class="cursor-pointer"
+              @click="handleAvatarSelection(option.id)"
+          />
+        </div>
       </div>
 
-      <form v-else @submit.prevent="confirmUsername" class="flex flex-col justify-center items-start gap-4 w-full">
-        <InputField v-model="avatarStore.username" type="text" placeholder="Type username here"/>
+      <div v-else class="flex flex-col justify-center items-center gap-12 ">
+          <span class="text-8xl font-bold text-amber-100">
+            {{ step === 1 ? 'Choose your avatar!' : 'Enter your username' }}
+          </span>
 
-        <PrimaryButton type="submit">
-          Confirm
-        </PrimaryButton>
-      </form>
+        <form @submit.prevent="confirmUsername" class="flex flex-col justify-center items-start gap-4 w-full">
+          <InputField v-model="avatarStore.username" type="text" placeholder="Type username here" class=""/>
+
+          <PrimaryButton type="submit">
+            Confirm
+          </PrimaryButton>
+        </form>
+      </div>
     </Transition>
   </div>
 </template>

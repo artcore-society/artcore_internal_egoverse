@@ -32,12 +32,12 @@ defineExpose({ focus: () => input.value.focus() });
 <template>
   <input
       ref="input"
-      class="border-2 border-blue-400 h-10 min-h-10 text-ellipsis rounded-md placeholder-black shadow-bottom-right focus:outline-none focus:ring-red-400 lg:rounded-lg"
+      class="border-2 border-amber-100 bg-white h-10 min-h-10 text-ellipsis rounded-md placeholder-black shadow-bottom-right focus:outline-none focus:ring-cyan-600 lg:rounded-lg"
       :class="{
 			'p-4': type === 'file',
 			'opacity-25': disabled,
-			'text-black focus:border-red-400 px-2': type !== 'checkbox',
-			'cursor-pointer text-red-400': type === 'checkbox'
+			'text-black focus:border-cyan-600 px-2': type !== 'checkbox',
+			'cursor-pointer text-cyan-600': type === 'checkbox'
 		}"
       :value="type !== 'file' ? modelValue : null"
       :checked="type === 'checkbox' ? modelValue : false"

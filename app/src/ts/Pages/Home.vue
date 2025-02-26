@@ -8,7 +8,7 @@ const applicationStore = useApplicationStore();
 </script>
 
 <template>
-  <div class="relative flex h-[100dvh] w-screen items-stretch justify-center">
+  <div class="relative flex h-dvh w-full items-stretch justify-center bg-amber-100 p-4 font-rubik">
     <Transition name="fade" mode="out-in" appear>
       <Onboarding
           v-if="applicationStore.currentStep === 'onboarding'"
