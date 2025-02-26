@@ -10,7 +10,7 @@ import { LandingAreaScene } from '../Classes/LandingAreaScene';
 import { MeetingRoomScene } from '../Classes/MeetingRoomScene';
 import { ExperienceSocket } from '../Classes/ExperienceSocket.ts';
 import { ISocketMessageData } from '../Interfaces/ISocketMessageData.ts';
-import { onBeforeUnmount, onMounted, Ref, ref, watch } from 'vue';
+import { ComponentPublicInstance, onBeforeUnmount, onMounted, Ref, ref, watch } from 'vue';
 import ExperienceManager from '../Classes/ExperienceManager.ts';
 import PrimaryButton from './PrimaryButton.vue';
 import Loader from './Loader.vue';
