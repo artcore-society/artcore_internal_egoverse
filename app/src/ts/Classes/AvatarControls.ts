@@ -100,7 +100,7 @@ export default class AvatarControls implements IAvatarControls {
 				play = AnimationName.RUNNING_JUMP;
 			}
 		} else if (isJumpKeyPressed) {
-			play = AnimationName.RUNNING;
+			play = AnimationName.JUMPING;
 		} else {
 			play = AnimationName.HAPPY_IDLE;
 		}
