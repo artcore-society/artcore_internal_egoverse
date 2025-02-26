@@ -7,7 +7,7 @@ import Avatar from './Avatar.ts';
 
 export default class AvatarControls implements IAvatarControls {
 	private readonly avatar: Avatar;
-	private currentAction: AnimationName = AnimationName.HAPPY_IDLE;
+	private currentAction: AnimationName = AnimationName.IDLE;
 	private walkDirection: Vector3 = new Vector3();
 	private rotateAngle: Vector3 = new Vector3(0, 1, 0);
 	private rotateQuaternion: Quaternion = new Quaternion();
@@ -102,13 +102,13 @@ export default class AvatarControls implements IAvatarControls {
 		} else if (isJumpKeyPressed) {
 			play = AnimationName.JUMPING;
 		} else {
-			play = AnimationName.HAPPY_IDLE;
+			play = AnimationName.IDLE;
 		}
 
 		// Do the animation if it's not already the current animation state
 		if (this.currentAction !== play && !this.isJumping && this.avatar) {
 			// Do a transition to the new animation state
-			const animationToPlay = this.avatar.animationsMap.get(play) ?? this.avatar.animationsMap.get(AnimationName.HAPPY_IDLE);
+			const animationToPlay = this.avatar.animationsMap.get(play) ?? this.avatar.animationsMap.get(AnimationName.IDLE);
 			const currentAnimation = this.avatar.animationsMap.get(this.currentAction);
 
 			if(!animationToPlay || !currentAnimation) return;
