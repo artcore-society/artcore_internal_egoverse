@@ -38,7 +38,7 @@ const confirmUsername = () => {
 
 <template>
   <div class="h-full w-full flex justify-center items-stretch bg-cyan-400 w-full overflow-hidden rounded-4xl">
-    <Transition name="fade" mode="out-in" appear>
+    <Transition name="fade-scale" mode="out-in" appear>
       <div v-if="step === 1" class="flex flex-col justify-center items-center gap-12 ">
           <span class="text-8xl font-bold text-amber-100">
             {{ step === 1 ? 'Choose your avatar!' : 'Enter your username' }}
