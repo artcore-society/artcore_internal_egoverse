@@ -10,6 +10,7 @@ import { ISocketInitData } from '../Interfaces/ISocketInitData.ts';
 import { ExperienceSocket } from './ExperienceSocket.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { IExtendedObject3D } from '../Interfaces/IExtendedObject3D.ts';
+import { IAvatarCacheEntry } from '../Interfaces/IAvatarCacheEntry.ts';
 import { ISocketMessageData } from '../Interfaces/ISocketMessageData.ts';
 import { ISocketJoinSceneData } from '../Interfaces/ISocketJoinSceneData.ts';
 import { ISocketClientSpawnPlayerData } from '../Interfaces/ISocketClientSpawnPlayerData.ts';
@@ -26,7 +27,6 @@ import {
 } from 'three';
 import ExperienceRenderer from './ExperienceRenderer.ts';
 import Avatar from './Avatar.ts';
-import { IAvatarCacheEntry } from '../Interfaces/IAvatarCacheEntry.ts';
 
 export default class ExperienceManager {
 	private static _instance: ExperienceManager | null = null;
@@ -34,7 +34,7 @@ export default class ExperienceManager {
 	public clock: Clock = new Clock();
 	public userId: string | null = null;
 	public username: string | null = null;
-	public selectedAvatarId: string | null = null;
+	public selectedAvatarId: number | null = null;
 	private renderer: ExperienceRenderer | null = null;
 	private scenes: Map<SceneKey, IExperienceScene> = new Map();
 	private animateFrameId: number | null = null;
@@ -46,7 +46,7 @@ export default class ExperienceManager {
 	public selectedAvatar: Ref<Avatar | null> = ref(null);
 	public incomingVisitorMessageData: Ref<ISocketMessageData | null> = ref(null);
 	public isInteractive: boolean = true;
-	private avatarCache: Map<string, IAvatarCacheEntry> = new Map();
+	private avatarCache: Map<number, IAvatarCacheEntry> = new Map();
 
 	private constructor() {}
 
@@ -57,7 +57,7 @@ export default class ExperienceManager {
 		return ExperienceManager._instance;
 	}
 
-	public init(canvas: HTMLCanvasElement, username: string, selectedAvatarId: string): void {
+	public init(canvas: HTMLCanvasElement, username: string, selectedAvatarId: number): void {
 		if (this.canvas) {
 			// Prevent re-initialization
 			throw new Error('ExperienceManager is already initialized');
@@ -123,7 +123,7 @@ export default class ExperienceManager {
 			// Add visitor for id to target scene
 			targetScene.addVisitor(
 				data.visitorId,
-				data.selectedAvatarId,
+				parseInt(data.selectedAvatarId),
 				new Vector3(data.spawnPosition.x, data.spawnPosition.y, data.spawnPosition.z), // Convert websocket data to Vector3
 				new Quaternion(...data.spawnRotation) // Convert websocket data to Quaternion
 			);
@@ -172,7 +172,7 @@ export default class ExperienceManager {
 			// Add visitor for id to target scene
 			targetScene.addVisitor(
 				data.userId,
-				data.selectedAvatarId,
+				parseInt(data.selectedAvatarId),
 				new Vector3(data.spawnPosition.x, data.spawnPosition.y, data.spawnPosition.z), // Convert websocket data to Vector3
 				new Quaternion(...data.spawnRotation) // Convert websocket data to Quaternion
 			);
@@ -344,7 +344,7 @@ export default class ExperienceManager {
 		this.hoveredAvatar = null;
 	}
 
-	public fetchOrLoadAvatarCacheEntry(selectedAvatarId: string, spawnPosition: Vector3, spawnRotation: Quaternion): Promise<IAvatarCacheEntry> {
+	public fetchOrLoadAvatarCacheEntry(selectedAvatarId: number, spawnPosition: Vector3, spawnRotation: Quaternion): Promise<IAvatarCacheEntry> {
 		return new Promise(async (resolve, reject) => {
 			if (this.avatarCache.has(selectedAvatarId)) {
 				// Reuse existing model

@@ -11,7 +11,7 @@ import ExperienceScene from './ExperienceScene.ts';
 import ExperienceManager from './ExperienceManager.ts';
 
 export default class Avatar implements IAvatar {
-	public selectedAvatarId: string;
+	public selectedAvatarId: number;
 	public experienceScene: IExperienceScene;
 	public camera: ExperienceCamera;
 	public readonly type: AvatarType = AvatarType.VISITOR
@@ -22,7 +22,7 @@ export default class Avatar implements IAvatar {
 	public spawnPosition: Vector3;
 	public spawnRotation: Quaternion;
 
-	constructor (selectedAvatarId: string, experienceScene: ExperienceScene, camera: ExperienceCamera, type: AvatarType, spawnPosition: Vector3 = new Vector3(), spawnRotation: Quaternion = new Quaternion()) {
+	constructor (selectedAvatarId: number, experienceScene: ExperienceScene, camera: ExperienceCamera, type: AvatarType, spawnPosition: Vector3 = new Vector3(), spawnRotation: Quaternion = new Quaternion()) {
 		this.selectedAvatarId = selectedAvatarId;
 		this.experienceScene = experienceScene;
 		this.camera = camera;

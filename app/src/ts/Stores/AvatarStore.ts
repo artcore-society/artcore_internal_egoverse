@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 
 export const useAvatarStore = defineStore('avatarStore', () => {
 	// State variables
-	const username: Ref<string | null> = ref(null);
+	const username: Ref<string> = ref('');
 	const selectedAvatarId: Ref<number> = ref(1);
 	const avatars: Ref<Array<{ id: number; asset: string; name: string }>> = ref([
 		{ id: 1, asset: '/assets/images/avatars/1.jpg', name: 'Worker' },

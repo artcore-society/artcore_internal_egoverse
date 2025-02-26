@@ -57,7 +57,7 @@ function submitMessage() {
 			return ExperienceManager.instance.activeScene?.visitorAvatars[key]?.model.uuid === ExperienceManager.instance.selectedAvatar.value.model.uuid;
 		}) ?? null;
 	} else {
-		// User has not selected an avatar and openend the chat via the UI => use the ref
+		// User has not selected an avatar and opened the chat via the UI => use the ref
 		visitorId = selectedChatUserId.value;
 	}
 

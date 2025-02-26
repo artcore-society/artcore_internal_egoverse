@@ -96,7 +96,7 @@ export default abstract class ExperienceScene implements IExperienceScene {
 		this.scene.add(dirLight);
 	}
 
-	public addCurrentPlayer(selectedAvatarId: string) {
+	public addCurrentPlayer(selectedAvatarId: number) {
 		if(this.currentPlayerAvatar) {
 			return;
 		}
@@ -115,7 +115,7 @@ export default abstract class ExperienceScene implements IExperienceScene {
 		this.currentPlayerAvatar = null;
 	}
 
-	public addVisitor(userId: string, selectedAvatarId: string, spawnPosition: Vector3 = new Vector3(), spawnRotation: Quaternion = new Quaternion()) {
+	public addVisitor(userId: string, selectedAvatarId: number, spawnPosition: Vector3 = new Vector3(), spawnRotation: Quaternion = new Quaternion()) {
 		// Create and add avatar of visitor to visitors list
 		this.visitorAvatars[userId] = new Avatar(selectedAvatarId, this, this.camera, AvatarType.VISITOR, spawnPosition, spawnRotation);
 	}

@@ -13,9 +13,9 @@ export interface IExperienceScene {
     visitorAvatars: { [key: string]: Avatar };
 
     setupFloor(color: number): void;
-    addVisitor(userId: string, selectedAvatarId: string, spawnPosition?: Vector3, spawnRotation?: Quaternion): void;
+    addVisitor(userId: string, selectedAvatarId: number, spawnPosition?: Vector3, spawnRotation?: Quaternion): void;
     removeVisitor(userId: string): void;
-    addCurrentPlayer(selectedAvatarId: string): void;
+    addCurrentPlayer(selectedAvatarId: number): void;
     removeCurrentPlayer(): void;
     update(delta: number): void;
     destroy(): void;
