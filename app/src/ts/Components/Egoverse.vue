@@ -16,6 +16,7 @@ import PrimaryButton from './PrimaryButton.vue';
 import Loader from './Loader.vue';
 import Modal from './Modal.vue';
 import InputField from './InputField.vue';
+import TextareaField from './TextareaField.vue';
 
 // Avatar store
 const { username, selectedAvatarId } = useAvatarStore();
@@ -198,7 +199,7 @@ onBeforeUnmount(() => {
     <!-- Chat list -->
     <Transition name="fade" mode="out-in" appear>
       <div v-if="Object.keys(chats).length > 0" class="absolute bottom-2 left-2 z-10 flex flex-col gap-4 bg-white p-2 rounded-md">
-        <div v-for="(chat, visitorId) in chats" :key="visitorId" class="flex flex-col gap-2 bg-yellow-400 p-2 text-white">
+        <div v-for="(chat, visitorId) in chats" :key="visitorId" class="flex flex-col gap-2 bg-cyan-400 p-2 text-white min-w-42">
           <div
               v-if="ExperienceManager.instance.activeScene && ExperienceManager.instance.activeScene.visitorAvatars[visitorId]"
               class="text-lg font-bold text-center"
@@ -210,57 +211,59 @@ onBeforeUnmount(() => {
               v-for="(message, index) in chat.messages"
               :key="`message-${index}`"
               :class="{
-            'bg-blue-400 text-white': chat.avatarType === AvatarType.VISITOR,
-            'bg-green-400 text-white': chat.avatarType === AvatarType.CURRENT_PLAYER
-          }"
+                'bg-blue-400 text-white': chat.avatarType === AvatarType.VISITOR,
+                'bg-green-400 text-white': chat.avatarType === AvatarType.CURRENT_PLAYER
+              }"
               class="p-3 rounded-lg max-w-xs mx-auto"
           >
             {{ message }}
           </div>
 
           <PrimaryButton @click="openChatModal(visitorId)">
-            View Chat
+            Chat
           </PrimaryButton>
         </div>
       </div>
 
-      <div v-else class="absolute bottom-2 left-2 z-10 flex flex-col gap-4 bg-white p-2 rounded-md">
+      <div v-else class="absolute bottom-2 left-2 z-10 flex flex-col gap-4 bg-cyan-400 text-white font-bold p-2 rounded-md">
         No chats...
       </div>
     </Transition>
 
     <!-- Chat Modal -->
     <Modal :show="isChatModalVisible" max-width="md" @close="closeChatModal">
-      <div class="flex flex-col gap-4 w-full">
-        <h2
-            v-if="selectedChatUserId && chats[selectedChatUserId] && chats[selectedChatUserId].username"
-            class="text-2xl font-semibold"
-        >
-          Chat with {{ selectedChatUserId && chats[selectedChatUserId].username }}
-        </h2>
-
-        <Transition name="fade" mode="out-in" appear>
-          <TransitionGroup
-              v-if="selectedChatUserId && chats[selectedChatUserId]"
-              name="list"
-              tag="ul"
-              class="flex flex-col gap-2"
+      <div class="flex flex-col gap-12 w-full">
+        <div class="flex flex-col gap-4 w-full">
+          <h2
+              v-if="selectedChatUserId && chats[selectedChatUserId] && chats[selectedChatUserId].username"
+              class="text-2xl font-semibold"
           >
-            <li
-                v-for="(chat, index) in chats[selectedChatUserId] || []"
-                :key="`chat-${index}`"
-                :class="{
-                'bg-blue-400 text-white text-left': chat.avatarType === AvatarType.VISITOR,
-                'bg-green-400 text-white text-right': chat.avatarType === AvatarType.CURRENT_PLAYER
-              }"
-                class="p-3 rounded-lg"
-            >
-              {{ chat.message }}
-            </li>
-          </TransitionGroup>
+            Chat with {{ selectedChatUserId && chats[selectedChatUserId].username }}
+          </h2>
 
-          <span v-else>No messages...</span>
-        </Transition>
+          <Transition name="fade" mode="out-in" appear>
+            <TransitionGroup
+                v-if="selectedChatUserId && chats[selectedChatUserId]"
+                name="list"
+                tag="div"
+                class="flex flex-col gap-2"
+            >
+              <div
+                  v-for="(chat, index) in chats[selectedChatUserId] || []"
+                  :key="`chat-${index}`"
+                  :class="{
+                    'bg-gray-500 text-white text-left': chat.avatarType === AvatarType.VISITOR,
+                    'bg-amber-400 text-white text-right': chat.avatarType === AvatarType.CURRENT_PLAYER
+                  }"
+                  class="p-3 rounded-lg shadow-xl font-bold break-all"
+              >
+                {{ chat.message }}
+              </div>
+            </TransitionGroup>
+
+            <span v-else class="font-bold">No messages...</span>
+          </Transition>
+        </div>
 
         <form @submit.prevent="submitMessage" class="flex flex-col gap-2">
           <InputField v-model="currentPlayerMessage" placeholder="Type message here" type="text" class="w-full" />

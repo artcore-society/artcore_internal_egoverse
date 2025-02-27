@@ -101,7 +101,7 @@ onUnmounted(() => {
 				>
 					<div
 						v-if="show"
-						class="relative z-50 flex w-full cursor-default flex-col items-center justify-center gap-4 bg-app-secondary-10 p-4 rounded-md text-center text-app-primary-100 shadow-2xl bg-white"
+						class="relative z-50 flex w-full cursor-default flex-col items-center justify-center gap-4 bg-app-secondary-10 p-4 rounded-md text-center text-app-primary-100 shadow-2xl bg-cyan-400"
 						:class="maxWidthClass"
 					>
 						<slot />

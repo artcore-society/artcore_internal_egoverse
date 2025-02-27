@@ -40,9 +40,9 @@ const confirmUsername = () => {
   <div class="h-full w-full flex justify-center items-stretch bg-cyan-400 w-full overflow-hidden rounded-4xl">
     <Transition name="fade-scale" mode="out-in" appear>
       <div v-if="step === 1" class="flex flex-col justify-center items-center gap-12 ">
-          <span class="text-8xl font-bold text-amber-100">
-            {{ step === 1 ? 'Choose your avatar!' : 'Enter your username' }}
-          </span>
+        <span class="text-8xl font-bold text-amber-100">
+          {{ 'Choose your avatar!' }}
+        </span>
 
         <div class="flex flex-wrap justify-center items-center gap-2">
           <AvatarOption
@@ -57,9 +57,9 @@ const confirmUsername = () => {
       </div>
 
       <div v-else class="flex flex-col justify-center items-center gap-12 ">
-          <span class="text-8xl font-bold text-amber-100">
-            {{ step === 1 ? 'Choose your avatar!' : 'Enter your username' }}
-          </span>
+        <span class="text-8xl font-bold text-amber-100">
+          {{ 'Enter your username' }}
+        </span>
 
         <form @submit.prevent="confirmUsername" class="flex flex-col justify-center items-start gap-4 w-full">
           <InputField v-model="avatarStore.username" type="text" placeholder="Type username here" class=""/>
