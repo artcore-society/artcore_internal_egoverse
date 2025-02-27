@@ -11,21 +11,21 @@ const pinia = createPinia();
 
 // Setup toast options
 const options = {
-  transition: 'Vue-Toastification__fade',
-  maxToasts: 5,
-  position: 'bottom-right',
-  timeout: 5000,
-  container: document.querySelector('#app'),
-  pauseOnFocusLoss: true,
-  pauseOnHover: true,
-  closeOnClick: true,
-  closeButton: 'button',
-  icon: false,
-  newestOnTop: true,
-  draggable: true,
-  draggablePercent: 0.6,
-  showCloseButtonOnHover: false,
-  rtl: false,
+	transition: 'Vue-Toastification__fade',
+	maxToasts: 5,
+	position: 'bottom-right',
+	timeout: 5000,
+	container: document.querySelector('#app'),
+	pauseOnFocusLoss: true,
+	pauseOnHover: true,
+	closeOnClick: true,
+	closeButton: 'button',
+	icon: false,
+	newestOnTop: true,
+	draggable: true,
+	draggablePercent: 0.6,
+	showCloseButtonOnHover: false,
+	rtl: false
 };
 
 // Create vue app

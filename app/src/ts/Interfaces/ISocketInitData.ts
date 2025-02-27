@@ -1,4 +1,4 @@
 export interface ISocketInitData {
-  id: string;
-  users: Array<string>;
+	id: string;
+	users: Array<string>;
 }

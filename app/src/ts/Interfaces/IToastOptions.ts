@@ -1,4 +1,4 @@
 export interface IToastOptions {
-  id?: string;
-  onClick?: () => void;
+	id?: string;
+	onClick?: () => void;
 }
