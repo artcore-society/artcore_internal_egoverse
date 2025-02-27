@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { TYPE } from 'vue-toastification';
 import { SceneKey } from '../Enums/SceneKey';
 import { AvatarType } from '../Enums/AvatarType.ts';
 import { SocketEvent } from '../Enums/SocketEvent.ts';
@@ -10,13 +11,13 @@ import { LandingAreaScene } from '../Classes/LandingAreaScene';
 import { MeetingRoomScene } from '../Classes/MeetingRoomScene';
 import { ExperienceSocket } from '../Classes/ExperienceSocket.ts';
 import { ISocketMessageData } from '../Interfaces/ISocketMessageData.ts';
+import { useClearToast, useShowToast } from '../Composables/Toastification.ts';
 import { ComponentPublicInstance, onBeforeUnmount, onMounted, Ref, ref, watch } from 'vue';
 import ExperienceManager from '../Classes/ExperienceManager.ts';
 import PrimaryButton from './PrimaryButton.vue';
 import Loader from './Loader.vue';
 import Modal from './Modal.vue';
 import InputField from './InputField.vue';
-import TextareaField from './TextareaField.vue';
 
 // Avatar store
 const { username, selectedAvatarId } = useAvatarStore();
@@ -47,6 +48,20 @@ function setReadyState(): void {
 
 function submitMessage() {
 	if (!ExperienceManager.instance.activeScene) {
+		return;
+	}
+
+	if(!currentPlayerMessage.value || !currentPlayerMessage.value.trim()) {
+		const errorId: string = 'empty-input-error';
+
+		// Clear toasts
+		useClearToast(errorId);
+
+		// Trigger toast
+		useShowToast('Error', 'Submitted field can\'t be empty.', TYPE.ERROR, {
+			id: errorId
+		});
+
 		return;
 	}
 
