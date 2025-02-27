@@ -1,3 +1,3 @@
 export interface IKeysPressed {
-    [key in KeyboardKey]: boolean;
+  [key in KeyboardKey]: boolean;
 }

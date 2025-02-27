@@ -1,3 +1,3 @@
 export enum CustomEventKey {
-    READY = 'ready',
+  READY = 'ready',
 }

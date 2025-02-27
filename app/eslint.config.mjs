@@ -1,56 +1,74 @@
+import globals from 'globals';
+import pluginJs from '@eslint/js';
+import tseslint from 'typescript-eslint';
 import pluginVue from 'eslint-plugin-vue';
-import {
-	defineConfigWithVueTs,
-	vueTsConfigs,
-	configureVueProject,
-} from '@vue/eslint-config-typescript';
+import prettier from 'eslint-plugin-prettier/recommended';
+import vueConfigTypescript from '@vue/eslint-config-typescript';
+import vueConfigPrettier from '@vue/eslint-config-prettier';
 
-configureVueProject({
-	scriptLangs: ['ts', 'js', 'tsx', 'jsx'],
-	rootDir: import.meta.dirname,
-});
-
-export default defineConfigWithVueTs(
-	pluginVue.configs['flat/essential'],
-	vueTsConfigs.recommended,
-	{
-		rules: {
-			// Enforce Unix line endings
-			'linebreak-style': ['error', 'unix'],
-
-			// Enforce single quotes
-			'quotes': ['error', 'single'],
-
-			// Enforce indentation with tabs
-			'indent': ['error', 'tab', { SwitchCase: 1 }],
-
-			// Allow mixed spaces and tabs (disable warning)
-			'no-mixed-spaces-and-tabs': 0,
-
-			// Enforce spacing inside curly braces in import statements
-			'object-curly-spacing': ['error', 'always'],
-
-			// Vue-specific rules
-			'vue/attribute-hyphenation': ['error', 'always'],
-			'vue/component-name-in-template-casing': ['error', 'PascalCase', {
-				registeredComponentsOnly: false,
-				ignores: [],
-			}],
-			'vue/component-tags-order': ['error', { order: ['script', 'template', 'style'] }],
-			'vue/html-self-closing': ['error', {
-				html: { void: 'any', normal: 'always', component: 'always' },
-				svg: 'always',
-				math: 'always',
-			}],
-			'vue/html-quotes': ['error', 'double', { avoidEscape: false }],
-			'vue/multiline-html-element-content-newline': ['error', {
-				ignoreWhenEmpty: true,
-				ignores: ['pre', 'textarea'],
-				allowEmptyLines: false,
-			}],
-			'vue/multi-word-component-names': 'off',
-			'vue/prop-name-casing': ['error', 'camelCase'],
-			'vue/v-bind-style': ['error', 'shorthand'],
-		},
-	}
-);
+/** @type {import('eslint').Linter.Config[]} */
+export default [
+  {
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+    },
+  },
+  // js
+  pluginJs.configs.recommended,
+  {
+    rules: {
+      'no-unused-vars': 'off',
+      'no-undef': 'off',
+    },
+  },
+  // ts
+  ...tseslint.configs.recommended,
+  {
+    rules: {
+      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
+    },
+  },
+  // vue
+  ...pluginVue.configs['flat/recommended'],
+  {
+    files: ['*.vue', '**/*.vue'],
+    languageOptions: {
+      parserOptions: {
+        parser: tseslint.parser,
+      },
+    },
+  },
+  {
+    rules: {
+      ...vueConfigTypescript.rules,
+      ...vueConfigPrettier.rules,
+      'prettier/prettier': [
+        'warn',
+        {
+          singleQuote: true,
+        },
+      ],
+      'vue/multi-word-component-names': 'off',
+      'vue/attribute-hyphenation': 'off',
+      'vue/no-v-html': 'off',
+      'vue/v-on-event-hyphenation': 'off',
+      '@typescript-eslint/ban-ts-comment': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+  {
+    ignores: ['node_modules', '.nuxt', '.output', 'dist'],
+  },
+  // prettier
+  prettier,
+  {
+    rules: {
+      'prettier/prettier': ['warn', { singleQuote: true }],
+    },
+  },
+];

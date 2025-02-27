@@ -1,12 +1,15 @@
 <template>
-	<div class="pulse-loader" />
+  <div class="pulse-loader" />
 </template>
 
 <style scoped>
 .pulse-loader {
-	position: relative;
-	display: inline-block;
-	transition: 0.3s color, 0.3s transform, 0.3s opacity;
+  position: relative;
+  display: inline-block;
+  transition:
+    0.3s color,
+    0.3s transform,
+    0.3s opacity;
 }
 
 .pulse-loader:before,
@@ -28,12 +31,12 @@
 }
 
 @keyframes pulse-loader {
-	0%,
-	100% {
-		transform: scale(0);
-	}
-	50% {
-		transform: scale(1);
-	}
+  0%,
+  100% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1);
+  }
 }
 </style>
