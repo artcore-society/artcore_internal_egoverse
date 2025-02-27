@@ -1,6 +1,6 @@
 import globals from 'globals';
 import pluginJs from '@eslint/js';
-import tseslint from 'typescript-eslint';
+import tsEslint from 'typescript-eslint';
 import pluginVue from 'eslint-plugin-vue';
 import prettier from 'eslint-plugin-prettier/recommended';
 import vueConfigTypescript from '@vue/eslint-config-typescript';
@@ -25,7 +25,7 @@ export default [
     },
   },
   // ts
-  ...tseslint.configs.recommended,
+  ...tsEslint.configs.recommended,
   {
     rules: {
       '@typescript-eslint/no-unused-vars': 'warn',
@@ -38,7 +38,7 @@ export default [
     files: ['*.vue', '**/*.vue'],
     languageOptions: {
       parserOptions: {
-        parser: tseslint.parser,
+        parser: tsEslint.parser,
       },
     },
   },
