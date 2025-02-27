@@ -42,7 +42,7 @@ The app uses eslint. The following commands can be useful:
    yarn lint:fix
    ```
    
-Make sure eslint & prettier runs on save in your IDE if you don't want to use those commands after updating the code base.
+Make sure eslint runs on save in your IDE if you don't want to use those commands after updating the code base.
 
 ### `server` - Socket.IO Server
 The `server` folder contains the WebSocket logic powered by Socket.IO. To run the socket server:
