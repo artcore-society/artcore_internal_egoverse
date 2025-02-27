@@ -234,12 +234,12 @@ onBeforeUnmount(() => {
     <Modal :show="isChatModalVisible" max-width="md" @close="closeChatModal">
       <div class="flex flex-col gap-12 w-full">
         <div class="flex flex-col gap-4 w-full">
-          <h2
-              v-if="selectedChatUserId && chats[selectedChatUserId] && chats[selectedChatUserId].username"
-              class="text-2xl font-semibold"
+          <div
+              v-if="ExperienceManager.instance.activeScene && selectedChatUserId && ExperienceManager.instance.activeScene.visitorAvatars[selectedChatUserId]"
+              class="text-lg font-bold text-center"
           >
-            Chat with {{ selectedChatUserId && chats[selectedChatUserId].username }}
-          </h2>
+            Chat with {{ ExperienceManager.instance.activeScene.visitorAvatars[selectedChatUserId].username }}
+          </div>
 
           <Transition name="fade" mode="out-in" appear>
             <TransitionGroup
