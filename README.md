@@ -29,6 +29,20 @@ The `app` folder contains the frontend built with Vue.js. To set up and run the 
    ```sh
    yarn build
    ```
+   
+#### Eslint & Prettier Formating
+The app uses eslint. The following commands can be useful:
+
+1. Check for eslint issues:
+   ```sh
+   yarn lint
+   ```
+2. Fix eslint issues:
+   ```sh
+   yarn lint:fix
+   ```
+   
+Make sure eslint & prettier runs on save in your IDE if you don't want to use those commands after updating the code base.
 
 ### `server` - Socket.IO Server
 The `server` folder contains the WebSocket logic powered by Socket.IO. To run the socket server:
