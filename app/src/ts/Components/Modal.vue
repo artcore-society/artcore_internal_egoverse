@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineEmits, onMounted, onUnmounted, watch } from 'vue';
+import { computed, defineEmits, defineProps, onMounted, onUnmounted, watch } from 'vue';
 
 // Define emits
 const emit = defineEmits<{
@@ -7,20 +7,20 @@ const emit = defineEmits<{
 }>();
 
 // Define props
-const props = defineProps({
-	show: {
-		type: Boolean,
-		default: false
-	},
-	maxWidth: {
-		type: String,
-		default: '2xl'
-	},
-	closeable: {
-		type: Boolean,
-		default: true
+const props = withDefaults(
+	defineProps<{
+		show: boolean;
+		maxWidth?: string;
+		closeable?: boolean;
+		transparentBackground?: boolean;
+	}>(),
+	{
+		show: false,
+		maxWidth: '2xl',
+		closeable: true,
+		transparentBackground: false
 	}
-});
+);
 
 // Define computed variable
 const maxWidthClass = computed(() => {
@@ -101,8 +101,8 @@ onUnmounted(() => {
 				>
 					<div
 						v-if="show"
-						class="bg-app-secondary-10 text-app-primary-100 relative z-50 flex w-full cursor-default flex-col items-center justify-center gap-4 rounded-md bg-cyan-400 p-4 text-center shadow-2xl"
-						:class="maxWidthClass"
+						class="text-app-primary-100 relative z-50 flex w-full cursor-default flex-col items-center justify-center gap-4 rounded-md p-4 text-center"
+						:class="[maxWidthClass, { 'bg-cyan-400 shadow-2xl': !transparentBackground }]"
 					>
 						<slot />
 					</div>

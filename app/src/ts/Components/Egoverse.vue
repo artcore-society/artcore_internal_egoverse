@@ -18,6 +18,8 @@ import PrimaryButton from './PrimaryButton.vue';
 import Loader from './Loader.vue';
 import Modal from './Modal.vue';
 import InputField from './InputField.vue';
+import { KeyboardKey } from '../Enums/KeyboardKey.ts';
+import EmoteSelector from './EmoteSelector.vue';
 
 // Avatar store
 const { username, selectedAvatarId } = useAvatarStore();
@@ -28,6 +30,7 @@ const currentPlayerMessage: Ref<string> = ref('');
 const selectedChatUserId: Ref<string | null> = ref(null);
 const isChatModalVisible: Ref<boolean> = ref(false);
 const isReady: Ref<boolean> = ref(false);
+const isEmoteSelectorVisible: Ref<boolean> = ref(false);
 const canvas: Ref<HTMLCanvasElement | null> = ref(null);
 const areaButtons: Ref<Record<SceneKey, HTMLElement>> = ref({} as Record<SceneKey, HTMLElement>);
 
@@ -121,6 +124,13 @@ function closeChatModal() {
 	selectedChatUserId.value = null;
 }
 
+function onKeyDown(event: KeyboardEvent) {
+	// Set ref
+	if (event.code === KeyboardKey.KeyT) {
+		isEmoteSelectorVisible.value = !isEmoteSelectorVisible.value;
+	}
+}
+
 // Watch
 watch(ExperienceManager.instance.selectedAvatar, (value) => {
 	if (value) {
@@ -179,6 +189,8 @@ onMounted(() => {
 
 		// Listen for ready event
 		EventService.listen(CustomEventKey.READY, setReadyState);
+
+		document.addEventListener('keydown', (event: KeyboardEvent) => onKeyDown(event));
 	}
 });
 
@@ -189,6 +201,7 @@ onBeforeUnmount(() => {
 
 	// Remove listeners
 	EventService.remove(CustomEventKey.READY, setReadyState);
+	document.removeEventListener('keydown', (event: KeyboardEvent) => onKeyDown(event));
 });
 </script>
 
@@ -315,5 +328,7 @@ onBeforeUnmount(() => {
 
 		<!-- 3D Canvas -->
 		<canvas ref="canvas" class="h-full w-full" />
+
+		<EmoteSelector :show="isEmoteSelectorVisible" @close="isEmoteSelectorVisible = false" />
 	</div>
 </template>

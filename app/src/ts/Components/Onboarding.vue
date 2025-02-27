@@ -37,7 +37,7 @@ const confirmUsername = () => {
 </script>
 
 <template>
-	<div class="flex h-full w-full items-stretch justify-center overflow-hidden rounded-4xl bg-cyan-400">
+	<div class="relative flex h-full w-full items-stretch justify-center overflow-hidden rounded-4xl bg-cyan-400">
 		<Transition name="fade-scale" mode="out-in" appear>
 			<div v-if="step === 1" class="flex flex-col items-center justify-center gap-12">
 				<span class="text-8xl font-bold text-amber-100">

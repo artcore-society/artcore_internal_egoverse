@@ -15,7 +15,8 @@ export default class AvatarControls implements IAvatarControls {
 	private fadeDuration: number = 0.2;
 	private runVelocity: number = 5;
 	private walkVelocity: number = 2;
-	private jumpAnimationTimeout: ReturnType<typeof setTimeout> | null = null;
+	private emoteAnimationTimeout: ReturnType<typeof setTimeout> | null = null;
+	public emoteAnimationName: AnimationName | null = null;
 	public keysPressed: { [key in KeyboardKey]: boolean } = {} as {
 		[key in KeyboardKey]: boolean;
 	};
@@ -82,6 +83,12 @@ export default class AvatarControls implements IAvatarControls {
 			return;
 		}
 
+		if (this.emoteAnimationName) {
+			this.playAnimation(this.emoteAnimationName);
+
+			return;
+		}
+
 		// Check direction
 		const directionPressed = this.directions.some((key) => keysPressed[key]);
 
@@ -125,17 +132,17 @@ export default class AvatarControls implements IAvatarControls {
 			// User does combo's => the previously set timeout must be cleared to stop the new animation at the correct time
 			if (isJumpKeyPressed) {
 				// Clear timeout if one is already set
-				if (this.jumpAnimationTimeout) {
+				if (this.emoteAnimationTimeout) {
 					// Reset
-					clearTimeout(this.jumpAnimationTimeout);
-					this.jumpAnimationTimeout = null;
+					clearTimeout(this.emoteAnimationTimeout);
+					this.emoteAnimationTimeout = null;
 				}
 
 				// Set jumping state
 				this.isJumping = true;
 
 				// Reset when animation is done
-				this.jumpAnimationTimeout = setTimeout(() => {
+				this.emoteAnimationTimeout = setTimeout(() => {
 					// Set false to disable jump or running jump animation
 					this.isJumping = false;
 				}, clipDuration * 1000);
@@ -204,6 +211,40 @@ export default class AvatarControls implements IAvatarControls {
 				this.avatar.experienceScene.cameraParent.position.x = this.avatar.model.position.x;
 				this.avatar.experienceScene.cameraParent.position.z = this.avatar.model.position.z;
 			}
+		}
+	}
+
+	playAnimation(animationName: AnimationName) {
+		console.log('play animation');
+		if (this.currentAction !== animationName) {
+			const animationToPlay = this.avatar.animationsMap.get(animationName);
+			const currentAnimation = this.avatar.animationsMap.get(this.currentAction);
+
+			if (!animationToPlay || !currentAnimation) {
+				return;
+			}
+
+			// Clear the previous timeout if it's set
+			if (this.emoteAnimationTimeout) {
+				clearTimeout(this.emoteAnimationTimeout);
+				this.emoteAnimationTimeout = null;
+			}
+
+			// Get the duration of the animation (you may need to adjust this depending on your system)
+			const clip = animationToPlay.getClip();
+			const clipDuration = clip.duration * 0.8; // Optional: Adjust duration if needed
+
+			// Set a timeout to reset the emote animation name after the animation duration
+			this.emoteAnimationTimeout = setTimeout(() => {
+				this.emoteAnimationName = null; // Reset the emote animation
+			}, clipDuration * 1000); // Multiply by 1000 to convert to milliseconds
+
+			// Fade out the current animation
+			currentAnimation.fadeOut(this.fadeDuration);
+
+			// Reset and fade in the new animation
+			animationToPlay.reset().fadeIn(this.fadeDuration).play();
+			this.currentAction = animationName;
 		}
 	}
 

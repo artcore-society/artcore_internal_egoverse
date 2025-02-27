@@ -11,3 +11,8 @@
 @theme {
   --font-rubik: 'Rubik', serif;
 }
+
+/* Apply the font globally */
+html {
+  font-family: var(--font-rubik), serif;
+}
