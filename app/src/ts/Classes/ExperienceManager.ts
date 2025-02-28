@@ -36,7 +36,7 @@ export default class ExperienceManager {
 	private pointer: Vector2 | null = null;
 	private hoveredAvatar: Avatar | null = null;
 	public selectedAvatar: Ref<Avatar | null> = ref(null);
-	public incomingVisitorMessageData: Ref<ISocketMessageData | null> = ref(null);
+	public incomingVisitorMessageData: Ref<ISocketMessageData> = ref({ message: null, senderUserId: null });
 	public isInteractive: boolean = true;
 	private avatarCache: Map<number, IAvatarCacheEntry> = new Map();
 

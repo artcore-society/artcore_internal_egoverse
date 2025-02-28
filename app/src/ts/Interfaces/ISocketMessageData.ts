@@ -1,4 +1,4 @@
 export interface ISocketMessageData {
-	message: string;
-	senderUserId: string;
+	message: string | null;
+	senderUserId: string | null;
 }

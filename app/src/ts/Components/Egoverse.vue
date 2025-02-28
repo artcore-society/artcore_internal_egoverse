@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { TYPE } from 'vue-toastification';
 import { SceneKey } from '../Enums/SceneKey';
 import { AvatarType } from '../Enums/AvatarType.ts';
+import { KeyboardKey } from '../Enums/KeyboardKey.ts';
 import { SocketEvent } from '../Enums/SocketEvent.ts';
 import { EventService } from '../Services/EventService.ts';
 import { ChatRoomScene } from '../Classes/ChatRoomScene';
@@ -11,28 +11,41 @@ import { LandingAreaScene } from '../Classes/LandingAreaScene';
 import { MeetingRoomScene } from '../Classes/MeetingRoomScene';
 import { ExperienceSocket } from '../Classes/ExperienceSocket.ts';
 import { ISocketMessageData } from '../Interfaces/ISocketMessageData.ts';
-import { useClearToast, useShowToast } from '../Composables/Toastification.ts';
 import { ComponentPublicInstance, onBeforeUnmount, onMounted, Ref, ref, watch } from 'vue';
 import ExperienceManager from '../Classes/ExperienceManager.ts';
 import PrimaryButton from './PrimaryButton.vue';
 import Loader from './Loader.vue';
-import Modal from './Modal.vue';
-import InputField from './InputField.vue';
-import { KeyboardKey } from '../Enums/KeyboardKey.ts';
 import EmoteSelector from './EmoteSelector.vue';
+import KeyboardIcon from './Icons/KeyboardIcon.vue';
+import KeybindingsModal from './KeybindingsModal.vue';
+import ChatList from './ChatList.vue';
+import ChatModal from './ChatModal.vue';
 
 // Avatar store
 const { username, selectedAvatarId } = useAvatarStore();
 
 // Set variables
 const chats: Ref<Record<string, Array<{ message: string; avatarType: string }>>> = ref({});
-const currentPlayerMessage: Ref<string> = ref('');
 const selectedChatUserId: Ref<string | null> = ref(null);
 const isChatModalVisible: Ref<boolean> = ref(false);
 const isReady: Ref<boolean> = ref(false);
 const isEmoteSelectorVisible: Ref<boolean> = ref(false);
+const isKeyBindingsModalVisible: Ref<boolean> = ref(false);
 const canvas: Ref<HTMLCanvasElement | null> = ref(null);
 const areaButtons: Ref<Record<SceneKey, HTMLElement>> = ref({} as Record<SceneKey, HTMLElement>);
+const keyBindingsData: Ref<Array<{ instruction: string; labels: Array<string>; isCombination: boolean }>> = ref([
+	{ instruction: 'Move forward', labels: ['Z', 'Arrow Up'], isCombination: false },
+	{ instruction: 'Move backwards', labels: ['S', 'Arrow Down'], isCombination: false },
+	{ instruction: 'Move left', labels: ['Q', 'Arrow Left'], isCombination: false },
+	{ instruction: 'Move left', labels: ['D', 'Arrow Right'], isCombination: false },
+	{ instruction: 'Sprint', labels: ['SHIFT', 'Any movement key'], isCombination: true },
+	{ instruction: 'Jump', labels: ['SPACE'], isCombination: true },
+	{ instruction: 'Toggle key bindings modal', labels: ['SHIFT', '?'], isCombination: true },
+	{ instruction: 'Toggle emote selection', labels: ['T'], isCombination: true }
+]);
+const keysPressed: { [key in KeyboardKey]: boolean } = {} as {
+	[key in KeyboardKey]: boolean;
+};
 
 // Define functions
 function transitionToScene(sceneKey: SceneKey): void {
@@ -49,22 +62,8 @@ function setReadyState(): void {
 	isReady.value = true;
 }
 
-function submitMessage() {
+function submitMessage(message: string) {
 	if (!ExperienceManager.instance.activeScene) {
-		return;
-	}
-
-	if (!currentPlayerMessage.value || !currentPlayerMessage.value.trim()) {
-		const errorId: string = 'empty-input-error';
-
-		// Clear toasts
-		useClearToast(errorId);
-
-		// Trigger toast
-		useShowToast('Error', "Submitted field can't be empty.", TYPE.ERROR, {
-			id: errorId
-		});
-
 		return;
 	}
 
@@ -86,28 +85,23 @@ function submitMessage() {
 
 	if (visitorId) {
 		// Populate first
-		if (!chats.value[visitorId]) {
+		if (!Array.isArray(chats.value[visitorId])) {
 			chats.value[visitorId] = [];
 		}
 
-		if (visitorId && chats.value && chats.value[visitorId] !== undefined) {
-			// Add your message to the chat if it exists with the target visitor
-			chats.value[visitorId].push({
-				message: currentPlayerMessage.value,
-				avatarType: AvatarType.CURRENT_PLAYER
-			});
-		}
+		// Add your message to the chat if it exists with the target visitor
+		chats.value[visitorId]?.push({
+			message: message,
+			avatarType: AvatarType.CURRENT_PLAYER
+		});
 
 		// Send message to visitor via websocket event
 		ExperienceSocket.emit(SocketEvent.SEND_MESSAGE, {
 			receiverUserId: visitorId,
 			senderUserId: ExperienceManager.instance.userId,
-			message: currentPlayerMessage.value
+			message: message
 		});
 	}
-
-	// Clear type message
-	currentPlayerMessage.value = null;
 
 	// Reset hovered avatar
 	ExperienceManager.instance.selectedAvatar.value = null;
@@ -125,33 +119,48 @@ function closeChatModal() {
 }
 
 function onKeyDown(event: KeyboardEvent) {
-	// Set ref
-	if (event.code === KeyboardKey.KeyT) {
+	// Save pressed key
+	keysPressed[event.code as KeyboardKey] = true;
+
+	if (keysPressed[KeyboardKey.KeyT]) {
+		// Set ref
 		isEmoteSelectorVisible.value = !isEmoteSelectorVisible.value;
 	}
+
+	if (keysPressed[KeyboardKey.ShiftLeft] && keysPressed[KeyboardKey.KeyM]) {
+		// Set ref
+		isKeyBindingsModalVisible.value = !isKeyBindingsModalVisible.value;
+	}
+}
+
+function onKeyUp(event: KeyboardEvent) {
+	// Save pressed key
+	keysPressed[event.code as KeyboardKey] = false;
 }
 
 // Watch
 watch(ExperienceManager.instance.selectedAvatar, (value) => {
-	if (value) {
+	if (value && ExperienceManager.instance.activeScene) {
 		// Get visitor id to send message to via websockets by retrieving it from visitors list/object (keys are the visitor id's)
 		const visitorId = Object.keys(ExperienceManager.instance.activeScene.visitorAvatars).find((key) => {
-			return ExperienceManager.instance.activeScene.visitorAvatars[key].model.uuid === value.model.uuid;
+			return ExperienceManager.instance.activeScene?.visitorAvatars[key]?.model?.uuid === value?.model?.uuid;
 		});
 
-		// Open chat modal
-		openChatModal(visitorId);
+		if (visitorId) {
+			// Open chat modal
+			openChatModal(visitorId);
+		}
 	}
 });
 
 watch(ExperienceManager.instance.incomingVisitorMessageData, (data: ISocketMessageData) => {
-	if (data) {
+	if (data && data.senderUserId && data.message) {
 		if (!chats.value[data.senderUserId]) {
 			// Create array if not set yet
 			chats.value[data.senderUserId] = [];
 		}
 
-		chats.value[data.senderUserId].push({
+		chats.value[data.senderUserId]?.push({
 			message: data.message,
 			avatarType: AvatarType.VISITOR
 		});
@@ -191,6 +200,7 @@ onMounted(() => {
 		EventService.listen(CustomEventKey.READY, setReadyState);
 
 		document.addEventListener('keydown', (event: KeyboardEvent) => onKeyDown(event));
+		document.addEventListener('keyup', (event: KeyboardEvent) => onKeyUp(event));
 	}
 });
 
@@ -202,16 +212,15 @@ onBeforeUnmount(() => {
 	// Remove listeners
 	EventService.remove(CustomEventKey.READY, setReadyState);
 	document.removeEventListener('keydown', (event: KeyboardEvent) => onKeyDown(event));
+	document.removeEventListener('keyup', (event: KeyboardEvent) => onKeyUp(event));
 });
 </script>
 
 <template>
 	<div class="fixed inset-0 bg-white">
-		<!-- Loader for initialization -->
 		<div class="absolute top-5 left-5 z-10 flex items-center justify-center gap-2">
 			<Loader v-if="!isReady" />
 
-			<!-- Scene navigation buttons -->
 			<PrimaryButton
 				:ref="(el) => (areaButtons[SceneKey.LANDING_AREA] = (el as ComponentPublicInstance).$el as HTMLElement)"
 				@click="transitionToScene(SceneKey.LANDING_AREA)"
@@ -234,101 +243,31 @@ onBeforeUnmount(() => {
 			</PrimaryButton>
 		</div>
 
-		<!-- Chat list -->
-		<Transition name="fade" mode="out-in" appear>
-			<div
-				v-if="Object.keys(chats).length > 0"
-				class="absolute bottom-2 left-2 z-10 flex flex-col gap-4 rounded-md bg-white p-2"
-			>
-				<div
-					v-for="(chat, visitorId) in chats"
-					:key="visitorId"
-					class="flex min-w-42 flex-col gap-2 bg-cyan-400 p-2 text-white"
-				>
-					<div
-						v-if="
-							ExperienceManager.instance.activeScene && ExperienceManager.instance.activeScene.visitorAvatars[visitorId]
-						"
-						class="text-center text-lg font-bold"
-					>
-						{{ ExperienceManager.instance.activeScene.visitorAvatars[visitorId].username }}
-					</div>
+		<ChatList :chats="chats" @open-chat-modal="openChatModal" />
 
-					<div
-						v-for="(message, index) in chat.messages"
-						:key="`message-${index}`"
-						:class="{
-							'bg-blue-400 text-white': chat.avatarType === AvatarType.VISITOR,
-							'bg-green-400 text-white': chat.avatarType === AvatarType.CURRENT_PLAYER
-						}"
-						class="mx-auto max-w-xs rounded-lg p-3"
-					>
-						{{ message }}
-					</div>
-
-					<PrimaryButton @click="openChatModal(visitorId)"> Chat </PrimaryButton>
-				</div>
-			</div>
-
-			<div
-				v-else
-				class="absolute bottom-2 left-2 z-10 flex flex-col gap-4 rounded-md bg-cyan-400 p-2 font-bold text-white"
-			>
-				No chats...
-			</div>
-		</Transition>
-
-		<!-- Chat Modal -->
-		<Modal :show="isChatModalVisible" max-width="md" @close="closeChatModal">
-			<div class="flex w-full flex-col gap-12">
-				<div class="flex w-full flex-col gap-4">
-					<div
-						v-if="
-							ExperienceManager.instance.activeScene &&
-							selectedChatUserId &&
-							ExperienceManager.instance.activeScene.visitorAvatars[selectedChatUserId]
-						"
-						class="text-center text-lg font-bold"
-					>
-						Chat with
-						{{ ExperienceManager.instance.activeScene.visitorAvatars[selectedChatUserId].username }}
-					</div>
-
-					<Transition name="fade" mode="out-in" appear>
-						<TransitionGroup
-							v-if="selectedChatUserId && chats[selectedChatUserId]"
-							name="list"
-							tag="div"
-							class="flex flex-col gap-2"
-						>
-							<div
-								v-for="(chat, index) in chats[selectedChatUserId] || []"
-								:key="`chat-${index}`"
-								:class="{
-									'bg-gray-500 text-left text-white': chat.avatarType === AvatarType.VISITOR,
-									'bg-amber-400 text-right text-white': chat.avatarType === AvatarType.CURRENT_PLAYER
-								}"
-								class="rounded-lg p-3 font-bold break-all shadow-xl"
-							>
-								{{ chat.message }}
-							</div>
-						</TransitionGroup>
-
-						<span v-else class="font-bold">No messages...</span>
-					</Transition>
-				</div>
-
-				<form class="flex flex-col gap-2" @submit.prevent="submitMessage">
-					<InputField v-model="currentPlayerMessage" placeholder="Type message here" type="text" class="w-full" />
-
-					<PrimaryButton type="submit"> Submit </PrimaryButton>
-				</form>
-			</div>
-		</Modal>
-
-		<!-- 3D Canvas -->
-		<canvas ref="canvas" class="h-full w-full" />
+		<ChatModal
+			:show="isChatModalVisible"
+			:selected-chat-user-id="selectedChatUserId"
+			:chats="chats"
+			@submit-message="submitMessage"
+			@close="closeChatModal"
+		/>
 
 		<EmoteSelector :show="isEmoteSelectorVisible" @close="isEmoteSelectorVisible = false" />
+
+		<KeybindingsModal
+			:show="isKeyBindingsModalVisible"
+			:data="keyBindingsData"
+			@close="isKeyBindingsModalVisible = false"
+		/>
+
+		<div
+			class="absolute right-2 bottom-2 z-10 cursor-pointer rounded-md bg-cyan-400 p-2 shadow-xl"
+			@click="isKeyBindingsModalVisible = true"
+		>
+			<KeyboardIcon class="h-8 w-8 text-white" />
+		</div>
+
+		<canvas ref="canvas" class="h-full w-full" />
 	</div>
 </template>
