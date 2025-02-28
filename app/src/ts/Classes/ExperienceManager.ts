@@ -18,6 +18,7 @@ import { ISocketClientUpdatePlayerData } from '../Interfaces/ISocketClientUpdate
 import { Clock, DefaultLoadingManager, LoadingManager, Object3D, Quaternion, Raycaster, Vector2, Vector3 } from 'three';
 import ExperienceRenderer from './ExperienceRenderer.ts';
 import Avatar from './Avatar.ts';
+import { ISocketTriggerEmoteData } from '../Interfaces/ISocketTriggerEmoteData.ts';
 
 export default class ExperienceManager {
 	private static _instance: ExperienceManager | null = null;
@@ -189,6 +190,32 @@ export default class ExperienceManager {
 
 			// Set ref
 			this.incomingVisitorMessageData.value = data;
+		});
+
+		ExperienceSocket.on<ISocketTriggerEmoteData>(SocketEvent.TRIGGER_EMOTE, (data) => {
+			console.log('Trigger emote', data);
+			if (
+				!this.activeScene ||
+				!this.activeScene.currentPlayerAvatar ||
+				!this.activeScene.currentPlayerAvatar.controls
+			) {
+				return;
+			}
+
+			// Find target visitor
+			const targetVisitor = this.activeScene.visitorAvatars[data.userId] ?? null;
+
+			if (!targetVisitor) {
+				console.warn('Target avatar not found when trying to trigger emote...');
+				return;
+			}
+
+			if (!targetVisitor.controls) {
+				return;
+			}
+
+			// Set emote animation name
+			targetVisitor.controls.emoteAnimationName = data.animationName;
 		});
 	}
 

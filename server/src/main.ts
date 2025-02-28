@@ -63,6 +63,14 @@ io.on('connection', async (socket) => {
         });
     });
 
+    // Trigger emote event
+    socket.on(SocketEvent.TRIGGER_EMOTE, (data) => {
+        socket.broadcast.emit(SocketEvent.TRIGGER_EMOTE, {
+            animationName: data.animationName,
+            userId: data.avatarUserId
+        });
+    });
+
     // Send player data to everyone but yourself
     socket.on(SocketEvent.CLIENT_UPDATE_PLAYER, (data) => {
         socket.broadcast.emit(SocketEvent.CLIENT_UPDATE_PLAYER, data);

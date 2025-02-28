@@ -4,6 +4,8 @@ import { IEmoteOption } from '../Interfaces/IEmoteOption';
 import { AnimationName } from '../Enums/AnimationName.ts';
 import Modal from './Modal.vue';
 import ExperienceManager from '../Classes/ExperienceManager.ts';
+import { ExperienceSocket } from '../Classes/ExperienceSocket.ts';
+import { SocketEvent } from '../Enums/SocketEvent.ts';
 
 // Define emits
 const emit = defineEmits<{
@@ -51,7 +53,14 @@ function onClick(animationName: AnimationName) {
 		ExperienceManager.instance.activeScene.currentPlayerAvatar &&
 		ExperienceManager.instance.activeScene.currentPlayerAvatar.controls
 	) {
+		// Set emote animation name
 		ExperienceManager.instance.activeScene.currentPlayerAvatar.controls.emoteAnimationName = animationName;
+
+		// Emit socket event
+		ExperienceSocket.emit(SocketEvent.TRIGGER_EMOTE, {
+			avatarUserId: ExperienceManager.instance.userId,
+			animationName: animationName
+		});
 	}
 
 	// Close modal

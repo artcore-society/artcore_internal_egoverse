@@ -6,5 +6,6 @@ export enum SocketEvent {
     CLIENT_UPDATE_PLAYER = 'client-update-player',
     JOIN_SCENE = 'join-scene',
     SEND_MESSAGE = 'send-message',
+    TRIGGER_EMOTE = 'trigger-emote',
     FAILED = 'failed'
 }
