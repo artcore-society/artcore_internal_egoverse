@@ -215,7 +215,6 @@ export default class AvatarControls implements IAvatarControls {
 	}
 
 	playAnimation(animationName: AnimationName) {
-		console.log('play animation');
 		if (this.currentAction !== animationName) {
 			const animationToPlay = this.avatar.animationsMap.get(animationName);
 			const currentAnimation = this.avatar.animationsMap.get(this.currentAction);
