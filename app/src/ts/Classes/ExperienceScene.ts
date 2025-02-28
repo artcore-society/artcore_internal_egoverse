@@ -1,4 +1,3 @@
-import { Sky } from 'three/examples/jsm/objects/Sky';
 import { gsap } from 'gsap';
 import { SceneKey } from '../Enums/SceneKey.ts';
 import { AvatarType } from '../Enums/AvatarType.ts';
@@ -9,8 +8,8 @@ import {
 	AmbientLight,
 	Color,
 	DirectionalLight,
+	Fog,
 	HemisphereLight,
-	MathUtils,
 	Mesh,
 	MeshStandardMaterial,
 	Object3D,
@@ -32,7 +31,6 @@ export default abstract class ExperienceScene implements IExperienceScene {
 	public updateAction: ((delta: number) => void) | null;
 	public currentPlayerAvatar: Avatar | null = null;
 	public visitorAvatars: { [key: string]: Avatar } = {};
-	public sky: Sky = new Sky();
 
 	protected constructor(canvas: HTMLCanvasElement, sceneKey: SceneKey) {
 		this.scene = new Scene();
@@ -51,11 +49,11 @@ export default abstract class ExperienceScene implements IExperienceScene {
 		// Add camera to parent object
 		this.cameraParent.add(this.camera);
 
+		// Scene fog
+		this.scene.fog = new Fog(0xffffff, 5, 15);
+
 		// Setup lighting
 		this.setupLighting();
-
-		// Setup sky
-		this.setupSky();
 	}
 
 	abstract init(): void;
@@ -98,40 +96,6 @@ export default abstract class ExperienceScene implements IExperienceScene {
 		dirLight.shadow.camera = new OrthographicCamera(-10, 10, 10, -10, 1, 1000);
 		dirLight.shadow.mapSize.set(4096, 4096);
 		this.scene.add(dirLight);
-	}
-
-	private setupSky() {
-		// Config the sky
-		this.sky.scale.setScalar(1000);
-
-		// Define effect controller
-		const effectController = {
-			turbidity: 3,
-			rayleigh: 1,
-			mieCoefficient: 0.005,
-			mieDirectionalG: 0.7,
-			elevation: 1,
-			azimuth: 180
-		};
-
-		// Set uniforms values
-		const uniforms = this.sky.material.uniforms;
-		uniforms['turbidity'].value = effectController.turbidity;
-		uniforms['rayleigh'].value = effectController.rayleigh;
-		uniforms['mieCoefficient'].value = effectController.mieCoefficient;
-		uniforms['mieDirectionalG'].value = effectController.mieDirectionalG;
-
-		// Calculate phi and theta for sun position
-		const phi = MathUtils.degToRad(90 - effectController.elevation);
-		const theta = MathUtils.degToRad(effectController.azimuth);
-
-		// Set sun position
-		const sun = new Vector3();
-		sun.setFromSphericalCoords(1, phi, theta);
-		uniforms['sunPosition'].value.copy(sun);
-
-		// Add to scene
-		this.scene.add(this.sky);
 	}
 
 	public addCurrentPlayer(username: string, selectedAvatarId: number) {
