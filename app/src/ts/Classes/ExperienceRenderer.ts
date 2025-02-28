@@ -1,4 +1,4 @@
-import { PCFSoftShadowMap, WebGLRenderer } from 'three';
+import { WebGLRenderer } from 'three';
 
 export default class ExperienceRenderer extends WebGLRenderer {
 	constructor(canvas: HTMLCanvasElement) {
