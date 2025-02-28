@@ -26,10 +26,10 @@ const hoveredEmote: Ref<IEmoteOption | null> = ref(null);
 const circleRadius: Ref<number> = ref(325);
 const emotes = ref<IEmoteOption[]>([
 	{ asset: '/assets/videos/dancing.webm', animationName: AnimationName.DANCING },
-	{ asset: '/assets/videos/waving.webm', animationName: AnimationName.WAVING },
+	{ asset: '/assets/videos/waving.webm', animationName: AnimationName.SIDE_KICK },
 	{ asset: '/assets/videos/taunting.webm', animationName: AnimationName.TAUNTING },
-	{ asset: '/assets/videos/clapping.webm', animationName: AnimationName.CLAPPING },
-	{ asset: '/assets/videos/flexing.webm', animationName: AnimationName.FLEXING },
+	{ asset: '/assets/videos/clapping.webm', animationName: AnimationName.PAIN },
+	{ asset: '/assets/videos/flexing.webm', animationName: AnimationName.FALL },
 	{ asset: '/assets/videos/cheering.webm', animationName: AnimationName.CHEERING }
 ]);
 

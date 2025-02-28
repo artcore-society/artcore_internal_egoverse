@@ -5,9 +5,9 @@ export enum AnimationName {
 	RUNNING = 'Running',
 	JUMPING = 'Jumping',
 	DANCING = 'Dancing',
-	WAVING = 'Waving',
+	SIDE_KICK = 'Side Kick',
+	PAIN = 'Pain',
 	TAUNTING = 'Taunting',
-	CLAPPING = 'Clapping',
-	FLEXING = 'Flexing',
+	FALL = 'Fall',
 	CHEERING = 'Cheering'
 }
