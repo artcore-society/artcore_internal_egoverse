@@ -13,12 +13,12 @@ import { IExtendedObject3D } from '../Interfaces/IExtendedObject3D.ts';
 import { IAvatarCacheEntry } from '../Interfaces/IAvatarCacheEntry.ts';
 import { ISocketMessageData } from '../Interfaces/ISocketMessageData.ts';
 import { ISocketJoinSceneData } from '../Interfaces/ISocketJoinSceneData.ts';
+import { ISocketTriggerEmoteData } from '../Interfaces/ISocketTriggerEmoteData.ts';
 import { ISocketClientSpawnPlayerData } from '../Interfaces/ISocketClientSpawnPlayerData.ts';
 import { ISocketClientUpdatePlayerData } from '../Interfaces/ISocketClientUpdatePlayerData.ts';
 import { Clock, DefaultLoadingManager, LoadingManager, Object3D, Quaternion, Raycaster, Vector2, Vector3 } from 'three';
 import ExperienceRenderer from './ExperienceRenderer.ts';
 import Avatar from './Avatar.ts';
-import { ISocketTriggerEmoteData } from '../Interfaces/ISocketTriggerEmoteData.ts';
 
 export default class ExperienceManager {
 	private static _instance: ExperienceManager | null = null;
