@@ -85,20 +85,23 @@ export default class ExperienceManager {
 				const scene = new ExperienceScene(this.canvas!, sceneData.sceneKey);
 				this.scenes.set(sceneData.sceneKey, scene);
 
-				// Add players
-				sceneData.players.forEach((player) => {
-					if (player.id === this.userId) {
-						scene.addCurrentPlayer(player.username, player.avatarId);
-					} else {
+				if (sceneData.currentPlayer) {
+					// Add current player
+					scene.addCurrentPlayer(sceneData.currentPlayer.username, sceneData.currentPlayer.avatarId);
+				}
+
+				if (!!sceneData.visitors && sceneData.visitors.length > 0) {
+					// Add visitors
+					sceneData.visitors.forEach((visitor) => {
 						scene.addVisitor(
-							player.id,
-							player.username,
-							player.avatarId,
-							new Vector3(...player.position),
-							new Quaternion(...player.rotation)
+							visitor.id,
+							visitor.username,
+							visitor.avatarId,
+							new Vector3(...visitor.position),
+							new Quaternion(...visitor.rotation)
 						);
-					}
-				});
+					});
+				}
 			});
 
 			// Set active scene
@@ -106,6 +109,8 @@ export default class ExperienceManager {
 		});
 
 		ExperienceSocket.on<ISocketSceneStateData>(SocketEvent.SCENE_STATE, (data) => {
+			// Check if
+
 			console.log('Scene state updated!', data);
 		});
 

@@ -75,16 +75,17 @@ io.on(SocketEvent.CONNECTION, (socket) => {
         scenes: Array.from(scenes.values()).map(scene => {
             return {
                 sceneKey: scene.sceneKey,
-                players: Array.from(scene.players.values()).map(p => {
-                    return {
+                currentPlayer: Array.from(scene.players.values()).find(p => p.isCurrent),
+                visitors: Array.from(scene.players.values())
+                    .filter(p => !p.isCurrent)
+                    .map(p => ({
                         id: p.id,
                         username: p.username,
                         avatarId: p.avatarId,
                         isCurrent: p.isCurrent,
                         position: [...p.position],
                         rotation: [...p.rotation],
-                    };
-                })
+                    }))
             };
         })
     });

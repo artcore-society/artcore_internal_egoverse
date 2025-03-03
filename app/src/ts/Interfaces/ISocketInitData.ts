@@ -6,7 +6,15 @@ export interface ISocketInitData {
 	currentSceneKey: string;
 	scenes: Array<{
 		sceneKey: SceneKey;
-		players: Array<{
+		currentPlayer: {
+			id: string;
+			username: string;
+			avatarId: number;
+			isCurrent: boolean;
+			position: Vector3;
+			rotation: Quaternion;
+		};
+		visitors: Array<{
 			id: string;
 			username: string;
 			avatarId: number;
