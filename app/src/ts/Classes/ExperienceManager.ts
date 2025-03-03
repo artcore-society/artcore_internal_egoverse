@@ -1,3 +1,4 @@
+import { gsap } from 'gsap';
 import { SceneKey } from '../Enums/SceneKey';
 import { ref, Ref } from 'vue';
 import { SocketEvent } from '../Enums/SocketEvent.ts';
@@ -84,24 +85,6 @@ export default class ExperienceManager {
 			data.scenes.forEach((sceneData) => {
 				const scene = new ExperienceScene(this.canvas!, sceneData.sceneKey);
 				this.scenes.set(sceneData.sceneKey, scene);
-
-				if (sceneData.currentPlayer) {
-					// Add current player
-					scene.addCurrentPlayer(sceneData.currentPlayer.username, sceneData.currentPlayer.avatarId);
-				}
-
-				if (!!sceneData.visitors && sceneData.visitors.length > 0) {
-					// Add visitors
-					sceneData.visitors.forEach((visitor) => {
-						scene.addVisitor(
-							visitor.id,
-							visitor.username,
-							visitor.avatarId,
-							new Vector3(...visitor.position),
-							new Quaternion(...visitor.rotation)
-						);
-					});
-				}
 			});
 
 			// Set active scene
@@ -109,70 +92,77 @@ export default class ExperienceManager {
 		});
 
 		ExperienceSocket.on<ISocketSceneStateData>(SocketEvent.SCENE_STATE, (data) => {
-			// Check if
-
-			console.log('Scene state updated!', data);
+			console.log('Active scene state updated!', data);
 		});
 
 		ExperienceSocket.on<ISocketUserData>(SocketEvent.PLAYER_JOINED, (data) => {
-			console.log('Player joined!', data);
-			// const targetScene = this.scenes.get(data.sceneKey as SceneKey);
-			// if (!targetScene) return;
-			//
-			// targetScene.addVisitor(
-			// 	data.id,
-			// 	data.username,
-			// 	data.avatarId,
-			// 	new Vector3(...data.position),
-			// 	new Quaternion(...data.rotation)
-			// );
+			console.log('Player joined active scene!', data);
+
+			if (data.id === this.userId) {
+				// Add current player
+				this.activeScene?.addCurrentPlayer(data.username, parseInt(data.avatarId));
+
+				return;
+			}
+
+			// Add the visitor
+			this.activeScene?.addVisitor(
+				data.id,
+				data.username,
+				parseInt(data.avatarId),
+				new Vector3(...data.position),
+				new Quaternion(...data.rotation)
+			);
 		});
 
 		ExperienceSocket.on<ISocketUserData>(SocketEvent.PLAYER_LEFT, (data) => {
-			console.log('Player left!', data);
-			// this.activeScene?.removeVisitor(data.id);
-		});
+			console.log('Player left active scene!', data);
 
-		ExperienceSocket.on<ISocketJoinSceneData>(SocketEvent.JOIN_SCENE, (data) => {
-			// console.log('Joined scene!', data);
-			// const targetScene = this.scenes.get(data.sceneKey as SceneKey);
-			// if (!targetScene) return;
-			//
-			// if (data.userId === this.userId) {
-			// 	this.activeScene = targetScene;
-			// 	targetScene.addCurrentPlayer(data.username, this.selectedAvatarId!);
-			// } else {
-			// 	targetScene.addVisitor(
-			// 		data.userId,
-			// 		data.username,
-			// 		parseInt(data.selectedAvatarId),
-			// 		new Vector3(data.spawnPosition.x, data.spawnPosition.y, data.spawnPosition.z),
-			// 		new Quaternion(...data.spawnRotation)
-			// 	);
-			// }
+			// Get player
+			const player =
+				data.id === this.userId ? this.activeScene?.currentPlayerAvatar : this.activeScene?.visitorAvatars[data.id];
+
+			// Make sure all tweens are killed first
+			gsap.killTweensOf(player.model.scale);
+
+			// Remove current player from previous active scene
+			gsap.to(player.model.scale, {
+				x: 0,
+				y: 0,
+				z: 0,
+				duration: 0.4,
+				ease: 'back.inOut',
+				onComplete: () => {
+					if (data.id === this.userId) {
+						// Remove active player from previous scene
+						this.activeScene?.removeCurrentPlayer();
+
+						return;
+					}
+
+					// Remove active player from previous scene
+					this.activeScene?.removeVisitor(data.id);
+				}
+			});
 		});
 
 		ExperienceSocket.on<ISocketClientUpdatePlayerData>(SocketEvent.CLIENT_UPDATE_PLAYER, (data) => {
-			// const targetScene = this.scenes.get(data.sceneKey as SceneKey);
-			// if (!targetScene) return;
-			// const visitorAvatar = targetScene.visitorAvatars[data.visitorId];
-			// if (visitorAvatar) {
-			// 	visitorAvatar.mixer?.update(data.delta);
-			// 	visitorAvatar.controls?.update(data.delta, data.keysPressed);
-			// }
+			// Update avatar in target scene
+			if (this.activeScene && this.activeScene.visitorAvatars && this.activeScene.sceneKey === data.sceneKey) {
+				// Update the mixer of the visitor avatar
+				this.activeScene.visitorAvatars[data.visitorId]?.mixer?.update(data.delta);
+
+				// Update the controls of the visitor avatar
+				this.activeScene.visitorAvatars[data.visitorId]?.controls?.update(data.delta, data.keysPressed);
+			}
 		});
 
 		ExperienceSocket.on<ISocketMessageData>(SocketEvent.SEND_MESSAGE, (data) => {
-			// console.log('New message received!', data);
-			// this.incomingVisitorMessageData.value = data;
+			console.log('New message received!', data);
 		});
 
 		ExperienceSocket.on<ISocketTriggerEmoteData>(SocketEvent.TRIGGER_EMOTE, (data) => {
-			// console.log('Emote triggered!', data);
-			// const targetVisitor = this.activeScene?.visitorAvatars[data.userId];
-			// if (targetVisitor && targetVisitor.controls) {
-			// 	targetVisitor.controls.emoteAnimationName = data.animationName;
-			// }
+			console.log('Emote triggered!', data);
 		});
 	}
 	setActiveScene(key: SceneKey): void {
@@ -183,6 +173,39 @@ export default class ExperienceManager {
 		}
 
 		if (this.activeScene && this.activeScene.sceneKey === key) {
+			return;
+		}
+
+		if (this.activeScene && this.activeScene.currentPlayerAvatar && this.activeScene.currentPlayerAvatar.model) {
+			// Make sure all tweens are killed first
+			gsap.killTweensOf(this.activeScene.currentPlayerAvatar.model.scale);
+
+			// First remove current player from previous active scene
+			gsap.to(this.activeScene.currentPlayerAvatar.model.scale, {
+				x: 0,
+				y: 0,
+				z: 0,
+				duration: 0.4,
+				ease: 'back.inOut',
+				onComplete: () => {
+					// Remove active player from previous scene
+					this.activeScene?.removeCurrentPlayer();
+
+					// Set new active scene
+					this.activeScene = this.scenes.get(key) || null;
+
+					// Emit join room
+					ExperienceSocket.emit(SocketEvent.JOIN_SCENE, {
+						userId: this.userId,
+						username: this.username,
+						selectedAvatarId: this.selectedAvatarId,
+						sceneKey: key,
+						spawnPosition: this.activeScene?.currentPlayerAvatar?.model?.position ?? new Vector3(),
+						spawnRotation: this.activeScene?.currentPlayerAvatar?.model?.quaternion ?? new Quaternion()
+					});
+				}
+			});
+
 			return;
 		}
 

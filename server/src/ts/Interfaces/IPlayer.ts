@@ -1,12 +1,12 @@
-import { Vector3, Euler } from 'three';
+import { Vector3, Quaternion } from 'three';
 
 export interface IPlayer {
     id: string;
     username: string;
     avatarId: string;
     position: Vector3;
-    rotation: Euler;
+    rotation: Quaternion;
     isCurrent: boolean;
 
-    updatePosition(position: Vector3, rotation: Euler): void;
+    updatePosition(position: Vector3, rotation: Quaternion): void;
 }

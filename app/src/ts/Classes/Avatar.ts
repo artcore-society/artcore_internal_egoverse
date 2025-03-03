@@ -15,7 +15,7 @@ export default class Avatar implements IAvatar {
 	public selectedAvatarId: number;
 	public experienceScene: IExperienceScene;
 	public camera: ExperienceCamera;
-	public readonly type: AvatarType = AvatarType.VISITOR;
+	public type: AvatarType = AvatarType.VISITOR;
 	public controls: AvatarControls | null = null;
 	public model: IExtendedObject3D | null = null;
 	public mixer: AnimationMixer = new AnimationMixer(new Mesh());

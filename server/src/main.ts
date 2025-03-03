@@ -75,31 +75,21 @@ io.on(SocketEvent.CONNECTION, (socket) => {
         scenes: Array.from(scenes.values()).map(scene => {
             return {
                 sceneKey: scene.sceneKey,
-                currentPlayer: Array.from(scene.players.values()).find(p => p.isCurrent),
-                visitors: Array.from(scene.players.values())
-                    .filter(p => !p.isCurrent)
-                    .map(p => ({
-                        id: p.id,
-                        username: p.username,
-                        avatarId: p.avatarId,
-                        isCurrent: p.isCurrent,
-                        position: [...p.position],
-                        rotation: [...p.rotation],
-                    }))
             };
         })
     });
 
-    // Send full scene state to new player
-    socket.emit(SocketEvent.SCENE_STATE, scene.getState(socket.id));
-
-    // Notify others that a player joined
-    socket.broadcast.to(sceneKey).emit(SocketEvent.PLAYER_JOINED, {
+    // Notify scene users that player has joined
+    io.to(sceneKey).emit(SocketEvent.PLAYER_JOINED, {
         id: player.id,
         username: player.username,
         avatarId: player.avatarId,
         position: player.position.toArray(),
-        rotation: [player.rotation.x, player.rotation.y, player.rotation.z]
+        rotation: [
+            player.rotation.x,
+            player.rotation.y,
+            player.rotation.z
+        ]
     });
 
     // Handle scene switching
@@ -133,10 +123,13 @@ io.on(SocketEvent.CONNECTION, (socket) => {
             username: player.username,
             avatarId: player.avatarId,
             position: player.position.toArray(),
-            rotation: [player.rotation.x, player.rotation.y, player.rotation.z]
+            rotation: [
+                player.rotation.x,
+                player.rotation.y,
+                player.rotation.z
+            ],
+            sceneKey: newSceneKey
         });
-
-        socket.emit(SocketEvent.SCENE_STATE, newScene.getState(socket.id));
     });
 
     // Rate limit player movement updates

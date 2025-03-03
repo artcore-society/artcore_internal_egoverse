@@ -1,3 +1,3 @@
 export interface ISocketSceneStateData {
-	currentPlayer: string;
+	sceneKey: string;
 }
