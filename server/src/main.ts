@@ -156,13 +156,7 @@ io.on(SocketEvent.CONNECTION, (socket) => {
         io.to(newSceneKey).emit(SocketEvent.SCENE_STATE, newScene.getState(socket.id));
     });
 
-    // Rate limit player movement updates
-    let lastUpdateTime = 0;
     socket.on(SocketEvent.CLIENT_UPDATE_PLAYER, (data) => {
-        const now = Date.now();
-        if (now - lastUpdateTime < 50) return;
-        lastUpdateTime = now;
-
         if (!player || !scenes.has(player.sceneKey as SceneKey)) return;
         socket.broadcast.to(player.sceneKey).emit(SocketEvent.CLIENT_UPDATE_PLAYER, data);
     });
