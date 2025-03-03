@@ -34,7 +34,7 @@ export class Scene implements IScene {
                 username: v.username,
                 avatarId: v.avatarId,
                 position: v.position.toArray(),
-                rotation: [v.rotation.x, v.rotation.y, v.rotation.z]
+                rotation: [v.rotation.x, v.rotation.y, v.rotation.z, v.rotation.w]
             }))
         };
     }

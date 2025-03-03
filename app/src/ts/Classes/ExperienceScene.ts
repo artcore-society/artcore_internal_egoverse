@@ -180,7 +180,7 @@ export default class ExperienceScene implements IExperienceScene {
 				keysPressed: ExperienceManager.instance.isInteractive ? this.currentPlayerAvatar.controls.keysPressed : {},
 				sceneKey: this.sceneKey,
 				spawnPosition: this.currentPlayerAvatar.model.position,
-				spawnRotation: this.currentPlayerAvatar.model.rotation
+				spawnRotation: this.currentPlayerAvatar.model.quaternion
 			});
 		}
 	}

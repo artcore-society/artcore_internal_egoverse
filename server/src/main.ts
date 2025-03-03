@@ -99,7 +99,8 @@ io.on(SocketEvent.CONNECTION, (socket) => {
         rotation: [
             player.rotation.x,
             player.rotation.y,
-            player.rotation.z
+            player.rotation.z,
+            player.rotation.w
         ]
     });
 
@@ -147,7 +148,8 @@ io.on(SocketEvent.CONNECTION, (socket) => {
             rotation: [
                 player.rotation.x,
                 player.rotation.y,
-                player.rotation.z
+                player.rotation.z,
+                player.rotation.w
             ],
             sceneKey: newSceneKey
         });
@@ -158,6 +160,12 @@ io.on(SocketEvent.CONNECTION, (socket) => {
 
     socket.on(SocketEvent.CLIENT_UPDATE_PLAYER, (data) => {
         if (!player || !scenes.has(player.sceneKey as SceneKey)) return;
+
+        // Update position and rotation in backend
+        player.position.set(data.spawnPosition.x, data.spawnPosition.y, data.spawnPosition.z);
+        player.rotation.set(...data.spawnRotation);
+
+        // Broadcast
         socket.broadcast.to(player.sceneKey).emit(SocketEvent.CLIENT_UPDATE_PLAYER, data);
     });
 
