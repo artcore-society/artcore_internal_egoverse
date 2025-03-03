@@ -23,7 +23,7 @@ import ExperienceCamera from './ExperienceCamera.ts';
 import Avatar from './Avatar.ts';
 import ExperienceManager from './ExperienceManager.ts';
 
-export default abstract class ExperienceScene implements IExperienceScene {
+export default class ExperienceScene implements IExperienceScene {
 	public readonly scene: Scene;
 	public sceneKey: SceneKey;
 	public readonly camera: ExperienceCamera;
@@ -32,7 +32,7 @@ export default abstract class ExperienceScene implements IExperienceScene {
 	public currentPlayerAvatar: Avatar | null = null;
 	public visitorAvatars: { [key: string]: Avatar } = {};
 
-	protected constructor(canvas: HTMLCanvasElement, sceneKey: SceneKey) {
+	constructor(canvas: HTMLCanvasElement, sceneKey: SceneKey) {
 		this.scene = new Scene();
 		this.sceneKey = sceneKey;
 		this.camera = new ExperienceCamera(this.scene, canvas);
@@ -54,17 +54,18 @@ export default abstract class ExperienceScene implements IExperienceScene {
 
 		// Setup lighting
 		this.setupLighting();
+
+		// Setup floor
+		this.setupFloor();
 	}
 
-	abstract init(): void;
-
-	public setupFloor(color: number): void {
+	public setupFloor(): void {
 		// Create a large plane
 		const geometry = new PlaneGeometry(500, 500, 10, 10);
 
 		// Create material with all maps
 		const material = new MeshStandardMaterial({
-			color: new Color(color ?? 'blue')
+			color: new Color('green')
 		});
 
 		// Create plane
