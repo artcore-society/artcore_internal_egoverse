@@ -22,19 +22,22 @@ import {
 import ExperienceCamera from './ExperienceCamera.ts';
 import Avatar from './Avatar.ts';
 import ExperienceManager from './ExperienceManager.ts';
+import { ISceneSettings } from '../Interfaces/ISceneSettings.ts';
 
 export default class ExperienceScene implements IExperienceScene {
 	public readonly scene: Scene;
 	public sceneKey: SceneKey;
+	public settings: ISceneSettings;
 	public readonly camera: ExperienceCamera;
 	public cameraParent: Object3D;
 	public updateAction: ((delta: number) => void) | null;
 	public currentPlayerAvatar: Avatar | null = null;
 	public visitorAvatars: { [key: string]: Avatar } = {};
 
-	constructor(canvas: HTMLCanvasElement, sceneKey: SceneKey) {
+	constructor(canvas: HTMLCanvasElement, sceneKey: SceneKey, settings: ISceneSettings = { color: 'Blue' }) {
 		this.scene = new Scene();
 		this.sceneKey = sceneKey;
+		this.settings = settings;
 		this.camera = new ExperienceCamera(this.scene, canvas);
 		this.cameraParent = new Object3D();
 		this.updateAction = null;
@@ -65,7 +68,7 @@ export default class ExperienceScene implements IExperienceScene {
 
 		// Create material with all maps
 		const material = new MeshStandardMaterial({
-			color: new Color('green')
+			color: new Color(this.settings.color)
 		});
 
 		// Create plane

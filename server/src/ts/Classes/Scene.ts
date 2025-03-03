@@ -1,13 +1,16 @@
 import { IScene } from '../Interfaces/IScene';
 import { IPlayer } from '../Interfaces/IPlayer';
 import { SceneKey } from '../Enums/SceneKey.ts';
+import { ISceneSettings } from '../Interfaces/ISceneSettings.ts';
 
 export class Scene implements IScene {
     sceneKey: SceneKey;
     players: Map<string, IPlayer>;
+    settings: ISceneSettings;
 
-    constructor(sceneKey: SceneKey) {
+    constructor(sceneKey: SceneKey, settings: ISceneSettings = { color: 'Blue' }) {
         this.sceneKey = sceneKey;
+        this.settings = settings;
         this.players = new Map();
     }
 

@@ -12,7 +12,6 @@ import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { IExtendedObject3D } from '../Interfaces/IExtendedObject3D.ts';
 import { IAvatarCacheEntry } from '../Interfaces/IAvatarCacheEntry.ts';
 import { ISocketMessageData } from '../Interfaces/ISocketMessageData.ts';
-import { ISocketJoinSceneData } from '../Interfaces/ISocketJoinSceneData.ts';
 import { ISocketSceneStateData } from '../Interfaces/ISocketSceneStateData.ts';
 import { ISocketTriggerEmoteData } from '../Interfaces/ISocketTriggerEmoteData.ts';
 import { ISocketClientUpdatePlayerData } from '../Interfaces/ISocketClientUpdatePlayerData.ts';
@@ -83,7 +82,7 @@ export default class ExperienceManager {
 
 			// Create scenes dynamically from backend data
 			data.scenes.forEach((sceneData) => {
-				const scene = new ExperienceScene(this.canvas!, sceneData.sceneKey);
+				const scene = new ExperienceScene(this.canvas!, sceneData.sceneKey, sceneData.settings);
 				this.scenes.set(sceneData.sceneKey, scene);
 			});
 
@@ -92,12 +91,28 @@ export default class ExperienceManager {
 		});
 
 		ExperienceSocket.on<ISocketSceneStateData>(SocketEvent.SCENE_STATE, (data) => {
-			console.log('Active scene state updated!', data);
+			console.log('Scene state', data);
+			// Sync visitors from active scene state
+			if (data.visitors && data.visitors.length > 0) {
+				data.visitors.forEach((visitor) => {
+					if (visitor.id === this.userId) {
+						// Early return if visitor id is of current player somehow
+						return;
+					}
+
+					// Add visitor to active scene
+					this.activeScene?.addVisitor(
+						visitor.id,
+						visitor.username,
+						parseInt(visitor.avatarId),
+						new Vector3(...visitor.position),
+						new Quaternion(...visitor.rotation)
+					);
+				});
+			}
 		});
 
 		ExperienceSocket.on<ISocketUserData>(SocketEvent.PLAYER_JOINED, (data) => {
-			console.log('Player joined active scene!', data);
-
 			if (data.id === this.userId) {
 				// Add current player
 				this.activeScene?.addCurrentPlayer(data.username, parseInt(data.avatarId));
@@ -116,11 +131,13 @@ export default class ExperienceManager {
 		});
 
 		ExperienceSocket.on<ISocketUserData>(SocketEvent.PLAYER_LEFT, (data) => {
-			console.log('Player left active scene!', data);
-
 			// Get player
 			const player =
 				data.id === this.userId ? this.activeScene?.currentPlayerAvatar : this.activeScene?.visitorAvatars[data.id];
+
+			if (!player || !player.model) {
+				return;
+			}
 
 			// Make sure all tweens are killed first
 			gsap.killTweensOf(player.model.scale);

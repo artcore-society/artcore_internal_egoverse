@@ -63,6 +63,7 @@ export default [
 			'@typescript-eslint/ban-ts-comment': 'off',
 			'@typescript-eslint/no-require-imports': 'off',
 			'@typescript-eslint/no-explicit-any': 'off',
+			'no-async-promise-executor': 'off',
 			'no-mixed-spaces-and-tabs': 0,
 			indent: ['error', 'tab'],
 			'linebreak-style': ['error', 'unix'],

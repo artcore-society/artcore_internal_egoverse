@@ -6,6 +6,7 @@ import { SocketEvent } from './ts/Enums/SocketEvent';
 import { createServer } from 'node:http';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
+import {ISceneSettings} from "./ts/Interfaces/ISceneSettings.ts";
 
 const app = express();
 const server = createServer(app);
@@ -17,9 +18,18 @@ const io = new Server(server, {
     }
 });
 
+// Set max allowed players
 const MAX_PLAYERS = 100;
-const scenes: Map<string, Scene> = new Map(
-    Object.values(SceneKey).map(key => [key, new Scene(key)])
+
+// Set scene colors
+const scenesSettings: Map<SceneKey, ISceneSettings> = new Map();
+scenesSettings.set(SceneKey.LANDING_AREA, { color: 'Red' });
+scenesSettings.set(SceneKey.MEETING_ROOM, { color: 'Blue' });
+scenesSettings.set(SceneKey.CHAT_ROOM, { color: 'Green' });
+
+// Create scenes map
+const scenes: Map<SceneKey, Scene> = new Map(
+    Object.values(SceneKey).map(key => [key as SceneKey, new Scene(key, scenesSettings.get(key))])
 );
 
 // Security: Input sanitization
@@ -75,6 +85,7 @@ io.on(SocketEvent.CONNECTION, (socket) => {
         scenes: Array.from(scenes.values()).map(scene => {
             return {
                 sceneKey: scene.sceneKey,
+                settings: scene.settings,
             };
         })
     });
@@ -94,7 +105,7 @@ io.on(SocketEvent.CONNECTION, (socket) => {
 
     // Handle scene switching
     socket.on(SocketEvent.JOIN_SCENE, (data) => {
-        const newSceneKey = sanitizeInput(data.sceneKey as string);
+        const newSceneKey = sanitizeInput(data.sceneKey) as SceneKey;
         if (!newSceneKey || !scenes.has(newSceneKey)) {
             socket.emit(SocketEvent.FAILED, { message: 'Invalid scene' });
             return;
@@ -102,15 +113,25 @@ io.on(SocketEvent.CONNECTION, (socket) => {
 
         if (player.sceneKey === newSceneKey) {
             console.warn(`Player ${player.id} is already in scene ${newSceneKey}, ignoring.`);
+
+            // Broadcast scene state to sender
+            socket.emit(SocketEvent.SCENE_STATE, scene.getState(socket.id));
             return;
         }
 
-        const oldSceneKey = player.sceneKey;
+        const oldSceneKey = player.sceneKey as SceneKey;
         if (scenes.has(oldSceneKey)) {
             const oldScene = scenes.get(oldSceneKey)!;
             oldScene.removePlayer(socket.id);
+
+            // Send the PLAYER_LEFT event to the sender before they leave the room
+            socket.emit(SocketEvent.PLAYER_LEFT, { id: socket.id });
+
+            // Send the PLAYER_LEFT event to everyone else in the old scene
+            socket.to(oldSceneKey).emit(SocketEvent.PLAYER_LEFT, { id: socket.id });
+
+            // Now the player leaves the old room
             socket.leave(oldSceneKey);
-            io.to(oldSceneKey).emit(SocketEvent.PLAYER_LEFT, { id: socket.id });
         }
 
         const newScene = scenes.get(newSceneKey)!;
@@ -130,6 +151,9 @@ io.on(SocketEvent.CONNECTION, (socket) => {
             ],
             sceneKey: newSceneKey
         });
+
+        // Broadcast scene state to sync the scene visitors
+        io.to(newSceneKey).emit(SocketEvent.SCENE_STATE, newScene.getState(socket.id));
     });
 
     // Rate limit player movement updates
@@ -139,7 +163,7 @@ io.on(SocketEvent.CONNECTION, (socket) => {
         if (now - lastUpdateTime < 50) return;
         lastUpdateTime = now;
 
-        if (!player || !scenes.has(player.sceneKey)) return;
+        if (!player || !scenes.has(player.sceneKey as SceneKey)) return;
         socket.broadcast.to(player.sceneKey).emit(SocketEvent.CLIENT_UPDATE_PLAYER, data);
     });
 
@@ -156,7 +180,7 @@ io.on(SocketEvent.CONNECTION, (socket) => {
     // Handle player disconnection
     socket.on(SocketEvent.DISCONNECT, () => {
         console.log(`Player disconnected: ${socket.id}`);
-        const scene = scenes.get(player.sceneKey);
+        const scene = scenes.get(player.sceneKey as SceneKey);
         if (scene) {
             scene.removePlayer(socket.id);
             io.to(player.sceneKey).emit(SocketEvent.PLAYER_LEFT, { id: socket.id });
