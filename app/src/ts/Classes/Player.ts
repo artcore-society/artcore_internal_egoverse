@@ -58,7 +58,7 @@ export default class Player implements IPlayer {
 
 	async load() {
 		try {
-			const { model, animations } = await ExperienceManager.instance.fetchOrLoadplayerCacheEntry(
+			const { model, animations } = await ExperienceManager.instance.fetchOrLoadPlayerCacheEntry(
 				this.selectedPlayerId,
 				this.spawnPosition,
 				this.spawnRotation

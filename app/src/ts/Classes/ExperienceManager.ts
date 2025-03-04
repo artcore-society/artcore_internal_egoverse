@@ -352,7 +352,7 @@ export default class ExperienceManager {
 		this.hoveredPlayer = null;
 	}
 
-	public fetchOrLoadplayerCacheEntry(
+	public fetchOrLoadPlayerCacheEntry(
 		selectedPlayerId: number,
 		spawnPosition: Vector3,
 		spawnRotation: Quaternion
