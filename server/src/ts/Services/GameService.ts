@@ -196,9 +196,6 @@ export class GameService {
         const spawnPosition = new Vector3(...data.spawnPosition);
         const spawnRotation = new Quaternion(...data.spawnRotation);
 
-        console.log("Received spawnRotation:", data.spawnRotation);
-        console.log("Parsed spawnRotation:", spawnRotation);
-
         // Update the player's position based on received data
         player.position.copy(spawnPosition);
 
