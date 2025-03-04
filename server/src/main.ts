@@ -179,6 +179,14 @@ io.on(SocketEvent.CONNECTION, (socket) => {
         });
     });
 
+    // Emotes
+    socket.on(SocketEvent.TRIGGER_EMOTE, (data) => {
+        socket.broadcast.emit(SocketEvent.TRIGGER_EMOTE, {
+            animationName: data.animationName,
+            userId: data.avatarUserId
+        });
+    });
+
     // Handle player disconnection
     socket.on(SocketEvent.DISCONNECT, () => {
         console.log(`Player disconnected: ${socket.id}`);
