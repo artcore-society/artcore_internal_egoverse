@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { SceneKey } from '../Enums/SceneKey';
-import { AvatarType } from '../Enums/AvatarType.ts';
 import { KeyboardKey } from '../Enums/KeyboardKey.ts';
 import { SocketEvent } from '../Enums/SocketEvent.ts';
 import { EventService } from '../Services/EventService.ts';
-import { ChatRoomScene } from '../Classes/ChatRoomScene';
 import { useAvatarStore } from '../Stores/AvatarStore.ts';
 import { CustomEventKey } from '../Enums/CustomEventKey.ts';
 import { LandingAreaScene } from '../Classes/LandingAreaScene';
@@ -72,9 +70,9 @@ function submitMessage(message: string) {
 	if (ExperienceManager.instance.selectedAvatar.value) {
 		// Get visitor id to send message to via websockets by retrieving it from visitors list/object (keys are the visitor id's)
 		visitorId =
-			Object.keys(ExperienceManager.instance.activeScene.visitorAvatars).find((key) => {
+			Object.keys(ExperienceManager.instance.activeScene.players).find((key) => {
 				return (
-					ExperienceManager.instance.activeScene?.visitorAvatars[key]?.model?.uuid ===
+					ExperienceManager.instance.activeScene?.players[key]?.model?.uuid ===
 					ExperienceManager.instance.selectedAvatar.value?.model?.uuid
 				);
 			}) ?? null;
@@ -92,7 +90,7 @@ function submitMessage(message: string) {
 		// Add your message to the chat if it exists with the target visitor
 		chats.value[visitorId]?.push({
 			message: message,
-			avatarType: AvatarType.CURRENT_PLAYER
+			isCurrentPlayer: true
 		});
 
 		// Send message to visitor via websocket event
@@ -142,8 +140,8 @@ function onKeyUp(event: KeyboardEvent) {
 watch(ExperienceManager.instance.selectedAvatar, (value) => {
 	if (value && ExperienceManager.instance.activeScene) {
 		// Get visitor id to send message to via websockets by retrieving it from visitors list/object (keys are the visitor id's)
-		const visitorId = Object.keys(ExperienceManager.instance.activeScene.visitorAvatars).find((key) => {
-			return ExperienceManager.instance.activeScene?.visitorAvatars[key]?.model?.uuid === value?.model?.uuid;
+		const visitorId = Object.keys(ExperienceManager.instance.activeScene.players).find((key) => {
+			return ExperienceManager.instance.activeScene?.players[key]?.model?.uuid === value?.model?.uuid;
 		});
 
 		if (visitorId) {
@@ -162,7 +160,7 @@ watch(ExperienceManager.instance.incomingVisitorMessageData, (data: ISocketMessa
 
 		chats.value[data.senderUserId]?.push({
 			message: data.message,
-			avatarType: AvatarType.VISITOR
+			isCurrentPlayer: false
 		});
 	}
 });

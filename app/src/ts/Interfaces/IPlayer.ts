@@ -1,14 +1,13 @@
-import { AvatarType } from '../Enums/AvatarType.ts';
 import { IExperienceScene } from './IExperienceScene.ts';
 import { AnimationAction, AnimationMixer, Object3D, Quaternion, Vector3 } from 'three';
-import AvatarControls from '../Classes/AvatarControls.ts';
+import PlayerControls from '../Classes/PlayerControls.ts';
 
-export interface IAvatar {
+export interface IPlayer {
 	username: string;
 	selectedAvatarId: number;
 	experienceScene: IExperienceScene;
-	type: AvatarType;
-	controls: AvatarControls | null;
+	isCurrent: boolean;
+	controls: PlayerControls | null;
 	model: Object3D | null;
 	mixer: AnimationMixer;
 	animationsMap: Map<string, AnimationAction | null>;

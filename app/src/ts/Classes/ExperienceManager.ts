@@ -10,14 +10,14 @@ import { ISocketInitData } from '../Interfaces/ISocketInitData.ts';
 import { ExperienceSocket } from './ExperienceSocket.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { IExtendedObject3D } from '../Interfaces/IExtendedObject3D.ts';
-import { IAvatarCacheEntry } from '../Interfaces/IAvatarCacheEntry.ts';
+import { IPlayerCacheEntry } from '../Interfaces/IPlayerCacheEntry.ts';
 import { ISocketMessageData } from '../Interfaces/ISocketMessageData.ts';
 import { ISocketSceneStateData } from '../Interfaces/ISocketSceneStateData.ts';
 import { ISocketTriggerEmoteData } from '../Interfaces/ISocketTriggerEmoteData.ts';
 import { ISocketClientUpdatePlayerData } from '../Interfaces/ISocketClientUpdatePlayerData.ts';
 import { Clock, DefaultLoadingManager, LoadingManager, Object3D, Quaternion, Raycaster, Vector2, Vector3 } from 'three';
 import ExperienceRenderer from './ExperienceRenderer.ts';
-import Avatar from './Avatar.ts';
+import Player from './Player.ts';
 import ExperienceScene from './ExperienceScene.ts';
 
 export default class ExperienceManager {
@@ -34,11 +34,11 @@ export default class ExperienceManager {
 	private loaderManager: LoadingManager = DefaultLoadingManager;
 	private raycaster: Raycaster = new Raycaster();
 	private pointer: Vector2 | null = null;
-	private hoveredAvatar: Avatar | null = null;
-	public selectedAvatar: Ref<Avatar | null> = ref(null);
+	private hoveredAvatar: Player | null = null;
+	public selectedAvatar: Ref<Player | null> = ref(null);
 	public incomingVisitorMessageData: Ref<ISocketMessageData> = ref({ message: null, senderUserId: null });
 	public isInteractive: boolean = true;
-	private avatarCache: Map<number, IAvatarCacheEntry> = new Map();
+	private avatarCache: Map<number, IPlayerCacheEntry> = new Map();
 
 	private constructor() {}
 
@@ -134,8 +134,7 @@ export default class ExperienceManager {
 
 		ExperienceSocket.on<ISocketUserData>(SocketEvent.PLAYER_LEFT, (data) => {
 			// Get player
-			const player =
-				data.id === this.userId ? this.activeScene?.currentPlayerAvatar : this.activeScene?.visitorAvatars[data.id];
+			const player = data.id === this.userId ? this.activeScene?.currentPlayer : this.activeScene?.players[data.id];
 
 			if (!player || !player.model) {
 				return;
@@ -167,12 +166,12 @@ export default class ExperienceManager {
 
 		ExperienceSocket.on<ISocketClientUpdatePlayerData>(SocketEvent.CLIENT_UPDATE_PLAYER, (data) => {
 			// Update avatar in target scene
-			if (this.activeScene && this.activeScene.visitorAvatars && this.activeScene.sceneKey === data.sceneKey) {
+			if (this.activeScene && this.activeScene.players && this.activeScene.sceneKey === data.sceneKey) {
 				// Update the mixer of the visitor avatar
-				this.activeScene.visitorAvatars[data.visitorId]?.mixer?.update(data.delta);
+				this.activeScene.players[data.visitorId]?.mixer?.update(data.delta);
 
 				// Update the controls of the visitor avatar
-				this.activeScene.visitorAvatars[data.visitorId]?.controls?.update(data.delta, data.keysPressed);
+				this.activeScene.players[data.visitorId]?.controls?.update(data.delta, data.keysPressed);
 			}
 		});
 
@@ -186,16 +185,12 @@ export default class ExperienceManager {
 		ExperienceSocket.on<ISocketTriggerEmoteData>(SocketEvent.TRIGGER_EMOTE, (data) => {
 			console.log('Emote triggered!', data);
 
-			if (
-				!this.activeScene ||
-				!this.activeScene.currentPlayerAvatar ||
-				!this.activeScene.currentPlayerAvatar.controls
-			) {
+			if (!this.activeScene || !this.activeScene.currentPlayer || !this.activeScene.currentPlayer.controls) {
 				return;
 			}
 
 			// Find target visitor
-			const targetVisitor = this.activeScene.visitorAvatars[data.userId] ?? null;
+			const targetVisitor = this.activeScene.players[data.userId] ?? null;
 
 			if (!targetVisitor) {
 				console.warn('Target avatar not found when trying to trigger emote...');
@@ -221,12 +216,12 @@ export default class ExperienceManager {
 			return;
 		}
 
-		if (this.activeScene && this.activeScene.currentPlayerAvatar && this.activeScene.currentPlayerAvatar.model) {
+		if (this.activeScene && this.activeScene.currentPlayer && this.activeScene.currentPlayer.model) {
 			// Make sure all tweens are killed first
-			gsap.killTweensOf(this.activeScene.currentPlayerAvatar.model.scale);
+			gsap.killTweensOf(this.activeScene.currentPlayer.model.scale);
 
 			// First remove current player from previous active scene
-			gsap.to(this.activeScene.currentPlayerAvatar.model.scale, {
+			gsap.to(this.activeScene.currentPlayer.model.scale, {
 				x: 0,
 				y: 0,
 				z: 0,
@@ -245,8 +240,8 @@ export default class ExperienceManager {
 						username: this.username,
 						selectedAvatarId: this.selectedAvatarId,
 						sceneKey: key,
-						spawnPosition: this.activeScene?.currentPlayerAvatar?.model?.position ?? new Vector3(),
-						spawnRotation: this.activeScene?.currentPlayerAvatar?.model?.quaternion ?? new Quaternion()
+						spawnPosition: this.activeScene?.currentPlayer?.model?.position ?? new Vector3(),
+						spawnRotation: this.activeScene?.currentPlayer?.model?.quaternion ?? new Quaternion()
 					});
 				}
 			});
@@ -263,8 +258,8 @@ export default class ExperienceManager {
 			username: this.username,
 			selectedAvatarId: this.selectedAvatarId,
 			sceneKey: key,
-			spawnPosition: this.activeScene?.currentPlayerAvatar?.model?.position ?? new Vector3(),
-			spawnRotation: this.activeScene?.currentPlayerAvatar?.model?.quaternion ?? new Quaternion()
+			spawnPosition: this.activeScene?.currentPlayer?.model?.position ?? new Vector3(),
+			spawnRotation: this.activeScene?.currentPlayer?.model?.quaternion ?? new Quaternion()
 		});
 	}
 
@@ -331,15 +326,14 @@ export default class ExperienceManager {
 
 			if (
 				this.activeScene &&
-				this.activeScene.visitorAvatars &&
-				Object.values(this.activeScene.visitorAvatars).length > 0 &&
+				this.activeScene.players &&
+				Object.values(this.activeScene.players).length > 0 &&
 				avatarRoot
 			) {
 				// Find the actual class instance
 				this.hoveredAvatar =
-					Object.values(this.activeScene?.visitorAvatars).find(
-						(avatar: Avatar) => avatar.model?.uuid === avatarRoot.uuid
-					) ?? null;
+					Object.values(this.activeScene?.players).find((avatar: Player) => avatar.model?.uuid === avatarRoot.uuid) ??
+					null;
 
 				if (this.hoveredAvatar) {
 					if (!document.body.classList.contains('cursor-pointer')) {
@@ -362,7 +356,7 @@ export default class ExperienceManager {
 		selectedAvatarId: number,
 		spawnPosition: Vector3,
 		spawnRotation: Quaternion
-	): Promise<IAvatarCacheEntry> {
+	): Promise<IPlayerCacheEntry> {
 		return new Promise(async (resolve, reject) => {
 			if (this.avatarCache.has(selectedAvatarId)) {
 				// Reuse existing model

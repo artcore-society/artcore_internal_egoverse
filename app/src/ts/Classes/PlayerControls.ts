@@ -1,12 +1,11 @@
-import { AvatarType } from '../Enums/AvatarType.ts';
 import { KeyboardKey } from '../Enums/KeyboardKey.ts';
 import { AnimationName } from '../Enums/AnimationName.ts';
-import { IAvatarControls } from '../Interfaces/IAvatarControls.ts';
+import { IPlayerControls } from '../Interfaces/IPlayerControls.ts';
 import { Quaternion, Vector3 } from 'three';
-import Avatar from './Avatar.ts';
+import Player from './Player.ts';
 
-export default class AvatarControls implements IAvatarControls {
-	private readonly avatar: Avatar;
+export default class PlayerControls implements IPlayerControls {
+	private readonly avatar: Player;
 	private currentAction: AnimationName = AnimationName.IDLE;
 	private walkDirection: Vector3 = new Vector3();
 	private rotateAngle: Vector3 = new Vector3(0, 1, 0);
@@ -31,11 +30,11 @@ export default class AvatarControls implements IAvatarControls {
 		KeyboardKey.ArrowRight
 	];
 
-	constructor(avatar: Avatar) {
+	constructor(avatar: Player) {
 		// Set properties
 		this.avatar = avatar;
 
-		if (this.avatar.type === AvatarType.CURRENT_PLAYER) {
+		if (this.avatar.isCurrent) {
 			// Make sure camera parent position is starts at spawn position
 			this.avatar.experienceScene.cameraParent.position.set(
 				this.avatar.spawnPosition.x,
@@ -172,7 +171,7 @@ export default class AvatarControls implements IAvatarControls {
 			// Smoothly rotate avatar model using slerp and apply delta to make it frame independent
 			this.avatar.model?.quaternion.slerp(this.rotateQuaternion, Math.min(3 * delta, 1));
 
-			if (this.avatar.type !== AvatarType.VISITOR) {
+			if (this.avatar.isCurrent) {
 				// Calculate direction
 				this.avatar.camera.getWorldDirection(this.walkDirection);
 			} else {
@@ -206,7 +205,7 @@ export default class AvatarControls implements IAvatarControls {
 			this.avatar.model.position.x += moveX;
 			this.avatar.model.position.z += moveZ;
 
-			if (this.avatar.type === AvatarType.CURRENT_PLAYER) {
+			if (this.avatar.isCurrent) {
 				// Sync camera with current player avatar
 				this.avatar.experienceScene.cameraParent.position.x = this.avatar.model.position.x;
 				this.avatar.experienceScene.cameraParent.position.z = this.avatar.model.position.z;

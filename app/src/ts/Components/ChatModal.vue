@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { TYPE } from 'vue-toastification';
-import { AvatarType } from '../Enums/AvatarType.ts';
 import { ref, onMounted, watch } from 'vue';
 import { useClearToast, useShowToast } from '../Composables/Toastification.ts';
 import InputField from './InputField.vue';
@@ -80,12 +79,12 @@ watch(
 					v-if="
 						ExperienceManager.instance.activeScene &&
 						selectedChatUserId &&
-						ExperienceManager.instance.activeScene.visitorAvatars[selectedChatUserId]
+						ExperienceManager.instance.activeScene.players[selectedChatUserId]
 					"
 					class="text-center text-lg font-bold"
 				>
 					Chat with
-					{{ ExperienceManager.instance.activeScene.visitorAvatars[selectedChatUserId].username }}
+					{{ ExperienceManager.instance.activeScene.players[selectedChatUserId].username }}
 				</div>
 
 				<Transition name="fade" mode="out-in" appear>
@@ -100,8 +99,8 @@ watch(
 							v-for="(chat, index) in chats[selectedChatUserId] || []"
 							:key="`chat-${index}`"
 							:class="{
-								'bg-gray-500 text-left text-white': chat.avatarType === AvatarType.VISITOR,
-								'bg-amber-400 text-right text-white': chat.avatarType === AvatarType.CURRENT_PLAYER
+								'bg-gray-500 text-left text-white': !chat.isCurrentPlayer,
+								'bg-amber-400 text-right text-white': chat.isCurrentPlayer
 							}"
 							class="rounded-lg p-3 font-bold break-all shadow-xl"
 						>

@@ -1,6 +1,5 @@
 import { gsap } from 'gsap';
 import { SceneKey } from '../Enums/SceneKey.ts';
-import { AvatarType } from '../Enums/AvatarType.ts';
 import { SocketEvent } from '../Enums/SocketEvent.ts';
 import { ExperienceSocket } from './ExperienceSocket.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
@@ -20,9 +19,10 @@ import {
 	Vector3
 } from 'three';
 import ExperienceCamera from './ExperienceCamera.ts';
-import Avatar from './Avatar.ts';
+import Player from './Player.ts';
 import ExperienceManager from './ExperienceManager.ts';
 import { ISceneSettings } from '../Interfaces/ISceneSettings.ts';
+import { IPlayer } from '../Interfaces/IPlayer.ts';
 
 export default class ExperienceScene implements IExperienceScene {
 	public readonly scene: Scene;
@@ -31,8 +31,7 @@ export default class ExperienceScene implements IExperienceScene {
 	public readonly camera: ExperienceCamera;
 	public cameraParent: Object3D;
 	public updateAction: ((delta: number) => void) | null;
-	public currentPlayerAvatar: Avatar | null = null;
-	public visitorAvatars: { [key: string]: Avatar } = {};
+	public players: { [key: string]: Player } = {};
 
 	constructor(canvas: HTMLCanvasElement, sceneKey: SceneKey, settings: ISceneSettings = { color: 'Blue' }) {
 		this.scene = new Scene();
@@ -60,6 +59,14 @@ export default class ExperienceScene implements IExperienceScene {
 
 		// Setup floor
 		this.setupFloor();
+	}
+
+	public get currentPlayer() {
+		if (Object.values(this.players).length === 0) {
+			return;
+		}
+
+		return Object.values(this.players).find((player: IPlayer) => player.isCurrent);
 	}
 
 	public setupFloor(): void {
@@ -103,22 +110,26 @@ export default class ExperienceScene implements IExperienceScene {
 	}
 
 	public addCurrentPlayer(username: string, selectedAvatarId: number) {
-		if (this.currentPlayerAvatar) {
+		if (this.currentPlayer) {
 			return;
 		}
 
-		// Create current player avatar
-		this.currentPlayerAvatar = new Avatar(username, selectedAvatarId, this, this.camera, AvatarType.CURRENT_PLAYER);
+		// Create current player avatar and add to players object
+		this.players[ExperienceManager.instance.userId!] = new Player(username, selectedAvatarId, this, this.camera, true);
+
+		console.log(this.players);
 	}
 
 	public removeCurrentPlayer() {
-		if (!this.currentPlayerAvatar) {
+		if (!this.currentPlayer) {
 			return;
 		}
 
 		// Destroy the current avatar
-		this.currentPlayerAvatar.destroy();
-		this.currentPlayerAvatar = null;
+		this.currentPlayer.destroy();
+
+		// Remove from players list
+		delete this.players[ExperienceManager.instance.userId!];
 	}
 
 	public addVisitor(
@@ -129,20 +140,22 @@ export default class ExperienceScene implements IExperienceScene {
 		spawnRotation: Quaternion = new Quaternion()
 	) {
 		// Create and add avatar of visitor to visitors list
-		this.visitorAvatars[userId] = new Avatar(
+		this.players[userId] = new Player(
 			username,
 			selectedAvatarId,
 			this,
 			this.camera,
-			AvatarType.VISITOR,
+			false,
 			spawnPosition,
 			spawnRotation
 		);
+
+		console.log(this.players);
 	}
 
 	public removeVisitor(userId: string) {
 		// Get the target visitor avatar
-		const targetVisitor = this.visitorAvatars[userId];
+		const targetVisitor = this.players[userId];
 
 		if (!targetVisitor || !targetVisitor.model) {
 			return;
@@ -163,24 +176,24 @@ export default class ExperienceScene implements IExperienceScene {
 				targetVisitor.destroy();
 
 				// Delete from visitors object
-				delete this.visitorAvatars[userId];
+				delete this.players[userId];
 			}
 		});
 	}
 
 	public update(delta: number): void {
-		if (this.currentPlayerAvatar && this.currentPlayerAvatar.controls && this.currentPlayerAvatar.model) {
+		if (this.currentPlayer && this.currentPlayer.controls && this.currentPlayer.model) {
 			// Update avatar
-			this.currentPlayerAvatar.update(delta);
+			this.currentPlayer.update(delta);
 
 			// Send data to socket server for sync
 			ExperienceSocket.emit(SocketEvent.CLIENT_UPDATE_PLAYER, {
 				visitorId: ExperienceManager.instance.userId,
 				delta: delta,
-				keysPressed: ExperienceManager.instance.isInteractive ? this.currentPlayerAvatar.controls.keysPressed : {},
+				keysPressed: ExperienceManager.instance.isInteractive ? this.currentPlayer.controls.keysPressed : {},
 				sceneKey: this.sceneKey,
-				spawnPosition: this.currentPlayerAvatar.model.position.toArray(),
-				spawnRotation: this.currentPlayerAvatar.model.quaternion.toArray()
+				spawnPosition: this.currentPlayer.model.position.toArray(),
+				spawnRotation: this.currentPlayer.model.quaternion.toArray()
 			});
 		}
 	}

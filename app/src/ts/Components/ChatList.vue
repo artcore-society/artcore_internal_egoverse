@@ -25,11 +25,8 @@ const hasChats = computed(() => Object.keys(props.chats).length > 0);
 				:key="visitorId"
 				class="flex min-w-42 flex-col gap-2 rounded-md bg-cyan-400 p-2 text-white shadow-xl"
 			>
-				<div
-					v-if="ExperienceManager.instance.activeScene?.visitorAvatars[visitorId]"
-					class="text-center text-lg font-bold"
-				>
-					{{ ExperienceManager.instance.activeScene.visitorAvatars[visitorId].username }}
+				<div v-if="ExperienceManager.instance.activeScene?.players[visitorId]" class="text-center text-lg font-bold">
+					{{ ExperienceManager.instance.activeScene.players[visitorId].username }}
 				</div>
 
 				<PrimaryButton @click="emit('open-chat-modal', visitorId)">Chat</PrimaryButton>

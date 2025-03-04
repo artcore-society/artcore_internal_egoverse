@@ -1,22 +1,21 @@
 import { gsap } from 'gsap';
-import { IAvatar } from '../Interfaces/IAvatar.ts';
-import { AvatarType } from '../Enums/AvatarType.ts';
+import { IPlayer } from '../Interfaces/IPlayer.ts';
 import { AnimationName } from '../Enums/AnimationName.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { IExtendedObject3D } from '../Interfaces/IExtendedObject3D.ts';
 import { AnimationAction, AnimationClip, AnimationMixer, Mesh, Vector3, Quaternion } from 'three';
-import AvatarControls from './AvatarControls.ts';
+import PlayerControls from './PlayerControls.ts';
 import ExperienceCamera from './ExperienceCamera.ts';
 import ExperienceScene from './ExperienceScene.ts';
 import ExperienceManager from './ExperienceManager.ts';
 
-export default class Avatar implements IAvatar {
+export default class Player implements IPlayer {
 	public username: string;
 	public selectedAvatarId: number;
 	public experienceScene: IExperienceScene;
 	public camera: ExperienceCamera;
-	public type: AvatarType = AvatarType.VISITOR;
-	public controls: AvatarControls | null = null;
+	public isCurrent: boolean = false;
+	public controls: PlayerControls | null = null;
 	public model: IExtendedObject3D | null = null;
 	public mixer: AnimationMixer = new AnimationMixer(new Mesh());
 	public animationsMap: Map<AnimationName, AnimationAction> = new Map();
@@ -28,7 +27,7 @@ export default class Avatar implements IAvatar {
 		selectedAvatarId: number,
 		experienceScene: ExperienceScene,
 		camera: ExperienceCamera,
-		type: AvatarType,
+		isCurrent: boolean = false,
 		spawnPosition: Vector3 = new Vector3(),
 		spawnRotation: Quaternion = new Quaternion()
 	) {
@@ -36,9 +35,9 @@ export default class Avatar implements IAvatar {
 		this.selectedAvatarId = selectedAvatarId;
 		this.experienceScene = experienceScene;
 		this.camera = camera;
-		this.type = type;
 		this.spawnPosition = spawnPosition;
 		this.spawnRotation = spawnRotation;
+		this.isCurrent = isCurrent;
 
 		// Initiate avatar
 		this.init();
@@ -49,9 +48,9 @@ export default class Avatar implements IAvatar {
 		await this.load();
 
 		// Setup avatar controls
-		this.controls = new AvatarControls(this);
+		this.controls = new PlayerControls(this);
 
-		if (this.type === AvatarType.CURRENT_PLAYER) {
+		if (this.isCurrent) {
 			// Make sure controls are connected
 			this.controls.connect();
 		}

@@ -50,11 +50,11 @@ const emotePositions = computed(() => {
 function onClick(animationName: AnimationName) {
 	if (
 		ExperienceManager.instance.activeScene &&
-		ExperienceManager.instance.activeScene.currentPlayerAvatar &&
-		ExperienceManager.instance.activeScene.currentPlayerAvatar.controls
+		ExperienceManager.instance.activeScene.currentPlayer &&
+		ExperienceManager.instance.activeScene.currentPlayer.controls
 	) {
 		// Set emote animation name
-		ExperienceManager.instance.activeScene.currentPlayerAvatar.controls.emoteAnimationName = animationName;
+		ExperienceManager.instance.activeScene.currentPlayer.controls.emoteAnimationName = animationName;
 
 		// Emit socket event
 		ExperienceSocket.emit(SocketEvent.TRIGGER_EMOTE, {
