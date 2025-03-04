@@ -1,4 +1,5 @@
 export enum AnimationName {
+	TPOSE = 'TPose',
 	RUNNING_JUMP = 'Running Jump',
 	IDLE = 'Happy Idle',
 	WALKING = 'Walking',

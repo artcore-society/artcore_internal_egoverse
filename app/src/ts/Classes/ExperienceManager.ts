@@ -10,7 +10,7 @@ import { ISocketInitData } from '../Interfaces/ISocketInitData.ts';
 import { ExperienceSocket } from './ExperienceSocket.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { IExtendedObject3D } from '../Interfaces/IExtendedObject3D.ts';
-import { IPlayerCacheEntry } from '../Interfaces/IPlayerCacheEntry.ts';
+import { IModelCacheEntry } from '../Interfaces/IModelCacheEntry.ts';
 import { ISocketMessageData } from '../Interfaces/ISocketMessageData.ts';
 import { ISocketSceneStateData } from '../Interfaces/ISocketSceneStateData.ts';
 import { ISocketTriggerEmoteData } from '../Interfaces/ISocketTriggerEmoteData.ts';
@@ -19,6 +19,7 @@ import { Clock, DefaultLoadingManager, LoadingManager, Object3D, Quaternion, Ray
 import ExperienceRenderer from './ExperienceRenderer.ts';
 import Player from './Player.ts';
 import ExperienceScene from './ExperienceScene.ts';
+import { ModelPrefix } from '../Enums/ModelPrefix.ts';
 
 export default class ExperienceManager {
 	private static _instance: ExperienceManager | null = null;
@@ -38,7 +39,7 @@ export default class ExperienceManager {
 	public selectedPlayer: Ref<Player | null> = ref(null);
 	public incomingVisitorMessageData: Ref<ISocketMessageData> = ref({ message: null, senderUserId: null });
 	public isInteractive: boolean = true;
-	private playerCache: Map<number, IPlayerCacheEntry> = new Map();
+	private modelCache: Map<number, IModelCacheEntry> = new Map();
 
 	private constructor() {}
 
@@ -356,15 +357,16 @@ export default class ExperienceManager {
 		this.hoveredPlayer = null;
 	}
 
-	public fetchOrLoadPlayerCacheEntry(
+	public fetchOrLoadModelCacheEntry(
+		prefix: ModelPrefix,
 		modelId: number,
 		spawnPosition: Vector3,
 		spawnRotation: Quaternion
-	): Promise<IPlayerCacheEntry> {
+	): Promise<IModelCacheEntry> {
 		return new Promise(async (resolve, reject) => {
-			if (this.playerCache.has(modelId)) {
+			if (this.modelCache.has(modelId)) {
 				// Reuse existing model
-				const cachedGltf = this.playerCache.get(modelId)!;
+				const cachedGltf = this.modelCache.get(modelId)!;
 
 				// Set spawn position and rotation
 				cachedGltf.model.position.copy(spawnPosition);
@@ -378,7 +380,7 @@ export default class ExperienceManager {
 
 			try {
 				// Load model for first time
-				const gltf = await ThreeLoaders.loadGLTF(`/assets/models/players/${modelId}/scene.gltf`);
+				const gltf = await ThreeLoaders.loadGLTF(`/assets/models/${prefix}/${modelId}/scene.gltf`);
 				const model: IExtendedObject3D = gltf.scene;
 
 				// Do adjustments
@@ -389,7 +391,7 @@ export default class ExperienceManager {
 				model.receiveShadow = true;
 
 				// Store in cache
-				this.playerCache.set(modelId, {
+				this.modelCache.set(modelId, {
 					model: model,
 					animations: gltf.animations
 				});

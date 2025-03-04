@@ -23,6 +23,7 @@ import Player from './Player.ts';
 import ExperienceManager from './ExperienceManager.ts';
 import { ISceneSettings } from '../Interfaces/ISceneSettings.ts';
 import { IPlayer } from '../Interfaces/IPlayer.ts';
+import { ModelPrefix } from '../Enums/ModelPrefix.ts';
 
 export default class ExperienceScene implements IExperienceScene {
 	public readonly scene: Scene;
@@ -115,7 +116,14 @@ export default class ExperienceScene implements IExperienceScene {
 		}
 
 		// Create current player and add to players object
-		this.players[ExperienceManager.instance.userId!] = new Player(username, modelId, this, this.camera, true);
+		this.players[ExperienceManager.instance.userId!] = new Player(
+			username,
+			ModelPrefix.PLAYER,
+			modelId,
+			this,
+			this.camera,
+			true
+		);
 	}
 
 	public removeCurrentPlayer() {
@@ -138,7 +146,16 @@ export default class ExperienceScene implements IExperienceScene {
 		spawnRotation: Quaternion = new Quaternion()
 	) {
 		// Create and add visitor to visitors list
-		this.players[userId] = new Player(username, modelId, this, this.camera, false, spawnPosition, spawnRotation);
+		this.players[userId] = new Player(
+			username,
+			ModelPrefix.PLAYER,
+			modelId,
+			this,
+			this.camera,
+			false,
+			spawnPosition,
+			spawnRotation
+		);
 	}
 
 	public removeVisitor(userId: string) {
