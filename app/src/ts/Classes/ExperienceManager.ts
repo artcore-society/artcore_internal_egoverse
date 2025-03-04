@@ -12,13 +12,13 @@ import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { IExtendedObject3D } from '../Interfaces/IExtendedObject3D.ts';
 import { IAvatarCacheEntry } from '../Interfaces/IAvatarCacheEntry.ts';
 import { ISocketMessageData } from '../Interfaces/ISocketMessageData.ts';
-import { ISocketJoinSceneData } from '../Interfaces/ISocketJoinSceneData.ts';
-import { ISocketClientSpawnPlayerData } from '../Interfaces/ISocketClientSpawnPlayerData.ts';
+import { ISocketSceneStateData } from '../Interfaces/ISocketSceneStateData.ts';
+import { ISocketTriggerEmoteData } from '../Interfaces/ISocketTriggerEmoteData.ts';
 import { ISocketClientUpdatePlayerData } from '../Interfaces/ISocketClientUpdatePlayerData.ts';
 import { Clock, DefaultLoadingManager, LoadingManager, Object3D, Quaternion, Raycaster, Vector2, Vector3 } from 'three';
 import ExperienceRenderer from './ExperienceRenderer.ts';
 import Avatar from './Avatar.ts';
-import { ISocketTriggerEmoteData } from '../Interfaces/ISocketTriggerEmoteData.ts';
+import ExperienceScene from './ExperienceScene.ts';
 
 export default class ExperienceManager {
 	private static _instance: ExperienceManager | null = null;
@@ -74,126 +74,118 @@ export default class ExperienceManager {
 
 	private setupSocketListeners(): void {
 		ExperienceSocket.on<ISocketInitData>(SocketEvent.INIT, (data) => {
-			console.log('Socket init!', data);
+			console.log('Init', data);
 
-			// Set current user id
+			// Set user id
 			this.userId = data.id;
 
-			// Set the default active scene
-			this.setActiveScene(SceneKey.LANDING_AREA);
-		});
+			// Make sure scenes map starts clean/empty
+			this.scenes.clear();
 
-		ExperienceSocket.on<ISocketUserData>(SocketEvent.USER_CONNECT, (data) => {
-			console.log('User connected!', data);
-
-			ExperienceSocket.emit(SocketEvent.CLIENT_SPAWN_PLAYER, {
-				userId: data.id,
-				username: this.username,
-				selectedAvatarId: this.selectedAvatarId,
-				visitorId: ExperienceManager.instance.userId,
-				sceneKey: this.activeScene?.sceneKey,
-				spawnPosition: this.activeScene?.currentPlayerAvatar?.model?.position,
-				spawnRotation: this.activeScene?.currentPlayerAvatar?.model?.quaternion
+			// Create scenes dynamically from backend data
+			data.scenes.forEach((sceneData) => {
+				const scene = new ExperienceScene(this.canvas!, sceneData.sceneKey, sceneData.settings);
+				this.scenes.set(sceneData.sceneKey, scene);
 			});
+
+			// Set active scene
+			this.setActiveScene(data.currentSceneKey as SceneKey);
 		});
 
-		ExperienceSocket.on<ISocketUserData>(SocketEvent.USER_DISCONNECT, (data) => {
-			console.log('User disconnected!', data);
-			this.activeScene?.removeVisitor(data.id);
-		});
+		ExperienceSocket.on<ISocketSceneStateData>(SocketEvent.SCENE_STATE, (data) => {
+			console.log('Scene state', data);
+			// Sync visitors from active scene state
+			if (data.visitors && data.visitors.length > 0) {
+				data.visitors.forEach((visitor) => {
+					if (visitor.id === this.userId) {
+						// Early return if visitor id is of current player somehow
+						return;
+					}
 
-		ExperienceSocket.on<ISocketClientSpawnPlayerData>(SocketEvent.CLIENT_SPAWN_PLAYER, (data) => {
-			console.log('Spawn new player!', data);
-
-			// Get target scene
-			const targetScene = this.scenes.get(data.sceneKey) ?? null;
-
-			if (!targetScene) {
-				return;
-			}
-
-			// Add visitor for id to target scene
-			targetScene.addVisitor(
-				data.visitorId,
-				data.username,
-				parseInt(data.selectedAvatarId),
-				new Vector3(data.spawnPosition.x, data.spawnPosition.y, data.spawnPosition.z), // Convert websocket data to Vector3
-				new Quaternion(...data.spawnRotation) // Convert websocket data to Quaternion
-			);
-		});
-
-		ExperienceSocket.on<ISocketClientUpdatePlayerData>(SocketEvent.CLIENT_UPDATE_PLAYER, (data) => {
-			const targetScene = this.scenes.get(data.sceneKey) ?? null;
-
-			if (!targetScene) {
-				return;
-			}
-
-			// Update avatar in target scene
-			if (targetScene && targetScene.visitorAvatars && targetScene.sceneKey === data.sceneKey) {
-				// Update the mixer of the visitor avatar
-				targetScene.visitorAvatars[data.visitorId]?.mixer?.update(data.delta);
-
-				// Update the controls of the visitor avatar
-				targetScene.visitorAvatars[data.visitorId]?.controls?.update(data.delta, data.keysPressed);
-			}
-		});
-
-		ExperienceSocket.on<ISocketJoinSceneData>(SocketEvent.JOIN_SCENE, (data) => {
-			console.log('Joined scene!', data);
-			const isCurrentPlayer = data.userId === this.userId;
-
-			if (isCurrentPlayer) {
-				// Current player
-				if (this.activeScene && this.selectedAvatarId) {
-					// Add current player avatar to active scene
-					this.activeScene.addCurrentPlayer(data.username, this.selectedAvatarId);
-				}
-
-				return;
-			}
-
-			// Visitor
-
-			// Get target scene
-			const targetScene = this.scenes.get(data.sceneKey) ?? null;
-
-			if (!targetScene) {
-				return;
-			}
-
-			// Add visitor for id to target scene
-			targetScene.addVisitor(
-				data.userId,
-				data.username,
-				parseInt(data.selectedAvatarId),
-				new Vector3(data.spawnPosition.x, data.spawnPosition.y, data.spawnPosition.z), // Convert websocket data to Vector3
-				new Quaternion(...data.spawnRotation) // Convert websocket data to Quaternion
-			);
-
-			// Check if visitor is present in any other scene and remove if so
-			const otherScenes: Array<IExperienceScene> = [...this.scenes.values()].filter(
-				(scene) => scene.sceneKey !== data.sceneKey
-			);
-			if (otherScenes && otherScenes.length !== 0) {
-				const otherScenesWhereVisitorIsStillPresent = otherScenes.filter((scene) => scene.visitorAvatars[data.userId]);
-
-				otherScenesWhereVisitorIsStillPresent.forEach((scene) => {
-					// Remove visitor from scene
-					scene.removeVisitor(data.userId);
+					// Add visitor to active scene
+					this.activeScene?.addVisitor(
+						visitor.id,
+						visitor.username,
+						parseInt(visitor.avatarId),
+						new Vector3(...visitor.position),
+						new Quaternion(...visitor.rotation)
+					);
 				});
 			}
 		});
 
+		ExperienceSocket.on<ISocketUserData>(SocketEvent.PLAYER_JOINED, (data) => {
+			if (data.id === this.userId) {
+				// Add current player
+				this.activeScene?.addCurrentPlayer(data.username, parseInt(data.avatarId));
+
+				return;
+			}
+
+			// Add the visitor
+			this.activeScene?.addVisitor(
+				data.id,
+				data.username,
+				parseInt(data.avatarId),
+				new Vector3(...data.position),
+				new Quaternion(...data.rotation)
+			);
+		});
+
+		ExperienceSocket.on<ISocketUserData>(SocketEvent.PLAYER_LEFT, (data) => {
+			// Get player
+			const player =
+				data.id === this.userId ? this.activeScene?.currentPlayerAvatar : this.activeScene?.visitorAvatars[data.id];
+
+			if (!player || !player.model) {
+				return;
+			}
+
+			// Make sure all tweens are killed first
+			gsap.killTweensOf(player.model.scale);
+
+			// Remove current player from previous active scene
+			gsap.to(player.model.scale, {
+				x: 0,
+				y: 0,
+				z: 0,
+				duration: 0.4,
+				ease: 'back.inOut',
+				onComplete: () => {
+					if (data.id === this.userId) {
+						// Remove active player from previous scene
+						this.activeScene?.removeCurrentPlayer();
+
+						return;
+					}
+
+					// Remove active player from previous scene
+					this.activeScene?.removeVisitor(data.id);
+				}
+			});
+		});
+
+		ExperienceSocket.on<ISocketClientUpdatePlayerData>(SocketEvent.CLIENT_UPDATE_PLAYER, (data) => {
+			// Update avatar in target scene
+			if (this.activeScene && this.activeScene.visitorAvatars && this.activeScene.sceneKey === data.sceneKey) {
+				// Update the mixer of the visitor avatar
+				this.activeScene.visitorAvatars[data.visitorId]?.mixer?.update(data.delta);
+
+				// Update the controls of the visitor avatar
+				this.activeScene.visitorAvatars[data.visitorId]?.controls?.update(data.delta, data.keysPressed);
+			}
+		});
+
 		ExperienceSocket.on<ISocketMessageData>(SocketEvent.SEND_MESSAGE, (data) => {
-			console.log('Message received', data);
+			console.log('New message received!', data);
 
 			// Set ref
 			this.incomingVisitorMessageData.value = data;
 		});
 
 		ExperienceSocket.on<ISocketTriggerEmoteData>(SocketEvent.TRIGGER_EMOTE, (data) => {
-			console.log('Trigger emote', data);
+			console.log('Emote triggered!', data);
+
 			if (
 				!this.activeScene ||
 				!this.activeScene.currentPlayerAvatar ||
@@ -218,11 +210,6 @@ export default class ExperienceManager {
 			targetVisitor.controls.emoteAnimationName = data.animationName;
 		});
 	}
-
-	addScene(key: SceneKey, scene: IExperienceScene): void {
-		this.scenes.set(key, scene);
-	}
-
 	setActiveScene(key: SceneKey): void {
 		// Check if the scene exists
 		if (!this.scenes.has(key)) {
