@@ -10,13 +10,13 @@ export class ExperienceSocket {
 
 	private constructor() {
 		// Avatar store
-		const { selectedPlayerId } = useAvatarStore();
+		const { modelId } = useAvatarStore();
 
 		// Create io instance
 		this.socket = io('ws://localhost:3000', {
 			query: {
 				username: ExperienceManager.instance.username ?? 'Default username',
-				selectedPlayerId: selectedPlayerId ?? 1,
+				modelId: modelId ?? 1,
 				sceneKey: ExperienceManager.instance.activeScene?.sceneKey ?? SceneKey.LANDING_AREA
 			}
 		});

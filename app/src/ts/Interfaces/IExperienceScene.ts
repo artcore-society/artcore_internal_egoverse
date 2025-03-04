@@ -19,12 +19,12 @@ export interface IExperienceScene {
 	addVisitor(
 		userId: string,
 		username: string,
-		selectedPlayerId: number,
+		modelId: number,
 		spawnPosition?: Vector3,
 		spawnRotation?: Quaternion
 	): void;
 	removeVisitor(userId: string): void;
-	addCurrentPlayer(username: string, selectedPlayerId: number): void;
+	addCurrentPlayer(username: string, modelId: number): void;
 	removeCurrentPlayer(): void;
 	update(delta: number): void;
 	destroy(): void;

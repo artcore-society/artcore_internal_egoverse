@@ -4,20 +4,18 @@ import { Vector3, Quaternion } from 'three';
 export class Player implements IPlayer {
     id: string;
     username: string;
-    playerId: string;
+    modelId: string;
     sceneKey: string;
     position: Vector3;
     quaternion: Quaternion;
-    isCurrent: boolean;
 
-    constructor(id: string, username: string, playerId: string, sceneKey: string, isCurrent = false) {
+    constructor(id: string, username: string, modelId: string, sceneKey: string) {
         this.id = id;
         this.username = username;
-        this.playerId = playerId;
+        this.modelId = modelId;
         this.sceneKey = sceneKey;
         this.position = new Vector3();
         this.quaternion = new Quaternion();
-        this.isCurrent = isCurrent;
     }
 
     updatePositionAndRotation(position: Vector3, quaternion: Quaternion): void {

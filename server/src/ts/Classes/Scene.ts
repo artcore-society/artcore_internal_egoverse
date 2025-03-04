@@ -1,6 +1,7 @@
 import { IScene } from '../Interfaces/IScene';
 import { IPlayer } from '../Interfaces/IPlayer';
 import { SceneKey } from '../Enums/SceneKey.ts';
+import { ISceneState } from '../Interfaces/ISceneState.ts';
 import { ISceneSettings } from '../Interfaces/ISceneSettings.ts';
 
 export class Scene implements IScene {
@@ -22,17 +23,17 @@ export class Scene implements IScene {
         this.players.delete(playerId);
     }
 
-    getState(currentUserId: string): object {
+    getState(currentUserId: string): ISceneState {
         const currentPlayer = this.players.get(currentUserId);
         const visitors = Array.from(this.players.values()).filter(p => p.id !== currentUserId);
 
         return {
-            sceneKey: this.sceneKey, // Only use sceneKey as the unique identifier
+            sceneKey: this.sceneKey,
             currentPlayer,
             visitors: visitors.map(v => ({
                 id: v.id,
                 username: v.username,
-                playerId: v.playerId,
+                modelId: parseInt(v.modelId),
                 position: v.position.toArray(),
                 quaternion: [v.quaternion.x, v.quaternion.y, v.quaternion.z, v.quaternion.w]
             }))

@@ -11,7 +11,7 @@ import ExperienceManager from './ExperienceManager.ts';
 
 export default class Player implements IPlayer {
 	public username: string;
-	public selectedPlayerId: number;
+	public modelId: number;
 	public experienceScene: IExperienceScene;
 	public camera: ExperienceCamera;
 	public isCurrent: boolean = false;
@@ -24,7 +24,7 @@ export default class Player implements IPlayer {
 
 	constructor(
 		username: string,
-		selectedPlayerId: number,
+		modelId: number,
 		experienceScene: ExperienceScene,
 		camera: ExperienceCamera,
 		isCurrent: boolean = false,
@@ -32,7 +32,7 @@ export default class Player implements IPlayer {
 		spawnRotation: Quaternion = new Quaternion()
 	) {
 		this.username = username;
-		this.selectedPlayerId = selectedPlayerId;
+		this.modelId = modelId;
 		this.experienceScene = experienceScene;
 		this.camera = camera;
 		this.spawnPosition = spawnPosition;
@@ -59,7 +59,7 @@ export default class Player implements IPlayer {
 	async load() {
 		try {
 			const { model, animations } = await ExperienceManager.instance.fetchOrLoadPlayerCacheEntry(
-				this.selectedPlayerId,
+				this.modelId,
 				this.spawnPosition,
 				this.spawnRotation
 			);

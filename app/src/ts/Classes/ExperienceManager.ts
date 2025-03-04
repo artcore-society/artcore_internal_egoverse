@@ -26,7 +26,7 @@ export default class ExperienceManager {
 	public clock: Clock = new Clock();
 	public userId: string | null = null;
 	public username: string | null = null;
-	public selectedPlayerId: number | null = null;
+	public modelId: number | null = null;
 	private renderer: ExperienceRenderer | null = null;
 	private scenes: Map<SceneKey, IExperienceScene> = new Map();
 	private animateFrameId: number | null = null;
@@ -49,7 +49,7 @@ export default class ExperienceManager {
 		return ExperienceManager._instance;
 	}
 
-	public init(canvas: HTMLCanvasElement, username: string, selectedPlayerId: number): void {
+	public init(canvas: HTMLCanvasElement, username: string, modelId: number): void {
 		if (this.canvas) {
 			// Prevent re-initialization
 			throw new Error('ExperienceManager is already initialized');
@@ -59,7 +59,7 @@ export default class ExperienceManager {
 		this.canvas = canvas;
 		this.renderer = new ExperienceRenderer(this.canvas);
 		this.username = username;
-		this.selectedPlayerId = selectedPlayerId;
+		this.modelId = modelId;
 		this.updateSceneCamerasAndRenderSize();
 
 		// Add event listeners
@@ -106,7 +106,7 @@ export default class ExperienceManager {
 					this.activeScene?.addVisitor(
 						visitor.id,
 						visitor.username,
-						parseInt(visitor.playerId),
+						parseInt(visitor.modelId),
 						new Vector3(...visitor.position),
 						new Quaternion(...visitor.quaternion)
 					);
@@ -117,7 +117,7 @@ export default class ExperienceManager {
 		ExperienceSocket.on<ISocketUserData>(SocketEvent.PLAYER_JOINED, (data) => {
 			if (data.id === this.userId) {
 				// Add current player
-				this.activeScene?.addCurrentPlayer(data.username, parseInt(data.playerId));
+				this.activeScene?.addCurrentPlayer(data.username, parseInt(data.modelId));
 
 				return;
 			}
@@ -126,7 +126,7 @@ export default class ExperienceManager {
 			this.activeScene?.addVisitor(
 				data.id,
 				data.username,
-				parseInt(data.playerId),
+				parseInt(data.modelId),
 				new Vector3(...data.position),
 				new Quaternion(...data.quaternion)
 			);
@@ -238,7 +238,7 @@ export default class ExperienceManager {
 					ExperienceSocket.emit(SocketEvent.JOIN_SCENE, {
 						userId: this.userId,
 						username: this.username,
-						selectedPlayerId: this.selectedPlayerId,
+						modelId: this.modelId,
 						sceneKey: key,
 						spawnPosition: this.activeScene?.currentPlayer?.model?.position ?? new Vector3(),
 						spawnRotation: this.activeScene?.currentPlayer?.model?.quaternion ?? new Quaternion()
@@ -256,7 +256,7 @@ export default class ExperienceManager {
 		ExperienceSocket.emit(SocketEvent.JOIN_SCENE, {
 			userId: this.userId,
 			username: this.username,
-			selectedPlayerId: this.selectedPlayerId,
+			modelId: this.modelId,
 			sceneKey: key,
 			spawnPosition: this.activeScene?.currentPlayer?.model?.position ?? new Vector3(),
 			spawnRotation: this.activeScene?.currentPlayer?.model?.quaternion ?? new Quaternion()
@@ -353,14 +353,14 @@ export default class ExperienceManager {
 	}
 
 	public fetchOrLoadPlayerCacheEntry(
-		selectedPlayerId: number,
+		modelId: number,
 		spawnPosition: Vector3,
 		spawnRotation: Quaternion
 	): Promise<IPlayerCacheEntry> {
 		return new Promise(async (resolve, reject) => {
-			if (this.playerCache.has(selectedPlayerId)) {
+			if (this.playerCache.has(modelId)) {
 				// Reuse existing model
-				const cachedGltf = this.playerCache.get(selectedPlayerId)!;
+				const cachedGltf = this.playerCache.get(modelId)!;
 
 				// Set spawn position and rotation
 				cachedGltf.model.position.copy(spawnPosition);
@@ -374,7 +374,7 @@ export default class ExperienceManager {
 
 			try {
 				// Load model for first time
-				const gltf = await ThreeLoaders.loadGLTF(`/assets/models/players/${selectedPlayerId}/scene.gltf`);
+				const gltf = await ThreeLoaders.loadGLTF(`/assets/models/players/${modelId}/scene.gltf`);
 				const model: IExtendedObject3D = gltf.scene;
 
 				// Do adjustments
@@ -385,7 +385,7 @@ export default class ExperienceManager {
 				model.receiveShadow = true;
 
 				// Store in cache
-				this.playerCache.set(selectedPlayerId, {
+				this.playerCache.set(modelId, {
 					model: model,
 					animations: gltf.animations
 				});

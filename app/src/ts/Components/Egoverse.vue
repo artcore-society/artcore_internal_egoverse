@@ -20,7 +20,7 @@ import ChatList from './ChatList.vue';
 import ChatModal from './ChatModal.vue';
 
 // Avatar store
-const { username, selectedPlayerId } = useAvatarStore();
+const { username, modelId } = useAvatarStore();
 
 // Set variables
 const chats: Ref<Record<string, Array<{ message: string; avatarType: string }>>> = ref({});
@@ -181,7 +181,7 @@ watch(isChatModalVisible, (newValue, oldValue) => {
 onMounted(() => {
 	if (canvas.value) {
 		// Initialize the experience manager
-		ExperienceManager.instance.init(canvas.value, username, selectedPlayerId);
+		ExperienceManager.instance.init(canvas.value, username, modelId);
 
 		// Listen for ready event (triggers when backend sends scene data)
 		EventService.listen(CustomEventKey.READY, setReadyState);

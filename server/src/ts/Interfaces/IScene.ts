@@ -1,4 +1,5 @@
 import { IPlayer } from './IPlayer';
+import { ISceneState } from './ISceneState.ts';
 import { ISceneSettings } from './ISceneSettings.ts';
 
 export interface IScene {
@@ -7,5 +8,5 @@ export interface IScene {
 
     addPlayer(player: IPlayer): void;
     removePlayer(playerId: string): void;
-    getState(currentUserId: string): object;
+    getState(currentUserId: string): ISceneState;
 }

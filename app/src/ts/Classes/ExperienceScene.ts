@@ -109,13 +109,13 @@ export default class ExperienceScene implements IExperienceScene {
 		this.scene.add(dirLight);
 	}
 
-	public addCurrentPlayer(username: string, selectedPlayerId: number) {
+	public addCurrentPlayer(username: string, modelId: number) {
 		if (this.currentPlayer) {
 			return;
 		}
 
 		// Create current player and add to players object
-		this.players[ExperienceManager.instance.userId!] = new Player(username, selectedPlayerId, this, this.camera, true);
+		this.players[ExperienceManager.instance.userId!] = new Player(username, modelId, this, this.camera, true);
 	}
 
 	public removeCurrentPlayer() {
@@ -133,20 +133,12 @@ export default class ExperienceScene implements IExperienceScene {
 	public addVisitor(
 		userId: string,
 		username: string,
-		selectedPlayerId: number,
+		modelId: number,
 		spawnPosition: Vector3 = new Vector3(),
 		spawnRotation: Quaternion = new Quaternion()
 	) {
 		// Create and add visitor to visitors list
-		this.players[userId] = new Player(
-			username,
-			selectedPlayerId,
-			this,
-			this.camera,
-			false,
-			spawnPosition,
-			spawnRotation
-		);
+		this.players[userId] = new Player(username, modelId, this, this.camera, false, spawnPosition, spawnRotation);
 	}
 
 	public removeVisitor(userId: string) {

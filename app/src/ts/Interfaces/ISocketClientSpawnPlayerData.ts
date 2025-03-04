@@ -4,7 +4,7 @@ import { Quaternion, Vector3 } from 'three';
 export interface ISocketClientSpawnPlayerData {
 	sceneKey: SceneKey;
 	username: string;
-	selectedPlayerId: string;
+	modelId: string;
 	visitorId: string;
 	spawnPosition: Vector3;
 	spawnRotation: Quaternion;
