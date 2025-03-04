@@ -175,7 +175,7 @@ export class GameService {
             username: player.username,
             modelId: player.modelId,
             position: player.position.toArray(),
-            quaternion: [player.quaternion.x, player.quaternion.y, player.quaternion.z, player.quaternion.w],
+            quaternion: player.quaternion.toArray(),
             sceneKey: newSceneKey
         });
 

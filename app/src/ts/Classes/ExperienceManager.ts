@@ -97,6 +97,11 @@ export default class ExperienceManager {
 			// Sync visitors from active scene state
 			if (data.visitors && data.visitors.length > 0) {
 				data.visitors.forEach((visitor) => {
+					if (this.activeScene?.players[visitor.id]) {
+						// Early return if visitor is already present in scene
+						return;
+					}
+
 					// Add visitor to active scene
 					this.activeScene?.addVisitor(
 						visitor.id,
