@@ -4,7 +4,7 @@ import { SceneKey } from '../Enums/SceneKey';
 import { SocketEvent } from '../Enums/SocketEvent';
 import { Server, Socket } from 'socket.io';
 import { ISceneSettings } from '../Interfaces/ISceneSettings';
-import {Euler, Quaternion, Vector3} from "three";
+import { Quaternion, Vector3 } from 'three';
 
 export class GameService {
     private static _instance: GameService;
