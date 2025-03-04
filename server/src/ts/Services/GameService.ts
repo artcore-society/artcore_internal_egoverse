@@ -196,11 +196,8 @@ export class GameService {
         const spawnPosition = new Vector3(...data.spawnPosition);
         const spawnRotation = new Quaternion(...data.spawnRotation);
 
-        // Update the player's position based on received data
-        player.position.copy(spawnPosition);
-
-        // Update the player's quaternion using the provided quaternion array
-        player.quaternion.copy(spawnRotation);
+        // Update player position and rotation
+        player.updatePositionAndRotation(spawnPosition, spawnRotation);
 
         // Broadcast the updated player data to all clients in the same scene except the sender
         socket.broadcast.to(player.sceneKey).emit(SocketEvent.CLIENT_UPDATE_PLAYER, data);
