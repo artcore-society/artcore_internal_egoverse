@@ -309,7 +309,7 @@ export default class ExperienceManager {
 
 			// Traverse up the parent hierarchy to find the player root
 			while (obj) {
-				if (obj.isAvatar) {
+				if (obj.isPlayer) {
 					return true;
 				}
 				obj = obj.parent as Object3D;
@@ -320,7 +320,7 @@ export default class ExperienceManager {
 		if (avatarIntersect) {
 			// Get the actual player root object
 			let avatarRoot: IExtendedObject3D = avatarIntersect.object;
-			while (avatarRoot && !avatarRoot.isAvatar) {
+			while (avatarRoot && !avatarRoot.isPlayer) {
 				avatarRoot = avatarRoot.parent as Object3D;
 			}
 
@@ -374,11 +374,11 @@ export default class ExperienceManager {
 
 			try {
 				// Load model for first time
-				const gltf = await ThreeLoaders.loadGLTF(`/assets/models/avatars/${selectedPlayerId}/avatar.gltf`);
+				const gltf = await ThreeLoaders.loadGLTF(`/assets/models/players/${selectedPlayerId}/scene.gltf`);
 				const model: IExtendedObject3D = gltf.scene;
 
 				// Do adjustments
-				model.isAvatar = true;
+				model.isPlayer = true;
 				model.position.copy(spawnPosition);
 				model.quaternion.copy(spawnRotation);
 				model.castShadow = true;
