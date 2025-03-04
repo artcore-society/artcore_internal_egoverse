@@ -5,8 +5,8 @@ export interface IPlayer {
     username: string;
     avatarId: string;
     position: Vector3;
-    rotation: Quaternion;
+    quaternion: Quaternion;
     isCurrent: boolean;
 
-    updatePosition(position: Vector3, rotation: Quaternion): void;
+    updatePosition(position: Vector3, quaternion: Quaternion): void;
 }

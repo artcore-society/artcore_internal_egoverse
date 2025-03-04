@@ -3,5 +3,5 @@ export interface ISocketUserData {
 	avatarId: string;
 	username: string;
 	position: Array<number>;
-	rotation: Array<number>;
+	quaternion: Array<number>;
 }

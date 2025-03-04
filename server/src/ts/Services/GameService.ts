@@ -4,6 +4,7 @@ import { SceneKey } from '../Enums/SceneKey';
 import { SocketEvent } from '../Enums/SocketEvent';
 import { Server, Socket } from 'socket.io';
 import { ISceneSettings } from '../Interfaces/ISceneSettings';
+import {Euler, Quaternion, Vector3} from "three";
 
 export class GameService {
     private static _instance: GameService;
@@ -109,7 +110,7 @@ export class GameService {
             username: player.username,
             avatarId: player.avatarId,
             position: player.position.toArray(),
-            rotation: [player.rotation.x, player.rotation.y, player.rotation.z, player.rotation.w]
+            quaternion: [player.quaternion.x, player.quaternion.y, player.quaternion.z, player.quaternion.w]
         });
 
         // Sets up event listeners for player interactions.
@@ -174,7 +175,7 @@ export class GameService {
             username: player.username,
             avatarId: player.avatarId,
             position: player.position.toArray(),
-            rotation: [player.rotation.x, player.rotation.y, player.rotation.z, player.rotation.w],
+            quaternion: [player.quaternion.x, player.quaternion.y, player.quaternion.z, player.quaternion.w],
             sceneKey: newSceneKey
         });
 
@@ -183,7 +184,7 @@ export class GameService {
     }
 
     /**
-     * Handles player movement and rotation updates.
+     * Handles player movement and quaternion updates.
      */
     private handlePlayerUpdate(socket: Socket, player: Player, data: any) {
         // Check if the scene associated with the player exists
@@ -191,11 +192,18 @@ export class GameService {
             return;
         }
 
-        // Update the player's position based on received data
-        player.position.set(data.spawnPosition.x, data.spawnPosition.y, data.spawnPosition.z);
+        // Convert websocket data
+        const spawnPosition = new Vector3(...data.spawnPosition);
+        const spawnRotation = new Quaternion(...data.spawnRotation);
 
-        // Update the player's rotation using the provided rotation array
-        player.rotation.set(...data.spawnRotation);
+        console.log("Received spawnRotation:", data.spawnRotation);
+        console.log("Parsed spawnRotation:", spawnRotation);
+
+        // Update the player's position based on received data
+        player.position.copy(spawnPosition);
+
+        // Update the player's quaternion using the provided quaternion array
+        player.quaternion.copy(spawnRotation);
 
         // Broadcast the updated player data to all clients in the same scene
         socket.broadcast.to(player.sceneKey).emit(SocketEvent.CLIENT_UPDATE_PLAYER, data);

@@ -179,8 +179,8 @@ export default class ExperienceScene implements IExperienceScene {
 				delta: delta,
 				keysPressed: ExperienceManager.instance.isInteractive ? this.currentPlayerAvatar.controls.keysPressed : {},
 				sceneKey: this.sceneKey,
-				spawnPosition: this.currentPlayerAvatar.model.position,
-				spawnRotation: this.currentPlayerAvatar.model.quaternion
+				spawnPosition: this.currentPlayerAvatar.model.position.toArray(),
+				spawnRotation: this.currentPlayerAvatar.model.quaternion.toArray()
 			});
 		}
 	}

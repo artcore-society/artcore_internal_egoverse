@@ -108,7 +108,7 @@ export default class ExperienceManager {
 						visitor.username,
 						parseInt(visitor.avatarId),
 						new Vector3(...visitor.position),
-						new Quaternion(...visitor.rotation)
+						new Quaternion(...visitor.quaternion)
 					);
 				});
 			}
@@ -128,7 +128,7 @@ export default class ExperienceManager {
 				data.username,
 				parseInt(data.avatarId),
 				new Vector3(...data.position),
-				new Quaternion(...data.rotation)
+				new Quaternion(...data.quaternion)
 			);
 		});
 

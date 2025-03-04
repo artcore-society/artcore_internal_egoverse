@@ -1,5 +1,5 @@
-import { Vector3, Quaternion } from 'three';
 import { IPlayer } from '../Interfaces/IPlayer';
+import { Vector3, Quaternion } from 'three';
 
 export class Player implements IPlayer {
     id: string;
@@ -7,7 +7,7 @@ export class Player implements IPlayer {
     avatarId: string;
     sceneKey: string;
     position: Vector3;
-    rotation: Quaternion;
+    quaternion: Quaternion;
     isCurrent: boolean;
 
     constructor(id: string, username: string, avatarId: string, sceneKey: string, isCurrent = false) {
@@ -16,12 +16,12 @@ export class Player implements IPlayer {
         this.avatarId = avatarId;
         this.sceneKey = sceneKey;
         this.position = new Vector3();
-        this.rotation = new Quaternion();
+        this.quaternion = new Quaternion();
         this.isCurrent = isCurrent;
     }
 
-    updatePosition(position: Vector3, rotation: Quaternion): void {
+    updatePosition(position: Vector3, quaternion: Quaternion): void {
         this.position.copy(position);
-        this.rotation.copy(rotation);
+        this.quaternion.copy(quaternion);
     }
 }

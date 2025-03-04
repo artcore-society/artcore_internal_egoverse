@@ -5,6 +5,6 @@ export interface ISocketSceneStateData {
 		id: string;
 		username: string;
 		position: Array<number>;
-		rotation: Array<number>;
+		quaternion: Array<number>;
 	}>;
 }
