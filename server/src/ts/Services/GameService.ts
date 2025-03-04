@@ -160,6 +160,9 @@ export class GameService {
         // Retrieve the new scene from the scenes map.
         const newScene = this.scenes.get(newSceneKey)!;
 
+        // Update the position and rotation of the player in the new scene to default (center)
+        player.updatePositionAndRotation(new Vector3(), new Quaternion());
+
         // Add the player to the new scene and update their sceneKey.
         newScene.addPlayer(player);
 
