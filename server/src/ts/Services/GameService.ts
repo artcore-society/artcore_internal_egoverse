@@ -202,7 +202,7 @@ export class GameService {
         // Update the player's quaternion using the provided quaternion array
         player.quaternion.copy(spawnRotation);
 
-        // Broadcast the updated player data to all clients in the same scene
+        // Broadcast the updated player data to all clients in the same scene except the sender
         socket.broadcast.to(player.sceneKey).emit(SocketEvent.CLIENT_UPDATE_PLAYER, data);
     }
 
