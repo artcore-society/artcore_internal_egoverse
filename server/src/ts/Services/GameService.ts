@@ -74,7 +74,7 @@ export class GameService {
 
         const username = this.sanitizeInput(socket.handshake.query.username as string);
         const avatarId = String(socket.handshake.query.selectedAvatarId) || '1';
-        const sceneKey = this.sanitizeInput(socket.handshake.query.sceneKey as SceneKey) || SceneKey.LANDING_AREA;
+        const sceneKey = this.sanitizeInput(socket.handshake.query.sceneKey) as SceneKey || SceneKey.LANDING_AREA;
 
         if (!username || !sceneKey) {
             socket.emit(SocketEvent.FAILED, { message: 'Invalid credentials' });
@@ -88,7 +88,7 @@ export class GameService {
             return;
         }
 
-        const scene = this.scenes.get(sceneKey as SceneKey)!;
+        const scene = this.scenes.get(sceneKey)!;
         const player = new Player(socket.id, username, avatarId, sceneKey, true);
         scene.addPlayer(player);
         socket.join(sceneKey);
