@@ -20,7 +20,7 @@ import ChatList from './ChatList.vue';
 import ChatModal from './ChatModal.vue';
 
 // Avatar store
-const { username, selectedAvatarId } = useAvatarStore();
+const { username, selectedPlayerId } = useAvatarStore();
 
 // Set variables
 const chats: Ref<Record<string, Array<{ message: string; avatarType: string }>>> = ref({});
@@ -67,17 +67,17 @@ function submitMessage(message: string) {
 
 	let visitorId: string | null;
 
-	if (ExperienceManager.instance.selectedAvatar.value) {
+	if (ExperienceManager.instance.selectedPlayer.value) {
 		// Get visitor id to send message to via websockets by retrieving it from visitors list/object (keys are the visitor id's)
 		visitorId =
 			Object.keys(ExperienceManager.instance.activeScene.players).find((key) => {
 				return (
 					ExperienceManager.instance.activeScene?.players[key]?.model?.uuid ===
-					ExperienceManager.instance.selectedAvatar.value?.model?.uuid
+					ExperienceManager.instance.selectedPlayer.value?.model?.uuid
 				);
 			}) ?? null;
 	} else {
-		// User has not selected an avatar and opened the chat via the UI => use the ref
+		// User has not selected an player and opened the chat via the UI => use the ref
 		visitorId = selectedChatUserId.value;
 	}
 
@@ -101,8 +101,8 @@ function submitMessage(message: string) {
 		});
 	}
 
-	// Reset hovered avatar
-	ExperienceManager.instance.selectedAvatar.value = null;
+	// Reset selected player
+	ExperienceManager.instance.selectedPlayer.value = null;
 }
 
 function openChatModal(visitorId: string) {
@@ -137,7 +137,7 @@ function onKeyUp(event: KeyboardEvent) {
 }
 
 // Watch
-watch(ExperienceManager.instance.selectedAvatar, (value) => {
+watch(ExperienceManager.instance.selectedPlayer, (value) => {
 	if (value && ExperienceManager.instance.activeScene) {
 		// Get visitor id to send message to via websockets by retrieving it from visitors list/object (keys are the visitor id's)
 		const visitorId = Object.keys(ExperienceManager.instance.activeScene.players).find((key) => {
@@ -181,7 +181,7 @@ watch(isChatModalVisible, (newValue, oldValue) => {
 onMounted(() => {
 	if (canvas.value) {
 		// Initialize the experience manager
-		ExperienceManager.instance.init(canvas.value, username, selectedAvatarId);
+		ExperienceManager.instance.init(canvas.value, username, selectedPlayerId);
 
 		// Listen for ready event (triggers when backend sends scene data)
 		EventService.listen(CustomEventKey.READY, setReadyState);

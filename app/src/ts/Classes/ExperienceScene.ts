@@ -109,15 +109,13 @@ export default class ExperienceScene implements IExperienceScene {
 		this.scene.add(dirLight);
 	}
 
-	public addCurrentPlayer(username: string, selectedAvatarId: number) {
+	public addCurrentPlayer(username: string, selectedPlayerId: number) {
 		if (this.currentPlayer) {
 			return;
 		}
 
-		// Create current player avatar and add to players object
-		this.players[ExperienceManager.instance.userId!] = new Player(username, selectedAvatarId, this, this.camera, true);
-
-		console.log(this.players);
+		// Create current player and add to players object
+		this.players[ExperienceManager.instance.userId!] = new Player(username, selectedPlayerId, this, this.camera, true);
 	}
 
 	public removeCurrentPlayer() {
@@ -125,7 +123,7 @@ export default class ExperienceScene implements IExperienceScene {
 			return;
 		}
 
-		// Destroy the current avatar
+		// Destroy the current player
 		this.currentPlayer.destroy();
 
 		// Remove from players list
@@ -135,26 +133,24 @@ export default class ExperienceScene implements IExperienceScene {
 	public addVisitor(
 		userId: string,
 		username: string,
-		selectedAvatarId: number,
+		selectedPlayerId: number,
 		spawnPosition: Vector3 = new Vector3(),
 		spawnRotation: Quaternion = new Quaternion()
 	) {
-		// Create and add avatar of visitor to visitors list
+		// Create and add visitor to visitors list
 		this.players[userId] = new Player(
 			username,
-			selectedAvatarId,
+			selectedPlayerId,
 			this,
 			this.camera,
 			false,
 			spawnPosition,
 			spawnRotation
 		);
-
-		console.log(this.players);
 	}
 
 	public removeVisitor(userId: string) {
-		// Get the target visitor avatar
+		// Get the target visitor player
 		const targetVisitor = this.players[userId];
 
 		if (!targetVisitor || !targetVisitor.model) {
@@ -183,7 +179,7 @@ export default class ExperienceScene implements IExperienceScene {
 
 	public update(delta: number): void {
 		if (this.currentPlayer && this.currentPlayer.controls && this.currentPlayer.model) {
-			// Update avatar
+			// Update the current player
 			this.currentPlayer.update(delta);
 
 			// Send data to socket server for sync

@@ -18,7 +18,7 @@ const step = ref(1);
 
 // Define functions
 function handleAvatarSelection(id: number) {
-	// Select avatar
+	// Select player
 	avatarStore.selectAvatar(id);
 
 	// Move to the next step

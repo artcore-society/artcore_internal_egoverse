@@ -11,7 +11,7 @@ export interface ISocketInitData {
 		currentPlayer: {
 			id: string;
 			username: string;
-			avatarId: number;
+			playerId: number;
 			isCurrent: boolean;
 			position: Vector3;
 			rotation: Quaternion;
@@ -19,7 +19,7 @@ export interface ISocketInitData {
 		visitors: Array<{
 			id: string;
 			username: string;
-			avatarId: number;
+			playerId: number;
 			isCurrent: boolean;
 			position: Vector3;
 			rotation: Quaternion;

@@ -5,7 +5,7 @@ import { Quaternion, Vector3 } from 'three';
 import Player from './Player.ts';
 
 export default class PlayerControls implements IPlayerControls {
-	private readonly avatar: Player;
+	private readonly player: Player;
 	private currentAction: AnimationName = AnimationName.IDLE;
 	private walkDirection: Vector3 = new Vector3();
 	private rotateAngle: Vector3 = new Vector3(0, 1, 0);
@@ -30,21 +30,21 @@ export default class PlayerControls implements IPlayerControls {
 		KeyboardKey.ArrowRight
 	];
 
-	constructor(avatar: Player) {
+	constructor(player: Player) {
 		// Set properties
-		this.avatar = avatar;
+		this.player = player;
 
-		if (this.avatar.isCurrent) {
+		if (this.player.isCurrent) {
 			// Make sure camera parent position is starts at spawn position
-			this.avatar.experienceScene.cameraParent.position.set(
-				this.avatar.spawnPosition.x,
-				this.avatar.spawnPosition.y,
-				this.avatar.spawnPosition.z
+			this.player.experienceScene.cameraParent.position.set(
+				this.player.spawnPosition.x,
+				this.player.spawnPosition.y,
+				this.player.spawnPosition.z
 			);
 		}
 
 		// Call animation when corresponding key is pressed
-		this.avatar.animationsMap.forEach((animation, key) => {
+		this.player.animationsMap.forEach((animation, key) => {
 			if (key === this.currentAction) {
 				// Play the animation
 				animation.play();
@@ -78,7 +78,7 @@ export default class PlayerControls implements IPlayerControls {
 	}
 
 	update(delta: number, keysPressed: { [key in KeyboardKey]: boolean }) {
-		if (!this.avatar.model) {
+		if (!this.player.model) {
 			return;
 		}
 
@@ -118,10 +118,10 @@ export default class PlayerControls implements IPlayerControls {
 		}
 
 		// Do the animation if it's not already the current animation state
-		if (this.currentAction !== play && !this.isJumping && this.avatar) {
+		if (this.currentAction !== play && !this.isJumping && this.player) {
 			// Do a transition to the new animation state
-			const animationToPlay = this.avatar.animationsMap.get(play) ?? this.avatar.animationsMap.get(AnimationName.IDLE);
-			const currentAnimation = this.avatar.animationsMap.get(this.currentAction);
+			const animationToPlay = this.player.animationsMap.get(play) ?? this.player.animationsMap.get(AnimationName.IDLE);
+			const currentAnimation = this.player.animationsMap.get(this.currentAction);
 
 			if (!animationToPlay || !currentAnimation) return;
 
@@ -165,17 +165,17 @@ export default class PlayerControls implements IPlayerControls {
 			// Calculate camera Y angle
 			const angleYCameraAngle = this.directionOffset(keysPressed);
 
-			// Rotate avatar model
+			// Rotate player model
 			this.rotateQuaternion.setFromAxisAngle(this.rotateAngle, angleYCameraAngle);
 
-			// Smoothly rotate avatar model using slerp and apply delta to make it frame independent
-			this.avatar.model?.quaternion.slerp(this.rotateQuaternion, Math.min(3 * delta, 1));
+			// Smoothly rotate player model using slerp and apply delta to make it frame independent
+			this.player.model?.quaternion.slerp(this.rotateQuaternion, Math.min(3 * delta, 1));
 
-			if (this.avatar.isCurrent) {
+			if (this.player.isCurrent) {
 				// Calculate direction
-				this.avatar.camera.getWorldDirection(this.walkDirection);
+				this.player.camera.getWorldDirection(this.walkDirection);
 			} else {
-				const visitorWorldDirection = this.avatar.camera.getWorldDirection(new Vector3());
+				const visitorWorldDirection = this.player.camera.getWorldDirection(new Vector3());
 				this.walkDirection = new Vector3(visitorWorldDirection.x, 0, visitorWorldDirection.z);
 			}
 
@@ -197,26 +197,26 @@ export default class PlayerControls implements IPlayerControls {
 					break;
 			}
 
-			// Move avatar & camera
+			// Move player & camera
 			const moveX = this.walkDirection.x * velocity * delta;
 			const moveZ = this.walkDirection.z * velocity * delta;
 
-			// Update avatar position
-			this.avatar.model.position.x += moveX;
-			this.avatar.model.position.z += moveZ;
+			// Update player position
+			this.player.model.position.x += moveX;
+			this.player.model.position.z += moveZ;
 
-			if (this.avatar.isCurrent) {
-				// Sync camera with current player avatar
-				this.avatar.experienceScene.cameraParent.position.x = this.avatar.model.position.x;
-				this.avatar.experienceScene.cameraParent.position.z = this.avatar.model.position.z;
+			if (this.player.isCurrent) {
+				// Sync camera with current player player
+				this.player.experienceScene.cameraParent.position.x = this.player.model.position.x;
+				this.player.experienceScene.cameraParent.position.z = this.player.model.position.z;
 			}
 		}
 	}
 
 	playAnimation(animationName: AnimationName) {
 		if (this.currentAction !== animationName) {
-			const animationToPlay = this.avatar.animationsMap.get(animationName);
-			const currentAnimation = this.avatar.animationsMap.get(this.currentAction);
+			const animationToPlay = this.player.animationsMap.get(animationName);
+			const currentAnimation = this.player.animationsMap.get(this.currentAction);
 
 			if (!animationToPlay || !currentAnimation) {
 				return;

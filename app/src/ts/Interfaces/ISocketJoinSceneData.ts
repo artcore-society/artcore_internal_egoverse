@@ -5,7 +5,7 @@ export interface ISocketJoinSceneData {
 	sceneKey: SceneKey;
 	userId: string;
 	username: string;
-	selectedAvatarId: string;
+	selectedPlayerId: string;
 	spawnPosition: Vector3;
 	spawnRotation: Quaternion;
 }

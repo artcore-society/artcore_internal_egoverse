@@ -71,7 +71,7 @@ export class GameService {
         console.log(`New connection: ${socket.id}`);
 
         const username = this.sanitizeInput(socket.handshake.query.username as string);
-        const avatarId = String(socket.handshake.query.selectedAvatarId) || '1';
+        const playerId = String(socket.handshake.query.selectedPlayerId) || '1';
         const sceneKey = this.sanitizeInput(socket.handshake.query.sceneKey) as SceneKey || SceneKey.LANDING_AREA;
 
         // Validate username and scene key.
@@ -90,7 +90,7 @@ export class GameService {
 
         // Assigns the player to the specified scene.
         const scene = this.scenes.get(sceneKey)!;
-        const player = new Player(socket.id, username, avatarId, sceneKey, true);
+        const player = new Player(socket.id, username, playerId, sceneKey, true);
         scene.addPlayer(player);
         socket.join(sceneKey);
 
@@ -108,7 +108,7 @@ export class GameService {
         this.io.to(sceneKey).emit(SocketEvent.PLAYER_JOINED, {
             id: player.id,
             username: player.username,
-            avatarId: player.avatarId,
+            playerId: player.playerId,
             position: player.position.toArray(),
             quaternion: [player.quaternion.x, player.quaternion.y, player.quaternion.z, player.quaternion.w]
         });
@@ -173,7 +173,7 @@ export class GameService {
         this.io.to(newSceneKey).emit(SocketEvent.PLAYER_JOINED, {
             id: player.id,
             username: player.username,
-            avatarId: player.avatarId,
+            playerId: player.playerId,
             position: player.position.toArray(),
             quaternion: [player.quaternion.x, player.quaternion.y, player.quaternion.z, player.quaternion.w],
             sceneKey: newSceneKey
@@ -232,7 +232,7 @@ export class GameService {
         // Broadcast the emote trigger event to all connected clients except the sender
         socket.broadcast.emit(SocketEvent.TRIGGER_EMOTE, {
             animationName: data.animationName, // Name of the emote animation to be played
-            userId: data.avatarUserId // User ID of the avatar performing the emote
+            userId: data.avatarUserId // User ID of the player performing the emote
         });
     }
 

@@ -1,7 +1,7 @@
 export interface ISocketSceneStateData {
 	sceneKey: string;
 	visitors: Array<{
-		avatarId: string;
+		playerId: string;
 		id: string;
 		username: string;
 		position: Array<number>;

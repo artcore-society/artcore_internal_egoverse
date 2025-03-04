@@ -26,7 +26,7 @@ export default class ExperienceManager {
 	public clock: Clock = new Clock();
 	public userId: string | null = null;
 	public username: string | null = null;
-	public selectedAvatarId: number | null = null;
+	public selectedPlayerId: number | null = null;
 	private renderer: ExperienceRenderer | null = null;
 	private scenes: Map<SceneKey, IExperienceScene> = new Map();
 	private animateFrameId: number | null = null;
@@ -34,11 +34,11 @@ export default class ExperienceManager {
 	private loaderManager: LoadingManager = DefaultLoadingManager;
 	private raycaster: Raycaster = new Raycaster();
 	private pointer: Vector2 | null = null;
-	private hoveredAvatar: Player | null = null;
-	public selectedAvatar: Ref<Player | null> = ref(null);
+	private hoveredPlayer: Player | null = null;
+	public selectedPlayer: Ref<Player | null> = ref(null);
 	public incomingVisitorMessageData: Ref<ISocketMessageData> = ref({ message: null, senderUserId: null });
 	public isInteractive: boolean = true;
-	private avatarCache: Map<number, IPlayerCacheEntry> = new Map();
+	private playerCache: Map<number, IPlayerCacheEntry> = new Map();
 
 	private constructor() {}
 
@@ -49,7 +49,7 @@ export default class ExperienceManager {
 		return ExperienceManager._instance;
 	}
 
-	public init(canvas: HTMLCanvasElement, username: string, selectedAvatarId: number): void {
+	public init(canvas: HTMLCanvasElement, username: string, selectedPlayerId: number): void {
 		if (this.canvas) {
 			// Prevent re-initialization
 			throw new Error('ExperienceManager is already initialized');
@@ -59,7 +59,7 @@ export default class ExperienceManager {
 		this.canvas = canvas;
 		this.renderer = new ExperienceRenderer(this.canvas);
 		this.username = username;
-		this.selectedAvatarId = selectedAvatarId;
+		this.selectedPlayerId = selectedPlayerId;
 		this.updateSceneCamerasAndRenderSize();
 
 		// Add event listeners
@@ -106,7 +106,7 @@ export default class ExperienceManager {
 					this.activeScene?.addVisitor(
 						visitor.id,
 						visitor.username,
-						parseInt(visitor.avatarId),
+						parseInt(visitor.playerId),
 						new Vector3(...visitor.position),
 						new Quaternion(...visitor.quaternion)
 					);
@@ -117,7 +117,7 @@ export default class ExperienceManager {
 		ExperienceSocket.on<ISocketUserData>(SocketEvent.PLAYER_JOINED, (data) => {
 			if (data.id === this.userId) {
 				// Add current player
-				this.activeScene?.addCurrentPlayer(data.username, parseInt(data.avatarId));
+				this.activeScene?.addCurrentPlayer(data.username, parseInt(data.playerId));
 
 				return;
 			}
@@ -126,7 +126,7 @@ export default class ExperienceManager {
 			this.activeScene?.addVisitor(
 				data.id,
 				data.username,
-				parseInt(data.avatarId),
+				parseInt(data.playerId),
 				new Vector3(...data.position),
 				new Quaternion(...data.quaternion)
 			);
@@ -165,12 +165,12 @@ export default class ExperienceManager {
 		});
 
 		ExperienceSocket.on<ISocketClientUpdatePlayerData>(SocketEvent.CLIENT_UPDATE_PLAYER, (data) => {
-			// Update avatar in target scene
+			// Update player in target scene
 			if (this.activeScene && this.activeScene.players && this.activeScene.sceneKey === data.sceneKey) {
-				// Update the mixer of the visitor avatar
+				// Update the mixer of the visitor player
 				this.activeScene.players[data.visitorId]?.mixer?.update(data.delta);
 
-				// Update the controls of the visitor avatar
+				// Update the controls of the visitor player
 				this.activeScene.players[data.visitorId]?.controls?.update(data.delta, data.keysPressed);
 			}
 		});
@@ -193,7 +193,7 @@ export default class ExperienceManager {
 			const targetVisitor = this.activeScene.players[data.userId] ?? null;
 
 			if (!targetVisitor) {
-				console.warn('Target avatar not found when trying to trigger emote...');
+				console.warn('Target player not found when trying to trigger emote...');
 				return;
 			}
 
@@ -238,7 +238,7 @@ export default class ExperienceManager {
 					ExperienceSocket.emit(SocketEvent.JOIN_SCENE, {
 						userId: this.userId,
 						username: this.username,
-						selectedAvatarId: this.selectedAvatarId,
+						selectedPlayerId: this.selectedPlayerId,
 						sceneKey: key,
 						spawnPosition: this.activeScene?.currentPlayer?.model?.position ?? new Vector3(),
 						spawnRotation: this.activeScene?.currentPlayer?.model?.quaternion ?? new Quaternion()
@@ -256,7 +256,7 @@ export default class ExperienceManager {
 		ExperienceSocket.emit(SocketEvent.JOIN_SCENE, {
 			userId: this.userId,
 			username: this.username,
-			selectedAvatarId: this.selectedAvatarId,
+			selectedPlayerId: this.selectedPlayerId,
 			sceneKey: key,
 			spawnPosition: this.activeScene?.currentPlayer?.model?.position ?? new Vector3(),
 			spawnRotation: this.activeScene?.currentPlayer?.model?.quaternion ?? new Quaternion()
@@ -303,11 +303,11 @@ export default class ExperienceManager {
 		// Calculate objects intersecting the picking ray
 		const intersects = this.raycaster.intersectObjects(this.activeScene.scene.children, true);
 
-		// Find the first intersected object that belongs to an avatar
+		// Find the first intersected object that belongs to an player
 		const avatarIntersect = intersects.find((intersect) => {
 			let obj: IExtendedObject3D = intersect.object;
 
-			// Traverse up the parent hierarchy to find the avatar root
+			// Traverse up the parent hierarchy to find the player root
 			while (obj) {
 				if (obj.isAvatar) {
 					return true;
@@ -318,7 +318,7 @@ export default class ExperienceManager {
 		});
 
 		if (avatarIntersect) {
-			// Get the actual avatar root object
+			// Get the actual player root object
 			let avatarRoot: IExtendedObject3D = avatarIntersect.object;
 			while (avatarRoot && !avatarRoot.isAvatar) {
 				avatarRoot = avatarRoot.parent as Object3D;
@@ -331,11 +331,11 @@ export default class ExperienceManager {
 				avatarRoot
 			) {
 				// Find the actual class instance
-				this.hoveredAvatar =
-					Object.values(this.activeScene?.players).find((avatar: Player) => avatar.model?.uuid === avatarRoot.uuid) ??
+				this.hoveredPlayer =
+					Object.values(this.activeScene?.players).find((player: Player) => player.model?.uuid === avatarRoot.uuid) ??
 					null;
 
-				if (this.hoveredAvatar) {
+				if (this.hoveredPlayer) {
 					if (!document.body.classList.contains('cursor-pointer')) {
 						document.body.classList.add('cursor-pointer');
 					}
@@ -348,19 +348,19 @@ export default class ExperienceManager {
 		// Make sure to remove cursor class
 		document.body.classList.remove('cursor-pointer');
 
-		// Reset hovered adn selected avatar when not hovering anymore
-		this.hoveredAvatar = null;
+		// Reset hovered adn selected player when not hovering anymore
+		this.hoveredPlayer = null;
 	}
 
-	public fetchOrLoadAvatarCacheEntry(
-		selectedAvatarId: number,
+	public fetchOrLoadplayerCacheEntry(
+		selectedPlayerId: number,
 		spawnPosition: Vector3,
 		spawnRotation: Quaternion
 	): Promise<IPlayerCacheEntry> {
 		return new Promise(async (resolve, reject) => {
-			if (this.avatarCache.has(selectedAvatarId)) {
+			if (this.playerCache.has(selectedPlayerId)) {
 				// Reuse existing model
-				const cachedGltf = this.avatarCache.get(selectedAvatarId)!;
+				const cachedGltf = this.playerCache.get(selectedPlayerId)!;
 
 				// Set spawn position and rotation
 				cachedGltf.model.position.copy(spawnPosition);
@@ -374,7 +374,7 @@ export default class ExperienceManager {
 
 			try {
 				// Load model for first time
-				const gltf = await ThreeLoaders.loadGLTF(`/assets/models/avatars/${selectedAvatarId}/avatar.gltf`);
+				const gltf = await ThreeLoaders.loadGLTF(`/assets/models/avatars/${selectedPlayerId}/avatar.gltf`);
 				const model: IExtendedObject3D = gltf.scene;
 
 				// Do adjustments
@@ -385,7 +385,7 @@ export default class ExperienceManager {
 				model.receiveShadow = true;
 
 				// Store in cache
-				this.avatarCache.set(selectedAvatarId, {
+				this.playerCache.set(selectedPlayerId, {
 					model: model,
 					animations: gltf.animations
 				});
@@ -394,7 +394,7 @@ export default class ExperienceManager {
 				resolve({ model: model, animations: gltf.animations });
 			} catch (error) {
 				console.error(error);
-				reject(new Error('Error loading avatar model'));
+				reject(new Error('Error loading player model'));
 			}
 		});
 	}
@@ -448,9 +448,9 @@ export default class ExperienceManager {
 	}
 
 	checkIntersectingPlayer() {
-		if (!this.selectedAvatar.value && this.hoveredAvatar) {
+		if (!this.selectedPlayer.value && this.hoveredPlayer) {
 			// Set ref so popup modal opens
-			this.selectedAvatar.value = this.hoveredAvatar;
+			this.selectedPlayer.value = this.hoveredPlayer;
 		}
 	}
 

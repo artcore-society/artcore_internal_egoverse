@@ -11,7 +11,7 @@ import ExperienceManager from './ExperienceManager.ts';
 
 export default class Player implements IPlayer {
 	public username: string;
-	public selectedAvatarId: number;
+	public selectedPlayerId: number;
 	public experienceScene: IExperienceScene;
 	public camera: ExperienceCamera;
 	public isCurrent: boolean = false;
@@ -24,7 +24,7 @@ export default class Player implements IPlayer {
 
 	constructor(
 		username: string,
-		selectedAvatarId: number,
+		selectedPlayerId: number,
 		experienceScene: ExperienceScene,
 		camera: ExperienceCamera,
 		isCurrent: boolean = false,
@@ -32,14 +32,14 @@ export default class Player implements IPlayer {
 		spawnRotation: Quaternion = new Quaternion()
 	) {
 		this.username = username;
-		this.selectedAvatarId = selectedAvatarId;
+		this.selectedPlayerId = selectedPlayerId;
 		this.experienceScene = experienceScene;
 		this.camera = camera;
 		this.spawnPosition = spawnPosition;
 		this.spawnRotation = spawnRotation;
 		this.isCurrent = isCurrent;
 
-		// Initiate avatar
+		// Initiate the player
 		this.init();
 	}
 
@@ -47,7 +47,7 @@ export default class Player implements IPlayer {
 		// Load model
 		await this.load();
 
-		// Setup avatar controls
+		// Setup player controls
 		this.controls = new PlayerControls(this);
 
 		if (this.isCurrent) {
@@ -58,8 +58,8 @@ export default class Player implements IPlayer {
 
 	async load() {
 		try {
-			const { model, animations } = await ExperienceManager.instance.fetchOrLoadAvatarCacheEntry(
-				this.selectedAvatarId,
+			const { model, animations } = await ExperienceManager.instance.fetchOrLoadplayerCacheEntry(
+				this.selectedPlayerId,
 				this.spawnPosition,
 				this.spawnRotation
 			);
@@ -78,7 +78,7 @@ export default class Player implements IPlayer {
 				this.animationsMap.set(animation.name as AnimationName, this.mixer.clipAction(animation));
 			});
 
-			// Add avatar to experienceScene
+			// Add player to experienceScene
 			this.experienceScene.scene.add(this.model);
 
 			// Make sure all tweens are killed first
@@ -98,7 +98,7 @@ export default class Player implements IPlayer {
 			);
 		} catch (error) {
 			console.error(error);
-			throw new Error('Something went wrong loading the avatar model');
+			throw new Error('Something went wrong loading the player model');
 		}
 	}
 
@@ -114,7 +114,7 @@ export default class Player implements IPlayer {
 
 	destroy() {
 		if (this.controls) {
-			// Disconnect avatar controls
+			// Disconnect player controls
 			this.controls.disconnect();
 		}
 

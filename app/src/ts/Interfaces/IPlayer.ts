@@ -4,7 +4,7 @@ import PlayerControls from '../Classes/PlayerControls.ts';
 
 export interface IPlayer {
 	username: string;
-	selectedAvatarId: number;
+	selectedPlayerId: number;
 	experienceScene: IExperienceScene;
 	isCurrent: boolean;
 	controls: PlayerControls | null;

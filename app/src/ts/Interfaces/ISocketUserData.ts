@@ -1,6 +1,6 @@
 export interface ISocketUserData {
 	id: string;
-	avatarId: string;
+	playerId: string;
 	username: string;
 	position: Array<number>;
 	quaternion: Array<number>;

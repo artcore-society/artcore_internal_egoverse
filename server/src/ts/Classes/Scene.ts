@@ -32,7 +32,7 @@ export class Scene implements IScene {
             visitors: visitors.map(v => ({
                 id: v.id,
                 username: v.username,
-                avatarId: v.avatarId,
+                playerId: v.playerId,
                 position: v.position.toArray(),
                 quaternion: [v.quaternion.x, v.quaternion.y, v.quaternion.z, v.quaternion.w]
             }))

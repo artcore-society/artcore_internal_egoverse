@@ -4,7 +4,7 @@ import { defineStore } from 'pinia';
 export const useAvatarStore = defineStore('avatarStore', () => {
 	// State variables
 	const username: Ref<string> = ref('');
-	const selectedAvatarId: Ref<number> = ref(1);
+	const selectedPlayerId: Ref<number> = ref(1);
 	const avatars: Ref<Array<{ id: number; asset: string; name: string }>> = ref([
 		{ id: 1, asset: '/assets/images/avatars/1.jpg', name: 'Worker' },
 		{ id: 2, asset: '/assets/images/avatars/2.jpg', name: 'Knight' },
@@ -15,14 +15,14 @@ export const useAvatarStore = defineStore('avatarStore', () => {
 
 	// Methods
 	const selectAvatar = (id: number) => {
-		if (avatars.value.some((avatar) => avatar.id === id)) {
-			selectedAvatarId.value = id;
+		if (avatars.value.some((player) => player.id === id)) {
+			selectedPlayerId.value = id;
 		}
 	};
 
 	return {
 		username,
-		selectedAvatarId,
+		selectedPlayerId,
 		avatars,
 		selectAvatar
 	};
