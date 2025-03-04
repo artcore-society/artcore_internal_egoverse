@@ -5,9 +5,6 @@ import { SocketEvent } from '../Enums/SocketEvent';
 import { Server, Socket } from 'socket.io';
 import { ISceneSettings } from '../Interfaces/ISceneSettings';
 
-/**
- * Singleton class to manage game logic and WebSocket interactions.
- */
 export class GameService {
     private static _instance: GameService;
     private io: Server;
@@ -15,7 +12,7 @@ export class GameService {
     private readonly MAX_PLAYERS = 100;
 
     /**
-     * Private constructor to enforce singleton pattern.
+     * Private constructor to enforce singleton pattern and initialize scenes & sockets.
      */
     private constructor(io: Server) {
         this.io = io;
@@ -53,21 +50,21 @@ export class GameService {
         scenesSettings.set(SceneKey.MEETING_ROOM, { color: 'Blue' });
         scenesSettings.set(SceneKey.CHAT_ROOM, { color: 'Green' });
 
+        // Creates scene instances and stores them in the map.
         this.scenes = new Map(
             Object.values(SceneKey).map(key => [key as SceneKey, new Scene(key, scenesSettings.get(key))])
         );
     }
 
     /**
-     * Sets up WebSocket event listeners for incoming connections.
+     * Sets up WebSocket event listeners for handling client connections.
      */
     private setupSocketEvents() {
         this.io.on(SocketEvent.CONNECTION, (socket) => this.handleConnection(socket));
     }
 
     /**
-     * Handles a new player connection.
-     * Validates input, creates a player, and assigns a scene.
+     * Handles a new player connection, validates input, and assigns a scene.
      */
     private handleConnection(socket: Socket) {
         console.log(`New connection: ${socket.id}`);
@@ -76,23 +73,27 @@ export class GameService {
         const avatarId = String(socket.handshake.query.selectedAvatarId) || '1';
         const sceneKey = this.sanitizeInput(socket.handshake.query.sceneKey) as SceneKey || SceneKey.LANDING_AREA;
 
+        // Validate username and scene key.
         if (!username || !sceneKey) {
             socket.emit(SocketEvent.FAILED, { message: 'Invalid credentials' });
             socket.disconnect();
             return;
         }
 
+        // Prevents new connections if the server is at full capacity.
         if (this.io.engine.clientsCount > this.MAX_PLAYERS) {
             socket.emit(SocketEvent.FAILED, { message: 'Server is full' });
             socket.disconnect();
             return;
         }
 
+        // Assigns the player to the specified scene.
         const scene = this.scenes.get(sceneKey)!;
         const player = new Player(socket.id, username, avatarId, sceneKey, true);
         scene.addPlayer(player);
         socket.join(sceneKey);
 
+        // Sends initialization data to the player.
         socket.emit(SocketEvent.INIT, {
             id: socket.id,
             currentSceneKey: sceneKey,
@@ -102,6 +103,7 @@ export class GameService {
             }))
         });
 
+        // Broadcasts the new player to others in the scene.
         this.io.to(sceneKey).emit(SocketEvent.PLAYER_JOINED, {
             id: player.id,
             username: player.username,
@@ -110,6 +112,7 @@ export class GameService {
             rotation: [player.rotation.x, player.rotation.y, player.rotation.z, player.rotation.w]
         });
 
+        // Sets up event listeners for player interactions.
         socket.on(SocketEvent.JOIN_SCENE, (data) => this.handleJoinScene(socket, player, data));
         socket.on(SocketEvent.CLIENT_UPDATE_PLAYER, (data) => this.handlePlayerUpdate(socket, player, data));
         socket.on(SocketEvent.SEND_MESSAGE, (data) => this.handleSendMessage(socket, data));
@@ -118,33 +121,54 @@ export class GameService {
     }
 
     /**
-     * Handles a player switching to a different scene.
+     * Handles player switching to a different scene.
      */
     private handleJoinScene(socket: Socket, player: Player, data: any) {
+        // Sanitize and retrieve the new scene key from the incoming data.
         const newSceneKey = this.sanitizeInput(data.sceneKey) as SceneKey;
+
+        // Check if the new scene key is valid and exists in the scenes map.
         if (!newSceneKey || !this.scenes.has(newSceneKey)) {
             socket.emit(SocketEvent.FAILED, { message: 'Invalid scene' });
             return;
         }
 
+        // Avoid redundant scene switching by checking if the player is already in the target scene.
         if (player.sceneKey === newSceneKey) {
             socket.emit(SocketEvent.SCENE_STATE, this.scenes.get(player.sceneKey)!.getState(socket.id));
             return;
         }
 
+        // Store the old scene key before switching.
         const oldSceneKey = player.sceneKey as SceneKey;
+
+        // Remove the player from the old scene if it exists.
         if (this.scenes.has(oldSceneKey)) {
             const oldScene = this.scenes.get(oldSceneKey)!;
+
+            // Remove player from the old scene.
             oldScene.removePlayer(socket.id);
+
+            // Remove the socket from the old scene's room.
             socket.leave(oldSceneKey);
+
+            // Notify others in the old scene.
             this.io.to(oldSceneKey).emit(SocketEvent.PLAYER_LEFT, { id: socket.id });
         }
 
+        // Retrieve the new scene from the scenes map.
         const newScene = this.scenes.get(newSceneKey)!;
+
+        // Add the player to the new scene and update their sceneKey.
         newScene.addPlayer(player);
+
+        // Add the player to the new scene's socket room.
         socket.join(newSceneKey);
+
+        // Update the player's scene reference.
         player.sceneKey = newSceneKey;
 
+        // Notify all players in the new scene that a new player has joined.
         this.io.to(newSceneKey).emit(SocketEvent.PLAYER_JOINED, {
             id: player.id,
             username: player.username,
@@ -154,18 +178,26 @@ export class GameService {
             sceneKey: newSceneKey
         });
 
+        // Send the updated scene state to the newly joined player.
         this.io.to(newSceneKey).emit(SocketEvent.SCENE_STATE, newScene.getState(socket.id));
     }
 
     /**
-     * Handles player position and rotation updates.
+     * Handles player movement and rotation updates.
      */
     private handlePlayerUpdate(socket: Socket, player: Player, data: any) {
-        if (!this.scenes.has(player.sceneKey as SceneKey)) return;
+        // Check if the scene associated with the player exists
+        if (!this.scenes.has(player.sceneKey as SceneKey)) {
+            return;
+        }
 
+        // Update the player's position based on received data
         player.position.set(data.spawnPosition.x, data.spawnPosition.y, data.spawnPosition.z);
+
+        // Update the player's rotation using the provided rotation array
         player.rotation.set(...data.spawnRotation);
 
+        // Broadcast the updated player data to all clients in the same scene
         socket.broadcast.to(player.sceneKey).emit(SocketEvent.CLIENT_UPDATE_PLAYER, data);
     }
 
@@ -173,11 +205,18 @@ export class GameService {
      * Handles sending messages between players.
      */
     private handleSendMessage(socket: Socket, data: any) {
+        // Destructure the receiver's user ID and message from the incoming data
         const { receiverUserId, message } = data;
-        if (!receiverUserId || !message) return;
+
+        // Validate that both receiverUserId and message exist; return if either is missing
+        if (!receiverUserId || !message) {
+            return;
+        }
+
+        // Send the message to the specified receiver user ID
         this.io.to(receiverUserId).emit(SocketEvent.SEND_MESSAGE, {
-            senderUserId: socket.id,
-            message: this.sanitizeInput(message)
+            senderUserId: socket.id, // Include sender's socket ID for identification
+            message: this.sanitizeInput(message) // Sanitize message before sending to prevent injection attacks
         });
     }
 
@@ -185,9 +224,10 @@ export class GameService {
      * Handles player emote triggers.
      */
     private handleTriggerEmote(socket: Socket, data: any) {
+        // Broadcast the emote trigger event to all connected clients except the sender
         socket.broadcast.emit(SocketEvent.TRIGGER_EMOTE, {
-            animationName: data.animationName,
-            userId: data.avatarUserId
+            animationName: data.animationName, // Name of the emote animation to be played
+            userId: data.avatarUserId // User ID of the avatar performing the emote
         });
     }
 
@@ -196,10 +236,14 @@ export class GameService {
      */
     private handleDisconnect(socket: Socket, player: Player) {
         console.log(`Player disconnected: ${socket.id}`);
+
+        // Retrieve the scene the player was in using their scene key
         const scene = this.scenes.get(player.sceneKey as SceneKey);
+
+        // If the scene exists, remove the player from it and notify other players
         if (scene) {
-            scene.removePlayer(socket.id);
-            this.io.to(player.sceneKey).emit(SocketEvent.PLAYER_LEFT, { id: socket.id });
+            scene.removePlayer(socket.id); // Remove the player from the scene
+            this.io.to(player.sceneKey).emit(SocketEvent.PLAYER_LEFT, { id: socket.id }); // Notify others in the same scene
         }
     }
 
@@ -207,7 +251,15 @@ export class GameService {
      * Sanitizes user input to prevent injection attacks.
      */
     private sanitizeInput(input: any): string {
-        if (typeof input !== 'string') return '';
-        return input.replace(/</g, '&lt;').replace(/>/g, '&gt;').trim();
+        // Ensure the input is a string; if not, return an empty string
+        if (typeof input !== 'string') {
+            return '';
+        }
+
+        // Replace HTML special characters to prevent potential XSS attacks
+        return input
+            .replace(/</g, '&lt;') // Replace '<' with '&lt;' to prevent HTML injection
+            .replace(/>/g, '&gt;') // Replace '>' with '&gt;' to prevent HTML injection
+            .trim(); // Remove leading and trailing whitespace
     }
 }
