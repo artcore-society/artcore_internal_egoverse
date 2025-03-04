@@ -24,16 +24,6 @@ function handleAvatarSelection(id: number) {
 	// Move to the next step
 	step.value = 2;
 }
-
-// Handle username confirmation
-const confirmUsername = () => {
-	// Trim and update the store value
-	// username = username.trim();
-	console.log('username: ', avatarStore.username);
-
-	// Emit to go to next step
-	emit('next');
-};
 </script>
 
 <template>
@@ -61,7 +51,7 @@ const confirmUsername = () => {
 					{{ 'Enter your username' }}
 				</span>
 
-				<form class="flex w-full flex-col items-start justify-center gap-4" @submit.prevent="confirmUsername">
+				<form class="flex w-full flex-col items-start justify-center gap-4" @submit.prevent="emit('next')">
 					<InputField v-model="avatarStore.username" type="text" placeholder="Type username here" class="" />
 
 					<PrimaryButton type="submit"> Confirm </PrimaryButton>

@@ -185,18 +185,7 @@ onMounted(() => {
 		// Initialize the experience manager
 		ExperienceManager.instance.init(canvas.value, username, selectedAvatarId);
 
-		// Add all scenes to ThreeManager
-		ExperienceManager.instance.addScene(
-			SceneKey.LANDING_AREA,
-			new LandingAreaScene(canvas.value, SceneKey.LANDING_AREA)
-		);
-		ExperienceManager.instance.addScene(
-			SceneKey.MEETING_ROOM,
-			new MeetingRoomScene(canvas.value, SceneKey.MEETING_ROOM)
-		);
-		ExperienceManager.instance.addScene(SceneKey.CHAT_ROOM, new ChatRoomScene(canvas.value, SceneKey.CHAT_ROOM));
-
-		// Listen for ready event
+		// Listen for ready event (triggers when backend sends scene data)
 		EventService.listen(CustomEventKey.READY, setReadyState);
 
 		document.addEventListener('keydown', (event: KeyboardEvent) => onKeyDown(event));

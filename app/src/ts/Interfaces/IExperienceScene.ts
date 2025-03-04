@@ -1,4 +1,5 @@
 import { SceneKey } from '../Enums/SceneKey.ts';
+import { ISceneSettings } from './ISceneSettings.ts';
 import { Object3D, Quaternion, Scene, Vector3 } from 'three';
 import ExperienceCamera from '../Classes/ExperienceCamera.ts';
 import Avatar from '../Classes/Avatar.ts';
@@ -6,6 +7,7 @@ import Avatar from '../Classes/Avatar.ts';
 export interface IExperienceScene {
 	scene: Scene;
 	sceneKey: SceneKey;
+	settings: ISceneSettings;
 	camera: ExperienceCamera;
 	cameraParent: Object3D;
 	updateAction: ((delta: number) => void) | null;

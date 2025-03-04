@@ -22,19 +22,22 @@ import {
 import ExperienceCamera from './ExperienceCamera.ts';
 import Avatar from './Avatar.ts';
 import ExperienceManager from './ExperienceManager.ts';
+import { ISceneSettings } from '../Interfaces/ISceneSettings.ts';
 
-export default abstract class ExperienceScene implements IExperienceScene {
+export default class ExperienceScene implements IExperienceScene {
 	public readonly scene: Scene;
 	public sceneKey: SceneKey;
+	public settings: ISceneSettings;
 	public readonly camera: ExperienceCamera;
 	public cameraParent: Object3D;
 	public updateAction: ((delta: number) => void) | null;
 	public currentPlayerAvatar: Avatar | null = null;
 	public visitorAvatars: { [key: string]: Avatar } = {};
 
-	protected constructor(canvas: HTMLCanvasElement, sceneKey: SceneKey) {
+	constructor(canvas: HTMLCanvasElement, sceneKey: SceneKey, settings: ISceneSettings = { color: 'Blue' }) {
 		this.scene = new Scene();
 		this.sceneKey = sceneKey;
+		this.settings = settings;
 		this.camera = new ExperienceCamera(this.scene, canvas);
 		this.cameraParent = new Object3D();
 		this.updateAction = null;
@@ -54,17 +57,18 @@ export default abstract class ExperienceScene implements IExperienceScene {
 
 		// Setup lighting
 		this.setupLighting();
+
+		// Setup floor
+		this.setupFloor();
 	}
 
-	abstract init(): void;
-
-	public setupFloor(color: number): void {
+	public setupFloor(): void {
 		// Create a large plane
 		const geometry = new PlaneGeometry(500, 500, 10, 10);
 
 		// Create material with all maps
 		const material = new MeshStandardMaterial({
-			color: new Color(color ?? 'blue')
+			color: new Color(this.settings.color)
 		});
 
 		// Create plane
@@ -176,7 +180,7 @@ export default abstract class ExperienceScene implements IExperienceScene {
 				keysPressed: ExperienceManager.instance.isInteractive ? this.currentPlayerAvatar.controls.keysPressed : {},
 				sceneKey: this.sceneKey,
 				spawnPosition: this.currentPlayerAvatar.model.position,
-				spawnRotation: this.currentPlayerAvatar.model.rotation
+				spawnRotation: this.currentPlayerAvatar.model.quaternion
 			});
 		}
 	}

@@ -1,3 +1,4 @@
+import { SceneKey } from '../Enums/SceneKey.ts';
 import { io, Socket } from 'socket.io-client';
 import { SocketEvent } from '../Enums/SocketEvent';
 import ExperienceManager from './ExperienceManager.ts';
@@ -15,7 +16,8 @@ export class ExperienceSocket {
 		this.socket = io('ws://localhost:3000', {
 			query: {
 				username: ExperienceManager.instance.username ?? 'Default username',
-				selectedAvatarId: selectedAvatarId ?? 1
+				selectedAvatarId: selectedAvatarId ?? 1,
+				sceneKey: ExperienceManager.instance.activeScene?.sceneKey ?? SceneKey.LANDING_AREA
 			}
 		});
 	}

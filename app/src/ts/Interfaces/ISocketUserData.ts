@@ -1,5 +1,7 @@
 export interface ISocketUserData {
 	id: string;
+	avatarId: string;
 	username: string;
-	selectedAvatarId: string;
+	position: Array<number>;
+	rotation: Array<number>;
 }
