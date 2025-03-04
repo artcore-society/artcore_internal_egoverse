@@ -110,6 +110,8 @@ export default class ExperienceManager {
 		});
 
 		ExperienceSocket.on<ISocketUserData>(SocketEvent.PLAYER_JOINED, (data) => {
+			console.log('Player joined', data);
+
 			if (data.id === this.userId) {
 				// Add current player
 				this.activeScene?.addCurrentPlayer(data.username, parseInt(data.modelId));
@@ -128,6 +130,8 @@ export default class ExperienceManager {
 		});
 
 		ExperienceSocket.on<ISocketUserData>(SocketEvent.PLAYER_LEFT, (data) => {
+			console.log('Player left', data);
+
 			// Get player
 			const player = data.id === this.userId ? this.activeScene?.currentPlayer : this.activeScene?.players[data.id];
 
