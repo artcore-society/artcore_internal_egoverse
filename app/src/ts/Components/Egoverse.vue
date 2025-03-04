@@ -1,25 +1,37 @@
 <script setup lang="ts">
 import { SceneKey } from '../Enums/SceneKey';
+import { AvatarType } from '../Enums/AvatarType.ts';
 import { KeyboardKey } from '../Enums/KeyboardKey.ts';
-import { useAvatarStore } from '../Stores/AvatarStore';
-import { onBeforeUnmount, onMounted, ref, Ref, ComponentPublicInstance } from 'vue';
-import ExperienceManager from '../Classes/ExperienceManager';
+import { SocketEvent } from '../Enums/SocketEvent.ts';
+import { EventService } from '../Services/EventService.ts';
+import { ChatRoomScene } from '../Classes/ChatRoomScene';
+import { useAvatarStore } from '../Stores/AvatarStore.ts';
+import { CustomEventKey } from '../Enums/CustomEventKey.ts';
+import { LandingAreaScene } from '../Classes/LandingAreaScene';
+import { MeetingRoomScene } from '../Classes/MeetingRoomScene';
+import { ExperienceSocket } from '../Classes/ExperienceSocket.ts';
+import { ISocketMessageData } from '../Interfaces/ISocketMessageData.ts';
+import { ComponentPublicInstance, onBeforeUnmount, onMounted, Ref, ref, watch } from 'vue';
+import ExperienceManager from '../Classes/ExperienceManager.ts';
 import PrimaryButton from './PrimaryButton.vue';
 import Loader from './Loader.vue';
-import { EventService } from '../Services/EventService.ts';
-import { CustomEventKey } from '../Enums/CustomEventKey.ts';
-import KeybindingsModal from './KeybindingsModal.vue';
 import EmoteSelector from './EmoteSelector.vue';
 import KeyboardIcon from './Icons/KeyboardIcon.vue';
+import KeybindingsModal from './KeybindingsModal.vue';
+import ChatList from './ChatList.vue';
+import ChatModal from './ChatModal.vue';
 
 // Avatar store
 const { username, selectedAvatarId } = useAvatarStore();
 
-// State variables
-const isReady = ref(false);
+// Set variables
+const chats: Ref<Record<string, Array<{ message: string; avatarType: string }>>> = ref({});
+const selectedChatUserId: Ref<string | null> = ref(null);
+const isChatModalVisible: Ref<boolean> = ref(false);
+const isReady: Ref<boolean> = ref(false);
 const isEmoteSelectorVisible: Ref<boolean> = ref(false);
 const isKeyBindingsModalVisible: Ref<boolean> = ref(false);
-const canvas = ref<HTMLCanvasElement | null>(null);
+const canvas: Ref<HTMLCanvasElement | null> = ref(null);
 const areaButtons: Ref<Record<SceneKey, HTMLElement>> = ref({} as Record<SceneKey, HTMLElement>);
 const keyBindingsData: Ref<Array<{ instruction: string; labels: Array<string>; isCombination: boolean }>> = ref([
 	{ instruction: 'Move forward', labels: ['Z', 'Arrow Up'], isCombination: false },
@@ -50,6 +62,62 @@ function setReadyState(): void {
 	isReady.value = true;
 }
 
+function submitMessage(message: string) {
+	if (!ExperienceManager.instance.activeScene) {
+		return;
+	}
+
+	let visitorId: string | null;
+
+	if (ExperienceManager.instance.selectedAvatar.value) {
+		// Get visitor id to send message to via websockets by retrieving it from visitors list/object (keys are the visitor id's)
+		visitorId =
+			Object.keys(ExperienceManager.instance.activeScene.visitorAvatars).find((key) => {
+				return (
+					ExperienceManager.instance.activeScene?.visitorAvatars[key]?.model?.uuid ===
+					ExperienceManager.instance.selectedAvatar.value?.model?.uuid
+				);
+			}) ?? null;
+	} else {
+		// User has not selected an avatar and opened the chat via the UI => use the ref
+		visitorId = selectedChatUserId.value;
+	}
+
+	if (visitorId) {
+		// Populate first
+		if (!Array.isArray(chats.value[visitorId])) {
+			chats.value[visitorId] = [];
+		}
+
+		// Add your message to the chat if it exists with the target visitor
+		chats.value[visitorId]?.push({
+			message: message,
+			avatarType: AvatarType.CURRENT_PLAYER
+		});
+
+		// Send message to visitor via websocket event
+		ExperienceSocket.emit(SocketEvent.SEND_MESSAGE, {
+			receiverUserId: visitorId,
+			senderUserId: ExperienceManager.instance.userId,
+			message: message
+		});
+	}
+
+	// Reset hovered avatar
+	ExperienceManager.instance.selectedAvatar.value = null;
+}
+
+function openChatModal(visitorId: string) {
+	// Set refs
+	selectedChatUserId.value = visitorId;
+	isChatModalVisible.value = true;
+}
+
+function closeChatModal() {
+	isChatModalVisible.value = false;
+	selectedChatUserId.value = null;
+}
+
 function onKeyDown(event: KeyboardEvent) {
 	// Save pressed key
 	keysPressed[event.code as KeyboardKey] = true;
@@ -70,9 +138,51 @@ function onKeyUp(event: KeyboardEvent) {
 	keysPressed[event.code as KeyboardKey] = false;
 }
 
+// Watch
+watch(ExperienceManager.instance.selectedAvatar, (value) => {
+	if (value && ExperienceManager.instance.activeScene) {
+		// Get visitor id to send message to via websockets by retrieving it from visitors list/object (keys are the visitor id's)
+		const visitorId = Object.keys(ExperienceManager.instance.activeScene.visitorAvatars).find((key) => {
+			return ExperienceManager.instance.activeScene?.visitorAvatars[key]?.model?.uuid === value?.model?.uuid;
+		});
+
+		if (visitorId) {
+			// Open chat modal
+			openChatModal(visitorId);
+		}
+	}
+});
+
+watch(ExperienceManager.instance.incomingVisitorMessageData, (data: ISocketMessageData) => {
+	if (data && data.senderUserId && data.message) {
+		if (!chats.value[data.senderUserId]) {
+			// Create array if not set yet
+			chats.value[data.senderUserId] = [];
+		}
+
+		chats.value[data.senderUserId]?.push({
+			message: data.message,
+			avatarType: AvatarType.VISITOR
+		});
+	}
+});
+
+watch(isChatModalVisible, (newValue, oldValue) => {
+	if (newValue && newValue !== oldValue) {
+		// Disable interactivity
+		ExperienceManager.instance.setInteractiveState(false);
+
+		return;
+	}
+
+	// Enable interactivity
+	ExperienceManager.instance.setInteractiveState(true);
+});
+
 // Lifecycle hooks
 onMounted(() => {
 	if (canvas.value) {
+		// Initialize the experience manager
 		ExperienceManager.instance.init(canvas.value, username, selectedAvatarId);
 
 		// Listen for ready event (triggers when backend sends scene data)
@@ -97,7 +207,7 @@ onBeforeUnmount(() => {
 
 <template>
 	<div class="fixed inset-0 bg-white">
-		<div class="absolute top-5 left-5 z-10 flex items-center gap-2">
+		<div class="absolute top-5 left-5 z-10 flex items-center justify-center gap-2">
 			<Loader v-if="!isReady" />
 
 			<PrimaryButton
@@ -121,6 +231,16 @@ onBeforeUnmount(() => {
 				Chat Room
 			</PrimaryButton>
 		</div>
+
+		<ChatList :chats="chats" @open-chat-modal="openChatModal" />
+
+		<ChatModal
+			:show="isChatModalVisible"
+			:selected-chat-user-id="selectedChatUserId"
+			:chats="chats"
+			@submit-message="submitMessage"
+			@close="closeChatModal"
+		/>
 
 		<EmoteSelector :show="isEmoteSelectorVisible" @close="isEmoteSelectorVisible = false" />
 

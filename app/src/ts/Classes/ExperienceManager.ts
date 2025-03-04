@@ -176,10 +176,36 @@ export default class ExperienceManager {
 
 		ExperienceSocket.on<ISocketMessageData>(SocketEvent.SEND_MESSAGE, (data) => {
 			console.log('New message received!', data);
+
+			// Set ref
+			this.incomingVisitorMessageData.value = data;
 		});
 
 		ExperienceSocket.on<ISocketTriggerEmoteData>(SocketEvent.TRIGGER_EMOTE, (data) => {
 			console.log('Emote triggered!', data);
+
+			if (
+				!this.activeScene ||
+				!this.activeScene.currentPlayerAvatar ||
+				!this.activeScene.currentPlayerAvatar.controls
+			) {
+				return;
+			}
+
+			// Find target visitor
+			const targetVisitor = this.activeScene.visitorAvatars[data.userId] ?? null;
+
+			if (!targetVisitor) {
+				console.warn('Target avatar not found when trying to trigger emote...');
+				return;
+			}
+
+			if (!targetVisitor.controls) {
+				return;
+			}
+
+			// Set emote animation name
+			targetVisitor.controls.emoteAnimationName = data.animationName;
 		});
 	}
 	setActiveScene(key: SceneKey): void {
