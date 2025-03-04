@@ -31,7 +31,6 @@ export default class Player implements IPlayer {
 		spawnPosition: Vector3 = new Vector3(),
 		spawnRotation: Quaternion = new Quaternion()
 	) {
-		console.log('test');
 		this.username = username;
 		this.modelId = modelId;
 		this.experienceScene = experienceScene;
