@@ -8,5 +8,5 @@ export interface IPlayer {
     quaternion: Quaternion;
     isCurrent: boolean;
 
-    updatePosition(position: Vector3, quaternion: Quaternion): void;
+    updatePositionAndRotation(position: Vector3, quaternion: Quaternion): void;
 }

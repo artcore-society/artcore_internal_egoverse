@@ -20,7 +20,7 @@ export class Player implements IPlayer {
         this.isCurrent = isCurrent;
     }
 
-    updatePosition(position: Vector3, quaternion: Quaternion): void {
+    updatePositionAndRotation(position: Vector3, quaternion: Quaternion): void {
         this.position.copy(position);
         this.quaternion.copy(quaternion);
     }
