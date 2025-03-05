@@ -106,6 +106,17 @@ export default class ExperienceManager {
 
 		ExperienceSocket.on<ISocketSceneStateData>(SocketEvent.SCENE_STATE, (data) => {
 			console.log('Scene state', data);
+			// Add npcs if they're not present in active scene
+			data.npcs.forEach((npc) => {
+				console.log(npc);
+				this.activeScene?.addNpc(
+					npc.username,
+					npc.modelId,
+					new Vector3(...npc.position),
+					new Quaternion(...npc.quaternion)
+				);
+			});
+
 			// Sync visitors from active scene state
 			if (data.visitors && data.visitors.length > 0) {
 				data.visitors.forEach((visitor) => {

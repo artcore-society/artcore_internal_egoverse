@@ -28,6 +28,7 @@ export interface IExperienceScene {
 	removeVisitor(userId: string): void;
 	addCurrentPlayer(username: string, modelId: number): void;
 	removeCurrentPlayer(): void;
+	addNpc(username: string, modelId: number, spawnPosition: Vector3, spawnRotation: Quaternion): void;
 	update(delta: number): void;
 	destroy(): void;
 }

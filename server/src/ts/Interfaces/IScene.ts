@@ -1,12 +1,14 @@
-import { IPlayer } from './IPlayer';
+import { Npc } from '../Classes/Npc.ts';
+import { Player } from '../Classes/Player.ts';
 import { ISceneState } from './ISceneState.ts';
 import { ISceneSettings } from './ISceneSettings.ts';
 
 export interface IScene {
-    players: Map<string, IPlayer>;
+    players: Map<string, Player>;
+    npcs: Array<Npc>;
     settings: ISceneSettings
 
-    addPlayer(player: IPlayer): void;
+    addPlayer(player: Player): void;
     removePlayer(playerId: string): void;
     getState(currentUserId: string): ISceneState;
 }

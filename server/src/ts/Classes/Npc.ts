@@ -1,12 +1,8 @@
-import { IPlayer } from '../Interfaces/IPlayer.ts';
 import { BaseCharacter } from './BaseCharacter.ts';
 import { Quaternion, Vector3 } from 'three';
 
-export class Player extends BaseCharacter implements IPlayer {
-    public id: string;
-
+export class Npc extends BaseCharacter {
     constructor(
-        id: string,
         username: string,
         modelId: number,
         sceneKey: string,
@@ -14,7 +10,5 @@ export class Player extends BaseCharacter implements IPlayer {
         spawnRotation: Quaternion = new Quaternion()
     ) {
         super(username, modelId, sceneKey, spawnPosition, spawnRotation);
-
-        this.id = id;
     }
 }

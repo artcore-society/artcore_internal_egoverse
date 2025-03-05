@@ -9,6 +9,13 @@ export interface ISocketSceneStateData {
 		position: Vector3;
 		quaternion: Quaternion;
 	};
+	npcs: Array<{
+		username: string;
+		modelId: number;
+		sceneKey: string;
+		position: Vector3;
+		quaternion: Quaternion;
+	}>;
 	visitors: Array<{
 		id: string;
 		modelId: string;

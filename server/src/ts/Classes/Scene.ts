@@ -1,21 +1,28 @@
+import { Npc } from './Npc.ts';
+import { Player } from './Player.ts';
 import { IScene } from '../Interfaces/IScene';
-import { IPlayer } from '../Interfaces/IPlayer';
 import { SceneKey } from '../Enums/SceneKey.ts';
 import { ISceneState } from '../Interfaces/ISceneState.ts';
 import { ISceneSettings } from '../Interfaces/ISceneSettings.ts';
+import { Quaternion, Vector3 } from 'three';
+import {IBaseCharacter} from "../Interfaces/IBaseCharacter.ts";
 
 export class Scene implements IScene {
     sceneKey: SceneKey;
-    players: Map<string, IPlayer>;
+    players: Map<string, Player>;
+    npcs: Array<IBaseCharacter>;
     settings: ISceneSettings;
 
     constructor(sceneKey: SceneKey, settings: ISceneSettings = { color: 'Blue' }) {
         this.sceneKey = sceneKey;
         this.settings = settings;
         this.players = new Map();
+        this.npcs = [
+            new Npc('NPC #1', 1, SceneKey.LANDING_AREA, new Vector3(-2, 0, -4), this.degreesToQuaternion(215))
+        ];
     }
 
-    addPlayer(player: IPlayer): void {
+    addPlayer(player: Player): void {
         this.players.set(player.id, player);
     }
 
@@ -30,13 +37,27 @@ export class Scene implements IScene {
         return {
             sceneKey: this.sceneKey,
             currentPlayer,
+            npcs: this.npcs.map(npc => ({
+                username: npc.username,
+                modelId: npc.modelId,
+                position: npc.position.toArray(),
+                quaternion: [npc.quaternion.x, npc.quaternion.y, npc.quaternion.z, npc.quaternion.w]
+            })),
             visitors: visitors.map(v => ({
                 id: v.id,
                 username: v.username,
-                modelId: parseInt(v.modelId),
+                modelId: v.modelId,
                 position: v.position.toArray(),
                 quaternion: [v.quaternion.x, v.quaternion.y, v.quaternion.z, v.quaternion.w]
             }))
         };
+    }
+
+    private degreesToQuaternion(degrees: number): Quaternion {
+        const angleRad = (degrees * Math.PI) / 180;
+        const halfAngle = angleRad / 2;
+
+        // Return the quaternion
+        return new Quaternion(0, Math.sin(halfAngle), 0, Math.cos(halfAngle));
     }
 }
