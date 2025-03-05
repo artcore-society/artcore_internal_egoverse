@@ -89,7 +89,10 @@ export default class BaseCharacter implements IBaseCharacter {
 					y: 1,
 					z: 1,
 					ease: 'back.out',
-					duration: 1
+					duration: 1,
+					onComplete: () => {
+						this.model;
+					}
 				}
 			);
 		} catch (error) {

@@ -1,4 +1,5 @@
 import { gsap } from 'gsap';
+import { clone } from 'three/examples/jsm/utils/SkeletonUtils';
 import { SceneKey } from '../Enums/SceneKey';
 import { ref, Ref } from 'vue';
 import { ModelPrefix } from '../Enums/ModelPrefix.ts';
@@ -106,13 +107,9 @@ export default class ExperienceManager {
 
 		ExperienceSocket.on<ISocketSceneStateData>(SocketEvent.SCENE_STATE, (data) => {
 			console.log('Scene state', data);
+
 			// Add npcs if they're not present in active scene
 			data.npcs.forEach((npc) => {
-				if (this.activeScene?.npcs.find((n) => npc.username === n.username)) {
-					// Early return because npc with username is already present in scene
-					return;
-				}
-
 				this.activeScene?.addNpc(
 					npc.username,
 					npc.modelId,
@@ -259,8 +256,16 @@ export default class ExperienceManager {
 				duration: 0.4,
 				ease: 'back.inOut',
 				onComplete: () => {
-					// Remove active player from previous scene
-					this.activeScene?.removeCurrentPlayer();
+					if (this.activeScene) {
+						// Remove active player from previous scene
+						this.activeScene.removeCurrentPlayer();
+
+						// Call destroy method on npc characters
+						this.activeScene.npcs.forEach((npc) => npc.destroy());
+
+						// Clear list
+						this.activeScene.npcs = [];
+					}
 
 					// Set new active scene
 					this.activeScene = this.scenes.get(key) || null;
@@ -412,7 +417,7 @@ export default class ExperienceManager {
 				cachedGltf.model.quaternion.copy(spawnRotation);
 
 				// Resolve
-				resolve({ model: cachedGltf.model, animations: cachedGltf.animations });
+				resolve({ model: clone(cachedGltf.model), animations: cachedGltf.animations });
 
 				return;
 			}
