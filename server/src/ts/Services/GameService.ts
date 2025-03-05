@@ -1,3 +1,4 @@
+import { Npc } from '../Classes/Npc.ts';
 import { Scene } from '../Classes/Scene';
 import { Player } from '../Classes/Player';
 import { SceneKey } from '../Enums/SceneKey';
@@ -43,17 +44,34 @@ export class GameService {
     }
 
     /**
-     * Initializes game scenes with predefined settings.
+     * Initializes game scenes with predefined data.
      */
     private initScenes() {
+        // Define scene settings
         const scenesSettings: Map<SceneKey, ISceneSettings> = new Map();
         scenesSettings.set(SceneKey.LANDING_AREA, { color: 'Red' });
         scenesSettings.set(SceneKey.MEETING_ROOM, { color: 'Blue' });
         scenesSettings.set(SceneKey.CHAT_ROOM, { color: 'Green' });
 
+        // Define scene npc characters
+        const scenesNpcs: Map<SceneKey, Array<Npc>> = new Map();
+        scenesNpcs.set(SceneKey.LANDING_AREA, [
+            new Npc('Peter', 1, new Vector3(-2, 0, -4), this.degreesToQuaternion(215)),
+            new Npc('Bart', 1, new Vector3(1.5, 0, -2), this.degreesToQuaternion(145)),
+        ]);
+        scenesNpcs.set(SceneKey.MEETING_ROOM, [
+            new Npc('Theo', 1, new Vector3(1.5, 0, -2), this.degreesToQuaternion(145)),
+        ]);
+        scenesNpcs.set(SceneKey.CHAT_ROOM, [
+            new Npc('Walter', 1, new Vector3(1, 0, -3), this.degreesToQuaternion(135)),
+        ]);
+
         // Creates scene instances and stores them in the map.
         this.scenes = new Map(
-            Object.values(SceneKey).map(key => [key as SceneKey, new Scene(key, scenesSettings.get(key))])
+            Object.values(SceneKey).map(key => [
+                key as SceneKey,
+                new Scene(key, scenesNpcs.get(key), scenesSettings.get(key))
+            ])
         );
     }
 
@@ -71,7 +89,7 @@ export class GameService {
         console.log(`New connection: ${socket.id}`);
 
         const username = this.sanitizeInput(socket.handshake.query.username as string);
-        const modelId = String(socket.handshake.query.modelId) || '1';
+        const modelId = parseInt(<string>socket.handshake.query.modelId) || 1;
         const sceneKey = this.sanitizeInput(socket.handshake.query.sceneKey) as SceneKey || SceneKey.LANDING_AREA;
 
         // Validate username and scene key.
@@ -101,6 +119,7 @@ export class GameService {
             scenes: Array.from(this.scenes.values()).map(scene => ({
                 sceneKey: scene.sceneKey,
                 settings: scene.settings,
+                npcs: scene.npcs
             }))
         });
 
@@ -266,5 +285,16 @@ export class GameService {
             .replace(/</g, '&lt;') // Replace '<' with '&lt;' to prevent HTML injection
             .replace(/>/g, '&gt;') // Replace '>' with '&gt;' to prevent HTML injection
             .trim(); // Remove leading and trailing whitespace
+    }
+
+    /**
+     * Convert degrees to a quaternion
+     */
+    private degreesToQuaternion(degrees: number): Quaternion {
+        const angleRad = (degrees * Math.PI) / 180;
+        const halfAngle = angleRad / 2;
+
+        // Return the quaternion
+        return new Quaternion(0, Math.sin(halfAngle), 0, Math.cos(halfAngle));
     }
 }

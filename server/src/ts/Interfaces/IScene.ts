@@ -2,6 +2,7 @@ import { Npc } from '../Classes/Npc.ts';
 import { Player } from '../Classes/Player.ts';
 import { ISceneState } from './ISceneState.ts';
 import { ISceneSettings } from './ISceneSettings.ts';
+import { Quaternion, Vector3 } from 'three';
 
 export interface IScene {
     players: Map<string, Player>;

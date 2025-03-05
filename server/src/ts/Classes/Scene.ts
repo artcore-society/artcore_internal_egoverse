@@ -4,7 +4,6 @@ import { IScene } from '../Interfaces/IScene';
 import { SceneKey } from '../Enums/SceneKey.ts';
 import { ISceneState } from '../Interfaces/ISceneState.ts';
 import { ISceneSettings } from '../Interfaces/ISceneSettings.ts';
-import { Quaternion, Vector3 } from 'three';
 
 export class Scene implements IScene {
     sceneKey: SceneKey;
@@ -12,13 +11,11 @@ export class Scene implements IScene {
     npcs: Array<Npc>;
     settings: ISceneSettings;
 
-    constructor(sceneKey: SceneKey, settings: ISceneSettings = { color: 'Blue' }) {
+    constructor(sceneKey: SceneKey, npcs: Array<Npc> = [], settings: ISceneSettings = { color: 'Blue' }) {
         this.sceneKey = sceneKey;
+        this.npcs = npcs;
         this.settings = settings;
         this.players = new Map();
-        this.npcs = [
-            new Npc('NPC #1', 1, SceneKey.LANDING_AREA, new Vector3(-2, 0, -4), this.degreesToQuaternion(215))
-        ];
     }
 
     addPlayer(player: Player): void {
@@ -50,13 +47,5 @@ export class Scene implements IScene {
                 quaternion: [v.quaternion.x, v.quaternion.y, v.quaternion.z, v.quaternion.w]
             }))
         };
-    }
-
-    private degreesToQuaternion(degrees: number): Quaternion {
-        const angleRad = (degrees * Math.PI) / 180;
-        const halfAngle = angleRad / 2;
-
-        // Return the quaternion
-        return new Quaternion(0, Math.sin(halfAngle), 0, Math.cos(halfAngle));
     }
 }
