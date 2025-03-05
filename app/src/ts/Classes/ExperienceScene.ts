@@ -63,21 +63,8 @@ export default class ExperienceScene implements IExperienceScene {
 		// Setup floor
 		this.setupFloor();
 
-		if (sceneKey === SceneKey.LANDING_AREA) {
-			// Create npc
-			const npc = new Npc(
-				'NPC #1',
-				ModelPrefix.NPC,
-				1,
-				this,
-				this.camera,
-				new Vector3(0, 0, -5),
-				new Quaternion(0, 1, 0, 0)
-			);
-
-			// Add to npc list
-			this.npcs.push(npc);
-		}
+		// Add npc characters
+		this.addNpcCharacters();
 	}
 
 	public get currentPlayer() {
@@ -126,6 +113,36 @@ export default class ExperienceScene implements IExperienceScene {
 		dirLight.shadow.camera = new OrthographicCamera(-10, 10, 10, -10, 1, 1000);
 		dirLight.shadow.mapSize.set(4096, 4096);
 		this.scene.add(dirLight);
+	}
+
+	private addNpcCharacters() {
+		if (this.sceneKey === SceneKey.LANDING_AREA) {
+			// Define the rotation angle in degrees
+			const angleDeg = 215;
+
+			// Convert degrees to radians
+			const angleRad = (angleDeg * Math.PI) / 180;
+
+			// Compute half of the rotation angle (since quaternions use half-angles)
+			const halfAngle = angleRad / 2;
+
+			// Create the quaternion for rotation around the Y-axis
+			const rotation = new Quaternion(0, Math.sin(halfAngle), 0, Math.cos(halfAngle));
+
+			// Create NPC with the computed quaternion
+			const npc = new Npc(
+				'NPC #1',
+				ModelPrefix.NPC,
+				1,
+				this,
+				this.camera,
+				new Vector3(-2, 0, -4), // NPC position in the scene
+				rotation // Correct rotation applied
+			);
+
+			// Add NPC to the list
+			this.npcs.push(npc);
+		}
 	}
 
 	public addCurrentPlayer(username: string, modelId: number) {
