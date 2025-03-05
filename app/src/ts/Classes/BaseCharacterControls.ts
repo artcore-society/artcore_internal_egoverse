@@ -2,9 +2,10 @@ import { KeyboardKey } from '../Enums/KeyboardKey.ts';
 import { AnimationName } from '../Enums/AnimationName.ts';
 import { IBaseCharacter } from '../Interfaces/IBaseCharacter.ts';
 import { Quaternion, Vector3 } from 'three';
+import { IBaseCharacterControls } from '../Interfaces/IBaseCharacterControls.ts';
 import Player from './Player.ts';
 
-export default class BaseCharacterControls {
+export default class BaseCharacterControls implements IBaseCharacterControls {
 	private readonly character: IBaseCharacter;
 	private currentAction: AnimationName = AnimationName.IDLE;
 	private walkDirection: Vector3 = new Vector3();
