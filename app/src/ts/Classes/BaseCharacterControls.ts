@@ -225,11 +225,12 @@ export default class BaseCharacterControls implements IBaseCharacterControls {
 
 			// Get the duration of the animation (you may need to adjust this depending on your system)
 			const clip = animationToPlay.getClip();
+			const clipDuration = clip.duration * 0.95;
 
 			// Set a timeout to reset the emote animation name after the animation duration
 			this.overwriteAnimationTimeout = setTimeout(() => {
 				this.overwriteAnimationName = null; // Reset the emote animation
-			}, clip.duration * 1000); // Multiply by 1000 to convert to milliseconds
+			}, clipDuration * 1000); // Multiply by 1000 to convert to milliseconds
 
 			// Fade out the current animation
 			currentAnimation.fadeOut(this.fadeDuration);

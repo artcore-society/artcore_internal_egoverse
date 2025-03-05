@@ -42,6 +42,7 @@ export default class ExperienceManager {
 	public incomingVisitorMessageData: Ref<ISocketMessageData> = ref({ message: null, senderUserId: null });
 	public isInteractive: boolean = true;
 	private modelCache: Map<string, IModelCacheEntry> = new Map();
+	private needsRaycast: boolean = false;
 
 	private constructor() {}
 
@@ -429,8 +430,13 @@ export default class ExperienceManager {
 			// Update the active scene
 			this.activeScene.update(delta);
 
-			// Handle raycaster
-			this.handleRaycaster();
+			if (this.needsRaycast) {
+				// Handle raycaster
+				this.handleRaycaster();
+
+				// Set needs raycast
+				this.needsRaycast = false;
+			}
 
 			// Render the renderer
 			this.renderer.render(this.activeScene.scene, this.activeScene.camera);
@@ -467,6 +473,9 @@ export default class ExperienceManager {
 
 		this.pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
 		this.pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+		// Set needs raycast
+		this.needsRaycast = true;
 	}
 
 	checkIntersectingPlayer() {
