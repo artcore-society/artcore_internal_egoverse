@@ -1,10 +1,10 @@
 import { ModelPrefix } from '../Enums/ModelPrefix.ts';
+import { AnimationName } from '../Enums/AnimationName.ts';
 import { Quaternion, Vector3 } from 'three';
 import ExperienceScene from './ExperienceScene.ts';
 import BaseCharacter from './BaseCharacter.ts';
 import ExperienceCamera from './ExperienceCamera.ts';
 import NpcControls from './NpcControls.ts';
-import { AnimationName } from '../Enums/AnimationName.ts';
 
 export default class Npc extends BaseCharacter {
 	constructor(
@@ -22,8 +22,13 @@ export default class Npc extends BaseCharacter {
 		this.init().then(() => {
 			// Setup controls after npc is fully initiated
 			this.controls = new NpcControls(this);
-
-			this.controls.playAnimation(AnimationName.TALKING);
 		});
+	}
+
+	public startDialog(): void {
+		if (this.controls) {
+			// Start playing talking animation
+			this.controls.playAnimation(AnimationName.TALKING);
+		}
 	}
 }
