@@ -309,7 +309,7 @@ export default class ExperienceManager {
 		const intersects = this.raycaster.intersectObjects(this.activeScene.scene.children, true);
 
 		// Find the first intersected object that belongs to an player
-		const avatarIntersect = intersects.find((intersect) => {
+		const playerIntersect = intersects.find((intersect) => {
 			let obj: IExtendedObject3D = intersect.object;
 
 			// Traverse up the parent hierarchy to find the player root
@@ -322,28 +322,37 @@ export default class ExperienceManager {
 			return false;
 		});
 
-		if (avatarIntersect) {
+		if (playerIntersect) {
 			// Get the actual player root object
-			let avatarRoot: IExtendedObject3D = avatarIntersect.object;
-			while (avatarRoot && !avatarRoot.isPlayer) {
-				avatarRoot = avatarRoot.parent as Object3D;
+			let playerRoot: IExtendedObject3D = playerIntersect.object;
+			while (playerRoot && !playerRoot.isPlayer) {
+				playerRoot = playerRoot.parent as Object3D;
 			}
 
 			if (
 				this.activeScene &&
 				this.activeScene.players &&
 				Object.values(this.activeScene.players).length > 0 &&
-				avatarRoot
+				playerRoot
 			) {
-				// Find the actual class instance
-				this.hoveredPlayer =
-					Object.values(this.activeScene?.players).find((player: Player) => player.model?.uuid === avatarRoot.uuid) ??
-					null;
+				// Find the actual class instance with socket id
+				const hoveredPlayerEntry = Object.entries(this.activeScene?.players ?? {}).find(
+					([_, player]) => player.model?.uuid === playerRoot.uuid
+				);
 
-				if (this.hoveredPlayer) {
-					if (!document.body.classList.contains('cursor-pointer')) {
-						document.body.classList.add('cursor-pointer');
-					}
+				if (!hoveredPlayerEntry) {
+					return;
+				}
+
+				const hoveredPlayerSocketId = hoveredPlayerEntry[0] ?? null;
+				this.hoveredPlayer = hoveredPlayerEntry[1] ?? null;
+
+				if (
+					this.hoveredPlayer &&
+					this.userId !== hoveredPlayerSocketId &&
+					!document.body.classList.contains('cursor-pointer')
+				) {
+					document.body.classList.add('cursor-pointer');
 				}
 			}
 
@@ -384,7 +393,7 @@ export default class ExperienceManager {
 				const model: IExtendedObject3D = gltf.scene;
 
 				// Do adjustments
-				model.isPlayer = true;
+				if (prefix === ModelPrefix.PLAYER) model.isPlayer = true;
 				model.position.copy(spawnPosition);
 				model.quaternion.copy(spawnRotation);
 				model.castShadow = true;
