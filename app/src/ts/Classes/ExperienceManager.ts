@@ -207,7 +207,7 @@ export default class ExperienceManager {
 			}
 
 			// Set emote animation name
-			targetVisitor.controls.emoteAnimationName = data.animationName;
+			targetVisitor.controls.playAnimation(data.animationName);
 		});
 	}
 	setActiveScene(key: SceneKey): void {

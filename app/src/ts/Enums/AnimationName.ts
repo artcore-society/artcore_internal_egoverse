@@ -10,5 +10,6 @@ export enum AnimationName {
 	PAIN = 'Pain',
 	TAUNTING = 'Taunting',
 	FALL = 'Fall',
-	CHEERING = 'Cheering'
+	CHEERING = 'Cheering',
+	TALKING = 'Talking'
 }

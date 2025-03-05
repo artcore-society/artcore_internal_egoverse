@@ -15,8 +15,9 @@ export default class BaseCharacterControls implements IBaseCharacterControls {
 	private fadeDuration: number = 0.2;
 	private runVelocity: number = 5;
 	private walkVelocity: number = 2;
-	private emoteAnimationTimeout: ReturnType<typeof setTimeout> | null = null;
-	public emoteAnimationName: AnimationName | null = null;
+	private jumpAnimationTimeout: ReturnType<typeof setTimeout> | null = null;
+	private overwriteAnimationTimeout: ReturnType<typeof setTimeout> | null = null;
+	private overwriteAnimationName: AnimationName | null = null;
 	public keysPressed: { [key in KeyboardKey]: boolean } = {} as {
 		[key in KeyboardKey]: boolean;
 	};
@@ -74,9 +75,7 @@ export default class BaseCharacterControls implements IBaseCharacterControls {
 			return;
 		}
 
-		if (this.emoteAnimationName) {
-			this.playAnimation(this.emoteAnimationName);
-
+		if (this.overwriteAnimationName) {
 			return;
 		}
 
@@ -124,17 +123,17 @@ export default class BaseCharacterControls implements IBaseCharacterControls {
 			// User does combo's => the previously set timeout must be cleared to stop the new animation at the correct time
 			if (isJumpKeyPressed) {
 				// Clear timeout if one is already set
-				if (this.emoteAnimationTimeout) {
+				if (this.jumpAnimationTimeout) {
 					// Reset
-					clearTimeout(this.emoteAnimationTimeout);
-					this.emoteAnimationTimeout = null;
+					clearTimeout(this.jumpAnimationTimeout);
+					this.jumpAnimationTimeout = null;
 				}
 
 				// Set jumping state
 				this.isJumping = true;
 
 				// Reset when animation is done
-				this.emoteAnimationTimeout = setTimeout(() => {
+				this.jumpAnimationTimeout = setTimeout(() => {
 					// Set false to disable jump or running jump animation
 					this.isJumping = false;
 				}, clipDuration * 1000);
@@ -207,6 +206,9 @@ export default class BaseCharacterControls implements IBaseCharacterControls {
 	}
 
 	playAnimation(animationName: AnimationName) {
+		// Set
+		this.overwriteAnimationName = animationName;
+
 		if (this.currentAction !== animationName) {
 			const animationToPlay = this.character.animationsMap.get(animationName);
 			const currentAnimation = this.character.animationsMap.get(this.currentAction);
@@ -216,19 +218,18 @@ export default class BaseCharacterControls implements IBaseCharacterControls {
 			}
 
 			// Clear the previous timeout if it's set
-			if (this.emoteAnimationTimeout) {
-				clearTimeout(this.emoteAnimationTimeout);
-				this.emoteAnimationTimeout = null;
+			if (this.overwriteAnimationTimeout) {
+				clearTimeout(this.overwriteAnimationTimeout);
+				this.overwriteAnimationTimeout = null;
 			}
 
 			// Get the duration of the animation (you may need to adjust this depending on your system)
 			const clip = animationToPlay.getClip();
-			const clipDuration = clip.duration * 0.8; // Optional: Adjust duration if needed
 
 			// Set a timeout to reset the emote animation name after the animation duration
-			this.emoteAnimationTimeout = setTimeout(() => {
-				this.emoteAnimationName = null; // Reset the emote animation
-			}, clipDuration * 1000); // Multiply by 1000 to convert to milliseconds
+			this.overwriteAnimationTimeout = setTimeout(() => {
+				this.overwriteAnimationName = null; // Reset the emote animation
+			}, clip.duration * 1000); // Multiply by 1000 to convert to milliseconds
 
 			// Fade out the current animation
 			currentAnimation.fadeOut(this.fadeDuration);
