@@ -17,7 +17,7 @@ import { ISocketMessageData } from '../Interfaces/ISocketMessageData.ts';
 import { ISocketSceneStateData } from '../Interfaces/ISocketSceneStateData.ts';
 import { ISocketTriggerEmoteData } from '../Interfaces/ISocketTriggerEmoteData.ts';
 import { ISocketClientUpdatePlayerData } from '../Interfaces/ISocketClientUpdatePlayerData.ts';
-import { Clock, DefaultLoadingManager, LoadingManager, Object3D, Quaternion, Raycaster, Vector2, Vector3 } from 'three';
+import { Clock, DefaultLoadingManager, LoadingManager, Quaternion, Raycaster, Vector2, Vector3 } from 'three';
 import ExperienceRenderer from './ExperienceRenderer.ts';
 import Player from './Player.ts';
 import ExperienceScene from './ExperienceScene.ts';
@@ -46,6 +46,8 @@ export default class ExperienceManager {
 	private modelCache: Map<string, IModelCacheEntry> = new Map();
 	private needsRaycast: boolean = false;
 	private stats: Stats = new Stats();
+	private raycastThrottle: number = 0;
+	private static readonly RAYCAST_INTERVAL: number = 5; // Runs every 5 frames
 
 	private constructor() {}
 
@@ -333,73 +335,82 @@ export default class ExperienceManager {
 			return;
 		}
 
-		// Set raycaster near/far limits
-		this.raycaster.near = 1;
-		this.raycaster.far = 1000;
+		this.raycastThrottle++;
+		if (this.raycastThrottle % ExperienceManager.RAYCAST_INTERVAL !== 0) {
+			return;
+		}
 
 		// Update the picking ray with the camera and pointer position
 		this.raycaster.setFromCamera(this.pointer, this.activeScene.camera);
 
+		// Filter players and NPCs beforehand
+		const intersectTargets = [
+			...Object.values(this.activeScene.players).map((player) => player.model),
+			...this.activeScene.npcs.map((npc) => npc.model)
+		];
+
 		// Calculate objects intersecting the picking ray
-		const intersects = this.raycaster.intersectObjects(this.activeScene.scene.children, true);
+		const intersects = this.raycaster.intersectObjects(intersectTargets, true);
 
 		// Find the first intersected object that belongs to an player
-		const playerIntersect = intersects.find((intersect) => {
+		let characterIntersect: IExtendedObject3D | null = null;
+		for (const intersect of intersects) {
 			let obj: IExtendedObject3D = intersect.object;
 
-			// Traverse up the parent hierarchy to find the player root
+			// Traverse up to find the player or NPC root
 			while (obj) {
 				if (obj.isPlayer || obj.isNpc) {
-					return true;
+					characterIntersect = obj; // Assign the actual player/NPC object
+					break; // Stop traversing since we found the right object
 				}
-				obj = obj.parent as Object3D;
-			}
-			return false;
-		});
-
-		if (playerIntersect) {
-			// Get the actual player root object
-			let characterRoot: IExtendedObject3D = playerIntersect.object;
-			while (characterRoot && !(characterRoot.isPlayer || characterRoot.isNpc)) {
-				characterRoot = characterRoot.parent as Object3D;
+				obj = obj.parent as IExtendedObject3D;
 			}
 
-			if (
-				this.activeScene &&
-				this.activeScene.players &&
-				Object.values(this.activeScene.players).length > 0 &&
-				characterRoot
-			) {
-				const hoveredPlayerEntry = Object.entries(this.activeScene?.players ?? {}).find(
-					([_, player]) => player.model?.uuid === characterRoot.uuid && !player.isCurrent
-				);
+			if (characterIntersect) break; // Stop searching once we find one
+		}
 
-				this.hoveredNpc =
-					Object.values(this.activeScene?.npcs ?? {}).find((npc) => npc.model?.uuid === characterRoot.uuid) ?? null;
+		if (!characterIntersect || !this.activeScene) {
+			// Remove class
+			document.body.classList.remove('cursor-pointer');
 
-				let hoveredPlayerSocketId = null;
-				if (hoveredPlayerEntry && hoveredPlayerEntry.length > 0) {
-					hoveredPlayerSocketId = hoveredPlayerEntry[0] ?? null;
-					this.hoveredPlayer = hoveredPlayerEntry[1] ?? null;
-				}
-
-				if (
-					((this.hoveredPlayer && this.userId !== hoveredPlayerSocketId) || this.hoveredNpc) &&
-					!document.body.classList.contains('cursor-pointer')
-				) {
-					document.body.classList.add('cursor-pointer');
-				}
-			}
+			// Reset hovered player and npc when not hovering anymore
+			this.hoveredPlayer = null;
+			this.hoveredNpc = null;
 
 			return;
 		}
 
-		// Make sure to remove cursor class
-		document.body.classList.remove('cursor-pointer');
+		// Attempt to find the hovered player or NPC in a single pass
+		const players = this.activeScene.players;
+		const npcs = this.activeScene.npcs;
 
-		// Reset hovered player and npc when not hovering anymore
 		this.hoveredPlayer = null;
 		this.hoveredNpc = null;
+		let hoveredPlayerSocketId: string | null = null;
+
+		for (const [socketId, player] of Object.entries(players)) {
+			if (player.model?.uuid === characterIntersect.uuid) {
+				if (!player.isCurrent) {
+					this.hoveredPlayer = player;
+					hoveredPlayerSocketId = socketId;
+				}
+				break; // Found the player, exit early
+			}
+		}
+
+		if (!this.hoveredPlayer) {
+			for (const npc of npcs) {
+				if (npc.model?.uuid === characterIntersect.uuid) {
+					this.hoveredNpc = npc;
+					break; // Found an NPC, exit early
+				}
+			}
+		}
+
+		// Update cursor if needed
+		if ((this.hoveredPlayer && this.userId !== hoveredPlayerSocketId) || this.hoveredNpc) {
+			document.body.classList.add('cursor-pointer');
+		}
 	}
 
 	public fetchOrLoadModelCacheEntry(
