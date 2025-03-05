@@ -1,6 +1,9 @@
 import { gsap } from 'gsap';
+import { IPlayer } from '../Interfaces/IPlayer.ts';
 import { SceneKey } from '../Enums/SceneKey.ts';
+import { ModelPrefix } from '../Enums/ModelPrefix.ts';
 import { SocketEvent } from '../Enums/SocketEvent.ts';
+import { ISceneSettings } from '../Interfaces/ISceneSettings.ts';
 import { ExperienceSocket } from './ExperienceSocket.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import {
@@ -21,9 +24,6 @@ import {
 import ExperienceCamera from './ExperienceCamera.ts';
 import Player from './Player.ts';
 import ExperienceManager from './ExperienceManager.ts';
-import { ISceneSettings } from '../Interfaces/ISceneSettings.ts';
-import { IPlayer } from '../Interfaces/IPlayer.ts';
-import { ModelPrefix } from '../Enums/ModelPrefix.ts';
 import Npc from './Npc.ts';
 
 export default class ExperienceScene implements IExperienceScene {

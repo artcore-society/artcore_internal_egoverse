@@ -25,10 +25,10 @@ export default class Player extends BaseCharacter implements IPlayer {
 
 		// Initiate
 		this.init().then(() => {
-			if (this.isCurrent) {
-				// Setup controls after player is fully initiated
-				this.controls = new PlayerControls(this);
+			// Setup controls after player is fully initiated
+			this.controls = new PlayerControls(this);
 
+			if (this.isCurrent) {
 				// Make sure controls are connected
 				this.controls.connect();
 			}
