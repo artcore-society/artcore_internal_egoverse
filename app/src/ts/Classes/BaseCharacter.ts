@@ -6,6 +6,9 @@ import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { AnimationAction, AnimationClip, AnimationMixer, Mesh, Object3D, Quaternion, Vector3 } from 'three';
 import ExperienceScene from './ExperienceScene.ts';
 import ExperienceManager from './ExperienceManager.ts';
+import PlayerControls from './PlayerControls.ts';
+import NpcControls from './NpcControls.ts';
+import ExperienceCamera from './ExperienceCamera.ts';
 
 export default class BaseCharacter implements IBaseCharacter {
 	public animationsMap: Map<string, AnimationAction>;
@@ -14,13 +17,17 @@ export default class BaseCharacter implements IBaseCharacter {
 	public model: Object3D;
 	public modelPrefix: ModelPrefix;
 	public modelId: number;
+	public controls: PlayerControls | NpcControls | null = null;
+	public camera: ExperienceCamera;
 	public spawnPosition: Vector3;
 	public spawnRotation: Quaternion;
 	public username: string;
+
 	constructor(
 		username: string,
 		modelPrefix: ModelPrefix,
 		modelId: number,
+		camera: ExperienceCamera,
 		experienceScene: ExperienceScene,
 		spawnPosition: Vector3 = new Vector3(),
 		spawnRotation: Quaternion = new Quaternion()
@@ -28,6 +35,7 @@ export default class BaseCharacter implements IBaseCharacter {
 		this.username = username;
 		this.modelPrefix = modelPrefix;
 		this.modelId = modelId;
+		this.camera = camera;
 		this.experienceScene = experienceScene;
 		this.spawnPosition = spawnPosition;
 		this.spawnRotation = spawnRotation;
@@ -93,9 +101,19 @@ export default class BaseCharacter implements IBaseCharacter {
 	update(delta: number): void {
 		// Update the mixer
 		this.mixer.update(delta);
+
+		if (this.controls && ExperienceManager.instance.isInteractive) {
+			// Update controls
+			this.controls.update(delta, this.controls.keysPressed);
+		}
 	}
 
 	destroy(): void {
+		if (this.controls) {
+			// Disconnect player controls
+			this.controls.disconnect();
+		}
+
 		if (this.model) {
 			// Make sure all tweens are killed first
 			gsap.killTweensOf(this.model.scale);
