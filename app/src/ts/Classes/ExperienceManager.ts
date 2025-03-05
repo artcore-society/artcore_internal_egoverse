@@ -21,6 +21,7 @@ import ExperienceRenderer from './ExperienceRenderer.ts';
 import Player from './Player.ts';
 import ExperienceScene from './ExperienceScene.ts';
 import Npc from './Npc.ts';
+import Stats from 'stats.js';
 
 export default class ExperienceManager {
 	private static _instance: ExperienceManager | null = null;
@@ -43,6 +44,7 @@ export default class ExperienceManager {
 	public isInteractive: boolean = true;
 	private modelCache: Map<string, IModelCacheEntry> = new Map();
 	private needsRaycast: boolean = false;
+	private stats: Stats = new Stats();
 
 	private constructor() {}
 
@@ -74,6 +76,12 @@ export default class ExperienceManager {
 
 		// Setup websocket event listeners
 		this.setupSocketListeners();
+
+		// Setup stats
+		this.stats.showPanel(0);
+		if (!document.body.contains(this.stats.dom)) {
+			document.body.appendChild(this.stats.dom);
+		}
 	}
 
 	private setupSocketListeners(): void {
@@ -427,6 +435,9 @@ export default class ExperienceManager {
 		const delta = this.clock.getDelta();
 
 		if (this.activeScene && this.renderer) {
+			// Begin stats
+			this.stats.begin();
+
 			// Update the active scene
 			this.activeScene.update(delta);
 
@@ -440,6 +451,9 @@ export default class ExperienceManager {
 
 			// Render the renderer
 			this.renderer.render(this.activeScene.scene, this.activeScene.camera);
+
+			// End stats
+			this.stats.end();
 		}
 
 		// Request new frame
