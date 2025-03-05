@@ -5,12 +5,11 @@ import { SceneKey } from '../Enums/SceneKey.ts';
 import { ISceneState } from '../Interfaces/ISceneState.ts';
 import { ISceneSettings } from '../Interfaces/ISceneSettings.ts';
 import { Quaternion, Vector3 } from 'three';
-import {IBaseCharacter} from "../Interfaces/IBaseCharacter.ts";
 
 export class Scene implements IScene {
     sceneKey: SceneKey;
     players: Map<string, Player>;
-    npcs: Array<IBaseCharacter>;
+    npcs: Array<Npc>;
     settings: ISceneSettings;
 
     constructor(sceneKey: SceneKey, settings: ISceneSettings = { color: 'Blue' }) {
