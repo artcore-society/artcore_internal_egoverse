@@ -35,8 +35,6 @@ export default class BaseCharacterControls implements IBaseCharacterControls {
 		// Set properties
 		this.character = character;
 
-		console.log(this.character);
-
 		// Call animation when corresponding key is pressed
 		this.character.animationsMap.forEach((animation, key) => {
 			if (key === this.currentAction) {

@@ -24,6 +24,7 @@ import ExperienceManager from './ExperienceManager.ts';
 import { ISceneSettings } from '../Interfaces/ISceneSettings.ts';
 import { IPlayer } from '../Interfaces/IPlayer.ts';
 import { ModelPrefix } from '../Enums/ModelPrefix.ts';
+import Npc from './Npc.ts';
 
 export default class ExperienceScene implements IExperienceScene {
 	public readonly scene: Scene;
@@ -33,6 +34,7 @@ export default class ExperienceScene implements IExperienceScene {
 	public cameraParent: Object3D;
 	public updateAction: ((delta: number) => void) | null;
 	public players: { [key: string]: Player } = {};
+	public npcs: Array<Npc> = [];
 
 	constructor(canvas: HTMLCanvasElement, sceneKey: SceneKey, settings: ISceneSettings = { color: 'Blue' }) {
 		this.scene = new Scene();
@@ -60,6 +62,22 @@ export default class ExperienceScene implements IExperienceScene {
 
 		// Setup floor
 		this.setupFloor();
+
+		if (sceneKey === SceneKey.LANDING_AREA) {
+			// Create npc
+			const npc = new Npc(
+				'NPC #1',
+				ModelPrefix.NPC,
+				1,
+				this,
+				this.camera,
+				new Vector3(0, 0, -5),
+				new Quaternion(0, 1, 0, 0)
+			);
+
+			// Add to npc list
+			this.npcs.push(npc);
+		}
 	}
 
 	public get currentPlayer() {
@@ -201,6 +219,9 @@ export default class ExperienceScene implements IExperienceScene {
 				spawnRotation: this.currentPlayer.model.quaternion.toArray()
 			});
 		}
+
+		// Update npc characters
+		this.npcs.forEach((npc) => npc.update(delta));
 	}
 
 	public destroy(): void {
