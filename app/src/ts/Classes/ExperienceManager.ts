@@ -1,6 +1,7 @@
 import { gsap } from 'gsap';
 import { SceneKey } from '../Enums/SceneKey';
 import { ref, Ref } from 'vue';
+import { ModelPrefix } from '../Enums/ModelPrefix.ts';
 import { SocketEvent } from '../Enums/SocketEvent.ts';
 import { ThreeLoaders } from './ThreeLoaders.ts';
 import { EventService } from '../Services/EventService.ts';
@@ -10,7 +11,7 @@ import { ISocketInitData } from '../Interfaces/ISocketInitData.ts';
 import { ExperienceSocket } from './ExperienceSocket.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { IExtendedObject3D } from '../Interfaces/IExtendedObject3D.ts';
-import { IPlayerCacheEntry } from '../Interfaces/IPlayerCacheEntry.ts';
+import { IModelCacheEntry } from '../Interfaces/IModelCacheEntry.ts';
 import { ISocketMessageData } from '../Interfaces/ISocketMessageData.ts';
 import { ISocketSceneStateData } from '../Interfaces/ISocketSceneStateData.ts';
 import { ISocketTriggerEmoteData } from '../Interfaces/ISocketTriggerEmoteData.ts';
@@ -19,6 +20,7 @@ import { Clock, DefaultLoadingManager, LoadingManager, Object3D, Quaternion, Ray
 import ExperienceRenderer from './ExperienceRenderer.ts';
 import Player from './Player.ts';
 import ExperienceScene from './ExperienceScene.ts';
+import Npc from './Npc.ts';
 
 export default class ExperienceManager {
 	private static _instance: ExperienceManager | null = null;
@@ -35,10 +37,11 @@ export default class ExperienceManager {
 	private raycaster: Raycaster = new Raycaster();
 	private pointer: Vector2 | null = null;
 	private hoveredPlayer: Player | null = null;
+	private hoveredNpc: Npc | null = null;
 	public selectedPlayer: Ref<Player | null> = ref(null);
 	public incomingVisitorMessageData: Ref<ISocketMessageData> = ref({ message: null, senderUserId: null });
 	public isInteractive: boolean = true;
-	private playerCache: Map<number, IPlayerCacheEntry> = new Map();
+	private modelCache: Map<string, IModelCacheEntry> = new Map();
 
 	private constructor() {}
 
@@ -206,7 +209,7 @@ export default class ExperienceManager {
 			}
 
 			// Set emote animation name
-			targetVisitor.controls.emoteAnimationName = data.animationName;
+			targetVisitor.controls.playAnimation(data.animationName);
 		});
 	}
 	setActiveScene(key: SceneKey): void {
@@ -301,6 +304,10 @@ export default class ExperienceManager {
 			return;
 		}
 
+		// Set raycaster near/far limits
+		this.raycaster.near = 1;
+		this.raycaster.far = 1000;
+
 		// Update the picking ray with the camera and pointer position
 		this.raycaster.setFromCamera(this.pointer, this.activeScene.camera);
 
@@ -308,12 +315,12 @@ export default class ExperienceManager {
 		const intersects = this.raycaster.intersectObjects(this.activeScene.scene.children, true);
 
 		// Find the first intersected object that belongs to an player
-		const avatarIntersect = intersects.find((intersect) => {
+		const playerIntersect = intersects.find((intersect) => {
 			let obj: IExtendedObject3D = intersect.object;
 
 			// Traverse up the parent hierarchy to find the player root
 			while (obj) {
-				if (obj.isPlayer) {
+				if (obj.isPlayer || obj.isNpc) {
 					return true;
 				}
 				obj = obj.parent as Object3D;
@@ -321,28 +328,37 @@ export default class ExperienceManager {
 			return false;
 		});
 
-		if (avatarIntersect) {
+		if (playerIntersect) {
 			// Get the actual player root object
-			let avatarRoot: IExtendedObject3D = avatarIntersect.object;
-			while (avatarRoot && !avatarRoot.isPlayer) {
-				avatarRoot = avatarRoot.parent as Object3D;
+			let characterRoot: IExtendedObject3D = playerIntersect.object;
+			while (characterRoot && !(characterRoot.isPlayer || characterRoot.isNpc)) {
+				characterRoot = characterRoot.parent as Object3D;
 			}
 
 			if (
 				this.activeScene &&
 				this.activeScene.players &&
 				Object.values(this.activeScene.players).length > 0 &&
-				avatarRoot
+				characterRoot
 			) {
-				// Find the actual class instance
-				this.hoveredPlayer =
-					Object.values(this.activeScene?.players).find((player: Player) => player.model?.uuid === avatarRoot.uuid) ??
-					null;
+				const hoveredPlayerEntry = Object.entries(this.activeScene?.players ?? {}).find(
+					([_, player]) => player.model?.uuid === characterRoot.uuid && !player.isCurrent
+				);
 
-				if (this.hoveredPlayer) {
-					if (!document.body.classList.contains('cursor-pointer')) {
-						document.body.classList.add('cursor-pointer');
-					}
+				this.hoveredNpc =
+					Object.values(this.activeScene?.npcs ?? {}).find((npc) => npc.model?.uuid === characterRoot.uuid) ?? null;
+
+				let hoveredPlayerSocketId = null;
+				if (hoveredPlayerEntry && hoveredPlayerEntry.length > 0) {
+					hoveredPlayerSocketId = hoveredPlayerEntry[0] ?? null;
+					this.hoveredPlayer = hoveredPlayerEntry[1] ?? null;
+				}
+
+				if (
+					((this.hoveredPlayer && this.userId !== hoveredPlayerSocketId) || this.hoveredNpc) &&
+					!document.body.classList.contains('cursor-pointer')
+				) {
+					document.body.classList.add('cursor-pointer');
 				}
 			}
 
@@ -356,15 +372,16 @@ export default class ExperienceManager {
 		this.hoveredPlayer = null;
 	}
 
-	public fetchOrLoadPlayerCacheEntry(
+	public fetchOrLoadModelCacheEntry(
+		modelPrefix: ModelPrefix,
 		modelId: number,
 		spawnPosition: Vector3,
 		spawnRotation: Quaternion
-	): Promise<IPlayerCacheEntry> {
+	): Promise<IModelCacheEntry> {
 		return new Promise(async (resolve, reject) => {
-			if (this.playerCache.has(modelId)) {
+			if (this.modelCache.has(`${modelPrefix}-${modelId}`)) {
 				// Reuse existing model
-				const cachedGltf = this.playerCache.get(modelId)!;
+				const cachedGltf = this.modelCache.get(`${modelPrefix}-${modelId}`)!;
 
 				// Set spawn position and rotation
 				cachedGltf.model.position.copy(spawnPosition);
@@ -378,18 +395,19 @@ export default class ExperienceManager {
 
 			try {
 				// Load model for first time
-				const gltf = await ThreeLoaders.loadGLTF(`/assets/models/players/${modelId}/scene.gltf`);
+				const gltf = await ThreeLoaders.loadGLTF(`/assets/models/${modelPrefix}/${modelId}/scene.gltf`);
 				const model: IExtendedObject3D = gltf.scene;
 
 				// Do adjustments
-				model.isPlayer = true;
+				if (modelPrefix === ModelPrefix.PLAYER) model.isPlayer = true;
+				if (modelPrefix === ModelPrefix.NPC) model.isNpc = true;
 				model.position.copy(spawnPosition);
 				model.quaternion.copy(spawnRotation);
 				model.castShadow = true;
 				model.receiveShadow = true;
 
 				// Store in cache
-				this.playerCache.set(modelId, {
+				this.modelCache.set(`${modelPrefix}-${modelId}`, {
 					model: model,
 					animations: gltf.animations
 				});
@@ -455,6 +473,11 @@ export default class ExperienceManager {
 		if (!this.selectedPlayer.value && this.hoveredPlayer) {
 			// Set ref so popup modal opens
 			this.selectedPlayer.value = this.hoveredPlayer;
+		}
+
+		if (this.hoveredNpc) {
+			// Play talking animation
+			this.hoveredNpc.startDialog();
 		}
 	}
 

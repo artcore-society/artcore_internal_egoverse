@@ -1,6 +1,9 @@
 import { gsap } from 'gsap';
+import { IPlayer } from '../Interfaces/IPlayer.ts';
 import { SceneKey } from '../Enums/SceneKey.ts';
+import { ModelPrefix } from '../Enums/ModelPrefix.ts';
 import { SocketEvent } from '../Enums/SocketEvent.ts';
+import { ISceneSettings } from '../Interfaces/ISceneSettings.ts';
 import { ExperienceSocket } from './ExperienceSocket.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import {
@@ -21,8 +24,7 @@ import {
 import ExperienceCamera from './ExperienceCamera.ts';
 import Player from './Player.ts';
 import ExperienceManager from './ExperienceManager.ts';
-import { ISceneSettings } from '../Interfaces/ISceneSettings.ts';
-import { IPlayer } from '../Interfaces/IPlayer.ts';
+import Npc from './Npc.ts';
 
 export default class ExperienceScene implements IExperienceScene {
 	public readonly scene: Scene;
@@ -32,6 +34,7 @@ export default class ExperienceScene implements IExperienceScene {
 	public cameraParent: Object3D;
 	public updateAction: ((delta: number) => void) | null;
 	public players: { [key: string]: Player } = {};
+	public npcs: Array<Npc> = [];
 
 	constructor(canvas: HTMLCanvasElement, sceneKey: SceneKey, settings: ISceneSettings = { color: 'Blue' }) {
 		this.scene = new Scene();
@@ -59,6 +62,9 @@ export default class ExperienceScene implements IExperienceScene {
 
 		// Setup floor
 		this.setupFloor();
+
+		// Add npc characters
+		this.addNpcCharacters();
 	}
 
 	public get currentPlayer() {
@@ -109,13 +115,50 @@ export default class ExperienceScene implements IExperienceScene {
 		this.scene.add(dirLight);
 	}
 
+	private addNpcCharacters() {
+		if (this.sceneKey === SceneKey.LANDING_AREA) {
+			// Define the rotation angle in degrees
+			const angleDeg = 215;
+
+			// Convert degrees to radians
+			const angleRad = (angleDeg * Math.PI) / 180;
+
+			// Compute half of the rotation angle (since quaternions use half-angles)
+			const halfAngle = angleRad / 2;
+
+			// Create the quaternion for rotation around the Y-axis
+			const rotation = new Quaternion(0, Math.sin(halfAngle), 0, Math.cos(halfAngle));
+
+			// Create NPC with the computed quaternion
+			const npc = new Npc(
+				'NPC #1',
+				ModelPrefix.NPC,
+				1,
+				this,
+				this.camera,
+				new Vector3(-2, 0, -4), // NPC position in the scene
+				rotation // Correct rotation applied
+			);
+
+			// Add NPC to the list
+			this.npcs.push(npc);
+		}
+	}
+
 	public addCurrentPlayer(username: string, modelId: number) {
 		if (this.currentPlayer) {
 			return;
 		}
 
 		// Create current player and add to players object
-		this.players[ExperienceManager.instance.userId!] = new Player(username, modelId, this, this.camera, true);
+		this.players[ExperienceManager.instance.userId!] = new Player(
+			username,
+			ModelPrefix.PLAYER,
+			modelId,
+			this,
+			this.camera,
+			true
+		);
 	}
 
 	public removeCurrentPlayer() {
@@ -138,7 +181,16 @@ export default class ExperienceScene implements IExperienceScene {
 		spawnRotation: Quaternion = new Quaternion()
 	) {
 		// Create and add visitor to visitors list
-		this.players[userId] = new Player(username, modelId, this, this.camera, false, spawnPosition, spawnRotation);
+		this.players[userId] = new Player(
+			username,
+			ModelPrefix.PLAYER,
+			modelId,
+			this,
+			this.camera,
+			false,
+			spawnPosition,
+			spawnRotation
+		);
 	}
 
 	public removeVisitor(userId: string) {
@@ -184,6 +236,9 @@ export default class ExperienceScene implements IExperienceScene {
 				spawnRotation: this.currentPlayer.model.quaternion.toArray()
 			});
 		}
+
+		// Update npc characters
+		this.npcs.forEach((npc) => npc.update(delta));
 	}
 
 	public destroy(): void {

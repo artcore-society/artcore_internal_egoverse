@@ -3,6 +3,7 @@ import { ISceneSettings } from './ISceneSettings.ts';
 import { Object3D, Quaternion, Scene, Vector3 } from 'three';
 import ExperienceCamera from '../Classes/ExperienceCamera.ts';
 import Player from '../Classes/Player.ts';
+import Npc from '../Classes/Npc.ts';
 
 export interface IExperienceScene {
 	scene: Scene;
@@ -12,6 +13,7 @@ export interface IExperienceScene {
 	cameraParent: Object3D;
 	updateAction: ((delta: number) => void) | null;
 	players: { [key: string]: Player };
+	npcs: Array<Npc>;
 
 	readonly currentPlayer: Player | undefined;
 

@@ -54,7 +54,7 @@ function onClick(animationName: AnimationName) {
 		ExperienceManager.instance.activeScene.currentPlayer.controls
 	) {
 		// Set emote animation name
-		ExperienceManager.instance.activeScene.currentPlayer.controls.emoteAnimationName = animationName;
+		ExperienceManager.instance.activeScene.currentPlayer.controls.playAnimation(animationName);
 
 		// Emit socket event
 		ExperienceSocket.emit(SocketEvent.TRIGGER_EMOTE, {
