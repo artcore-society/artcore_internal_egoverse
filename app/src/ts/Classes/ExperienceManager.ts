@@ -39,7 +39,7 @@ export default class ExperienceManager {
 	public selectedPlayer: Ref<Player | null> = ref(null);
 	public incomingVisitorMessageData: Ref<ISocketMessageData> = ref({ message: null, senderUserId: null });
 	public isInteractive: boolean = true;
-	private modelCache: Map<number, IModelCacheEntry> = new Map();
+	private modelCache: Map<string, IModelCacheEntry> = new Map();
 
 	private constructor() {}
 
@@ -367,15 +367,15 @@ export default class ExperienceManager {
 	}
 
 	public fetchOrLoadModelCacheEntry(
-		prefix: ModelPrefix,
+		modelPrefix: ModelPrefix,
 		modelId: number,
 		spawnPosition: Vector3,
 		spawnRotation: Quaternion
 	): Promise<IModelCacheEntry> {
 		return new Promise(async (resolve, reject) => {
-			if (this.modelCache.has(modelId)) {
+			if (this.modelCache.has(`${modelPrefix}-${modelId}`)) {
 				// Reuse existing model
-				const cachedGltf = this.modelCache.get(modelId)!;
+				const cachedGltf = this.modelCache.get(`${modelPrefix}-${modelId}`)!;
 
 				// Set spawn position and rotation
 				cachedGltf.model.position.copy(spawnPosition);
@@ -389,18 +389,18 @@ export default class ExperienceManager {
 
 			try {
 				// Load model for first time
-				const gltf = await ThreeLoaders.loadGLTF(`/assets/models/${prefix}/${modelId}/scene.gltf`);
+				const gltf = await ThreeLoaders.loadGLTF(`/assets/models/${modelPrefix}/${modelId}/scene.gltf`);
 				const model: IExtendedObject3D = gltf.scene;
 
 				// Do adjustments
-				if (prefix === ModelPrefix.PLAYER) model.isPlayer = true;
+				if (modelPrefix === ModelPrefix.PLAYER) model.isPlayer = true;
 				model.position.copy(spawnPosition);
 				model.quaternion.copy(spawnRotation);
 				model.castShadow = true;
 				model.receiveShadow = true;
 
 				// Store in cache
-				this.modelCache.set(modelId, {
+				this.modelCache.set(`${modelPrefix}-${modelId}`, {
 					model: model,
 					animations: gltf.animations
 				});
