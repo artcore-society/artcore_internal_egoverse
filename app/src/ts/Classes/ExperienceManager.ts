@@ -397,8 +397,9 @@ export default class ExperienceManager {
 		// Make sure to remove cursor class
 		document.body.classList.remove('cursor-pointer');
 
-		// Reset hovered adn selected player when not hovering anymore
+		// Reset hovered player and npc when not hovering anymore
 		this.hoveredPlayer = null;
+		this.hoveredNpc = null;
 	}
 
 	public fetchOrLoadModelCacheEntry(
