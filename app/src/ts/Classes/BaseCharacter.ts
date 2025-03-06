@@ -1,5 +1,6 @@
 import { gsap } from 'gsap';
 import { ModelPrefix } from '../Enums/ModelPrefix.ts';
+import { ThreeLoaders } from './ThreeLoaders.ts';
 import { AnimationName } from '../Enums/AnimationName.ts';
 import { IBaseCharacter } from '../Interfaces/IBaseCharacter.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
@@ -21,7 +22,6 @@ import ExperienceManager from './ExperienceManager.ts';
 import PlayerControls from './PlayerControls.ts';
 import NpcControls from './NpcControls.ts';
 import ExperienceCamera from './ExperienceCamera.ts';
-import { ThreeLoaders } from './ThreeLoaders.ts';
 import Player from './Player.ts';
 
 export default class BaseCharacter implements IBaseCharacter {
