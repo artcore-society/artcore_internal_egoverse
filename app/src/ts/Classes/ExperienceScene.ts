@@ -36,7 +36,7 @@ export default class ExperienceScene implements IExperienceScene {
 	public players: { [key: string]: Player } = {};
 	public npcs: Array<Npc> = [];
 
-	constructor(canvas: HTMLCanvasElement, sceneKey: SceneKey, settings: ISceneSettings = { color: 'Blue' }) {
+	constructor(canvas: HTMLCanvasElement, sceneKey: SceneKey, settings: ISceneSettings = { floorColor: 'Blue' }) {
 		this.scene = new Scene();
 		this.sceneKey = sceneKey;
 		this.settings = settings;
@@ -78,7 +78,7 @@ export default class ExperienceScene implements IExperienceScene {
 
 		// Create material with all maps
 		const material = new MeshStandardMaterial({
-			color: new Color(this.settings.color)
+			color: new Color(this.settings.floorColor)
 		});
 
 		// Create plane

@@ -11,10 +11,10 @@ export class Scene implements IScene {
 	npcs: Array<Npc>;
 	settings: ISceneSettings;
 
-	constructor(sceneKey: SceneKey, npcs: Array<Npc> = [], settings: ISceneSettings = { color: 'Blue' }) {
+	constructor(sceneKey: SceneKey) {
 		this.sceneKey = sceneKey;
-		this.npcs = npcs;
-		this.settings = settings;
+		this.npcs = [];
+		this.settings = { floorColor: 'Blue' };
 		this.players = new Map();
 	}
 
@@ -24,6 +24,18 @@ export class Scene implements IScene {
 
 	removePlayer(playerId: string): void {
 		this.players.delete(playerId);
+	}
+
+	public addNpc(npc: Npc) {
+		this.npcs.push(npc);
+	}
+
+	public removeNpc(npc: Npc) {
+		this.npcs = this.npcs.filter((n) => n.username !== npc.username);
+	}
+
+	public updateSettings(newSettings: Partial<ISceneSettings>) {
+		this.settings = { ...this.settings, ...newSettings };
 	}
 
 	getState(currentUserId: string): ISceneState {

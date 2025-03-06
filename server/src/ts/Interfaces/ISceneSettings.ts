@@ -1,3 +1,3 @@
 export interface ISceneSettings {
-	color: string;
+	floorColor: string;
 }

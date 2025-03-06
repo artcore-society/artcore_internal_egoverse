@@ -49,9 +49,9 @@ export class GameService {
 	private initScenes() {
 		// Define scene settings
 		const scenesSettings: Map<SceneKey, ISceneSettings> = new Map();
-		scenesSettings.set(SceneKey.LANDING_AREA, { color: 'Red' });
-		scenesSettings.set(SceneKey.MEETING_ROOM, { color: 'Blue' });
-		scenesSettings.set(SceneKey.CHAT_ROOM, { color: 'Green' });
+		scenesSettings.set(SceneKey.LANDING_AREA, { floorColor: 'Red' });
+		scenesSettings.set(SceneKey.MEETING_ROOM, { floorColor: 'Blue' });
+		scenesSettings.set(SceneKey.CHAT_ROOM, { floorColor: 'Green' });
 
 		// Define scene npc characters
 		const scenesNpcs: Map<SceneKey, Array<Npc>> = new Map();
@@ -64,10 +64,21 @@ export class GameService {
 
 		// Creates scene instances and stores them in the map.
 		this.scenes = new Map(
-			Object.values(SceneKey).map((key) => [
-				key as SceneKey,
-				new Scene(key, scenesNpcs.get(key), scenesSettings.get(key))
-			])
+			Object.values(SceneKey).map((key) => {
+				const scene = new Scene(key);
+
+				// Add npcs to scene
+				const npcs = scenesNpcs.get(key) ?? null;
+				npcs?.forEach((npc) => scene.addNpc(npc));
+
+				// Update scene settings
+				const sceneSetting = scenesSettings.get(key) ?? null;
+				if (sceneSetting) {
+					scene.updateSettings(sceneSetting);
+				}
+
+				return [key as SceneKey, scene];
+			})
 		);
 	}
 
