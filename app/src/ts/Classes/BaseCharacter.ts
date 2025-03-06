@@ -8,7 +8,6 @@ import {
 	AnimationClip,
 	AnimationMixer,
 	Box3,
-	BufferGeometry,
 	DoubleSide,
 	Mesh,
 	MeshBasicMaterial,
