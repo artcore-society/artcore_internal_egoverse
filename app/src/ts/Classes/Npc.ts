@@ -52,7 +52,7 @@ export default class Npc extends BaseCharacter implements INpc {
 		// Generate messages
 		for (const message of this.dialog.messages) {
 			// Create 3D text for message
-			const textMesh: Mesh = await Text3D.createText(message!, fontUrl, textSize, textColor);
+			const textMesh: Mesh = await Text3D.create(message!, fontUrl, textSize, textColor);
 
 			// Position text near the model
 			textMesh.position.set(this.model.position.x, targetPositionY, this.model.position.z);

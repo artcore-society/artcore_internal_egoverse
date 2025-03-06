@@ -55,7 +55,7 @@ export default class BaseCharacter implements IBaseCharacter {
 
 	async load(): Promise<void> {
 		try {
-			const { model, animations } = await ExperienceManager.instance.fetchOrLoadModelCacheEntry(
+			const { model, animations } = await ExperienceManager.instance.getModel(
 				this.modelPrefix,
 				this.modelId,
 				this.spawnPosition,
@@ -111,7 +111,7 @@ export default class BaseCharacter implements IBaseCharacter {
 		}
 
 		// Create 3D text
-		this.usernameLabel = await Text3D.createText(this.username, '/assets/fonts/rubik.json');
+		this.usernameLabel = await Text3D.create(this.username, '/assets/fonts/rubik.json');
 
 		// Get model height
 		const bbox = new Box3();

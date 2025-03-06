@@ -421,7 +421,7 @@ export default class ExperienceManager {
 		}
 	}
 
-	public fetchOrLoadModelCacheEntry(
+	public getModel(
 		modelPrefix: ModelPrefix,
 		modelId: number,
 		spawnPosition: Vector3,
