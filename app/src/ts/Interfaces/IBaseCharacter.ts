@@ -7,6 +7,7 @@ import ExperienceCamera from '../Classes/ExperienceCamera.ts';
 
 export interface IBaseCharacter {
 	username: string;
+	usernameLabel: Object3D | null;
 	modelPrefix: ModelPrefix;
 	modelId: number;
 	controls: PlayerControls | NpcControls | null;

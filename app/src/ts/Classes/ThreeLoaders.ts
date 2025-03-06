@@ -1,11 +1,12 @@
-import * as THREE from 'three';
-import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { TextureLoader } from 'three/src/loaders/TextureLoader';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
-import { Mesh, Object3D } from 'three';
 import { EXRLoader } from 'three/examples/jsm/loaders/EXRLoader';
+import { Font, FontLoader } from 'three/examples/jsm/loaders/FontLoader';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
+import { TextureLoader } from 'three/src/loaders/TextureLoader';
+import { Mesh, Object3D, Texture } from 'three';
+import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 export class ThreeLoaders {
+	private static fontLoader: FontLoader = new FontLoader();
 	private static textureLoader: TextureLoader = new TextureLoader();
 	private static exrLoader: EXRLoader = new EXRLoader();
 	private static gltfLoader: GLTFLoader = new GLTFLoader();
@@ -42,15 +43,21 @@ export class ThreeLoaders {
 		});
 	}
 
-	static loadTexture(url: string): Promise<THREE.Texture> {
+	static loadTexture(url: string): Promise<Texture> {
 		return new Promise((resolve, reject) => {
 			this.textureLoader.load(url, resolve, undefined, reject);
 		});
 	}
 
-	static loadExr(url: string): Promise<THREE.Texture> {
+	static loadExr(url: string): Promise<Texture> {
 		return new Promise((resolve, reject) => {
 			this.exrLoader.load(url, resolve, undefined, reject);
+		});
+	}
+
+	static loadFont(url: string): Promise<Font> {
+		return new Promise((resolve, reject) => {
+			this.fontLoader.load(url, resolve, undefined, reject);
 		});
 	}
 }
