@@ -7,6 +7,7 @@ import { SocketEvent } from '../Enums/SocketEvent';
 import { Server, Socket } from 'socket.io';
 import { ISceneSettings } from '../Interfaces/ISceneSettings';
 import { Quaternion, Vector3 } from 'three';
+import Dialog from '../Classes/Dialog.ts';
 
 export class GameService {
 	private static _instance: GameService;
@@ -54,25 +55,49 @@ export class GameService {
 		scenesSettings.set(SceneKey.MEETING_ROOM, { floorColor: 'Blue' });
 		scenesSettings.set(SceneKey.CHAT_ROOM, { floorColor: 'Green' });
 
-		// Define scene npc characters
+		// Define scene NPC characters with unique dialogs
 		const scenesNpcs: Map<SceneKey, Array<Npc>> = new Map();
 		scenesNpcs.set(SceneKey.LANDING_AREA, [
-			new Npc(`NPC ${faker.person.firstName()}`, 1, new Vector3(-2, 0, -4), this.degreesToQuaternion(215)),
-			new Npc(`NPC ${faker.person.firstName()}`, 2, new Vector3(1.5, 0, -2), this.degreesToQuaternion(145))
+			new Npc(
+				`NPC ${faker.person.firstName()}`,
+				1,
+				this.generateUniqueDialog(),
+				new Vector3(-2, 0, -4),
+				this.degreesToQuaternion(215)
+			),
+			new Npc(
+				`NPC ${faker.person.firstName()}`,
+				2,
+				this.generateUniqueDialog(),
+				new Vector3(1.5, 0, -2),
+				this.degreesToQuaternion(145)
+			)
 		]);
 		scenesNpcs.set(SceneKey.MEETING_ROOM, [
-			new Npc(`NPC ${faker.person.firstName()}`, 1, new Vector3(1.5, 0, -2), this.degreesToQuaternion(145))
+			new Npc(
+				`NPC ${faker.person.firstName()}`,
+				1,
+				this.generateUniqueDialog(),
+				new Vector3(1.5, 0, -2),
+				this.degreesToQuaternion(145)
+			)
 		]);
 		scenesNpcs.set(SceneKey.CHAT_ROOM, [
-			new Npc(`NPC ${faker.person.firstName()}`, 2, new Vector3(0.5, 0, -3), this.degreesToQuaternion(175))
+			new Npc(
+				`NPC ${faker.person.firstName()}`,
+				2,
+				this.generateUniqueDialog(),
+				new Vector3(0.5, 0, -3),
+				this.degreesToQuaternion(175)
+			)
 		]);
 
-		// Creates scene instances and stores them in the map.
+		// Create scene instances and store them in the map.
 		this.scenes = new Map(
 			Object.values(SceneKey).map((key) => {
 				const scene = new Scene(key);
 
-				// Add npcs to scene
+				// Add NPCs to the scene
 				const npcs = scenesNpcs.get(key) ?? null;
 				if (npcs && npcs.length > 0) {
 					npcs.forEach((npc) => scene.addNpc(npc));
@@ -87,6 +112,25 @@ export class GameService {
 				return [key as SceneKey, scene];
 			})
 		);
+
+		console.log(this.scenes);
+	}
+
+	/**
+	 * Generates a unique dialog full of messages.
+	 */
+	private generateUniqueDialog(): Dialog {
+		// Create dialog instance
+		const dialog = new Dialog();
+
+		// Generate 2-4 sentences for the dialog
+		const messageCount = faker.number.int({ min: 2, max: 4 });
+		for (let i = 0; i < messageCount; i++) {
+			// Add message to dialog
+			dialog.addMessage(faker.lorem.sentence());
+		}
+
+		return dialog;
 	}
 
 	/**

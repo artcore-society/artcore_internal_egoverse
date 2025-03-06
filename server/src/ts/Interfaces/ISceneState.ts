@@ -1,12 +1,13 @@
+import { IDialog } from './IDialog.ts';
 import { SceneKey } from '../Enums/SceneKey.ts';
 import { IBaseCharacter } from './IBaseCharacter.ts';
-
 export interface ISceneState {
 	sceneKey: SceneKey;
 	currentPlayer: IBaseCharacter | undefined;
 	npcs: Array<{
 		username: string;
 		modelId: number;
+		dialog: IDialog;
 		position: Array<number>;
 		quaternion: Array<number>;
 	}>;

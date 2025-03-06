@@ -48,6 +48,7 @@ export class Scene implements IScene {
 			npcs: this.npcs.map((npc) => ({
 				username: npc.username,
 				modelId: npc.modelId,
+				dialog: npc.dialog,
 				position: npc.position.toArray(),
 				quaternion: [npc.quaternion.x, npc.quaternion.y, npc.quaternion.z, npc.quaternion.w]
 			})),
