@@ -13,6 +13,7 @@ import Text3D from './Text3D.ts';
 
 export default class Npc extends BaseCharacter implements INpc {
 	public dialog: IDialog;
+	public isTalking: boolean = false;
 
 	constructor(
 		username: string,
@@ -36,9 +37,12 @@ export default class Npc extends BaseCharacter implements INpc {
 	}
 
 	public async startDialog(): Promise<void> {
-		if (!this.controls) {
+		if (!this.controls || this.isTalking) {
 			return;
 		}
+
+		// Set talking state
+		this.isTalking = true;
 
 		// Play the talking animation
 		this.controls.playAnimation(AnimationName.TALKING);
@@ -81,5 +85,8 @@ export default class Npc extends BaseCharacter implements INpc {
 			// Wait
 			await wait(1);
 		}
+
+		// Reset talking state
+		this.isTalking = false;
 	}
 }

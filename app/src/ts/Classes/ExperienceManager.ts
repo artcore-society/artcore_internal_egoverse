@@ -546,7 +546,7 @@ export default class ExperienceManager {
 			this.selectedPlayer.value = this.hoveredPlayer;
 		}
 
-		if (this.hoveredNpc) {
+		if (this.hoveredNpc && !this.hoveredNpc.isTalking) {
 			// Play talking animation
 			this.hoveredNpc.startDialog();
 
