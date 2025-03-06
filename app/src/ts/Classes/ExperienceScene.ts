@@ -2,11 +2,13 @@ import { gsap } from 'gsap';
 import { IDialog } from '../Interfaces/IDialog.ts';
 import { IPlayer } from '../Interfaces/IPlayer.ts';
 import { SceneKey } from '../Enums/SceneKey.ts';
+import { CameraPov } from '../Enums/CameraPov.ts';
 import { ModelPrefix } from '../Enums/ModelPrefix.ts';
 import { SocketEvent } from '../Enums/SocketEvent.ts';
 import { ISceneSettings } from '../Interfaces/ISceneSettings.ts';
 import { ExperienceSocket } from './ExperienceSocket.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
+import { ICameraPovOptions } from '../Interfaces/ICameraPovOptions.ts';
 import {
 	AmbientLight,
 	Color,
@@ -36,6 +38,8 @@ export default class ExperienceScene implements IExperienceScene {
 	public updateAction: ((delta: number) => void) | null;
 	public players: { [key: string]: Player } = {};
 	public npcs: Array<Npc> = [];
+	public currentCameraPov: CameraPov = CameraPov.THIRD_PERSON;
+	private readonly cameraPovOptions: Array<ICameraPovOptions> = [];
 
 	constructor(canvas: HTMLCanvasElement, sceneKey: SceneKey, settings: ISceneSettings = { floorColor: 'Blue' }) {
 		this.scene = new Scene();
@@ -44,6 +48,16 @@ export default class ExperienceScene implements IExperienceScene {
 		this.camera = new ExperienceCamera(this.scene, canvas);
 		this.cameraParent = new Object3D();
 		this.updateAction = null;
+		this.cameraPovOptions = [
+			{
+				type: CameraPov.FIRST_PERSON,
+				position: new Vector3(0, 1.45, 0)
+			},
+			{
+				type: CameraPov.THIRD_PERSON,
+				position: new Vector3(0, 1, 2)
+			}
+		];
 
 		// Setup camera parent
 		this.cameraParent.rotation.order = 'YXZ';
@@ -54,6 +68,9 @@ export default class ExperienceScene implements IExperienceScene {
 
 		// Add camera to parent object
 		this.cameraParent.add(this.camera);
+
+		// Set camera pov
+		this.setCameraPov(this.currentCameraPov);
 
 		// Scene fog
 		this.scene.fog = new Fog(0xffffff, 5, 15);
@@ -125,6 +142,27 @@ export default class ExperienceScene implements IExperienceScene {
 
 		// Add NPC to the list
 		this.npcs.push(npc);
+	}
+
+	public setCameraPov(pov: CameraPov) {
+		// Get current pov setting
+		const currentPov = this.cameraPovOptions.find((option) => option.type === pov);
+
+		if (!currentPov) {
+			return;
+		}
+
+		// Set current camera pov
+		this.currentCameraPov = pov;
+
+		// Set position => third or first person
+		gsap.to(this.camera.position, {
+			x: currentPov.position.x,
+			y: currentPov.position.y,
+			z: currentPov.position.z,
+			duration: 0.4,
+			ease: 'power1.easeInOut'
+		});
 	}
 
 	public addCurrentPlayer(username: string, modelId: number) {

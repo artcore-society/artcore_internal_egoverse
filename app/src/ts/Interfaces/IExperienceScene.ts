@@ -1,5 +1,6 @@
 import { IDialog } from './IDialog.ts';
 import { SceneKey } from '../Enums/SceneKey.ts';
+import { CameraPov } from '../Enums/CameraPov.ts';
 import { ISceneSettings } from './ISceneSettings.ts';
 import { Object3D, Quaternion, Scene, Vector3 } from 'three';
 import ExperienceCamera from '../Classes/ExperienceCamera.ts';
@@ -15,6 +16,7 @@ export interface IExperienceScene {
 	updateAction: ((delta: number) => void) | null;
 	players: { [key: string]: Player };
 	npcs: Array<Npc>;
+	currentCameraPov: CameraPov;
 
 	readonly currentPlayer: Player | undefined;
 
@@ -30,6 +32,7 @@ export interface IExperienceScene {
 	addCurrentPlayer(username: string, modelId: number): void;
 	removeCurrentPlayer(): void;
 	addNpc(username: string, modelId: number, dialog: IDialog, spawnPosition: Vector3, spawnRotation: Quaternion): void;
+	setCameraPov(pov: CameraPov): void;
 	update(delta: number): void;
 	destroy(): void;
 }

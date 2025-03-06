@@ -5,6 +5,7 @@ export enum KeyboardKey {
 	KeyD = 'KeyD',
 	KeyT = 'KeyT',
 	KeyM = 'KeyM',
+	KeyV = 'KeyV',
 	ArrowUp = 'ArrowUp',
 	ArrowDown = 'ArrowDown',
 	ArrowLeft = 'ArrowLeft',

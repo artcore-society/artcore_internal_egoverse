@@ -16,6 +16,7 @@ import KeyboardIcon from './Icons/KeyboardIcon.vue';
 import KeybindingsModal from './KeybindingsModal.vue';
 import ChatList from './ChatList.vue';
 import ChatModal from './ChatModal.vue';
+import { CameraPov } from '../Enums/CameraPov.ts';
 
 // Avatar store
 const { username, modelId } = useAvatarStore();
@@ -38,7 +39,8 @@ const keyBindingsData: Ref<Array<{ instruction: string; labels: Array<string>; i
 	{ instruction: 'Sprint', labels: ['SHIFT', 'Any movement key'], isCombination: true },
 	{ instruction: 'Jump', labels: ['SPACE'], isCombination: true },
 	{ instruction: 'Toggle key bindings modal', labels: ['SHIFT', '?'], isCombination: true },
-	{ instruction: 'Toggle emote selection', labels: ['T'], isCombination: true }
+	{ instruction: 'Toggle emote selection', labels: ['T'], isCombination: true },
+	{ instruction: 'Toggle camera pov', labels: ['V'], isCombination: true }
 ]);
 const keysPressed: { [key in KeyboardKey]: boolean } = {} as {
 	[key in KeyboardKey]: boolean;
@@ -146,6 +148,17 @@ function onKeyDown(event: KeyboardEvent) {
 	if (keysPressed[KeyboardKey.KeyT]) {
 		// Set ref
 		isEmoteSelectorVisible.value = !isEmoteSelectorVisible.value;
+	}
+
+	if (keysPressed[KeyboardKey.KeyV] && ExperienceManager.instance.activeScene) {
+		// Get target pov
+		const targetPov =
+			ExperienceManager.instance.activeScene.currentCameraPov === CameraPov.THIRD_PERSON
+				? CameraPov.FIRST_PERSON
+				: CameraPov.THIRD_PERSON;
+
+		// Toggle camera pov
+		ExperienceManager.instance.activeScene.setCameraPov(targetPov);
 	}
 
 	if (keysPressed[KeyboardKey.ShiftLeft] && keysPressed[KeyboardKey.KeyM]) {
