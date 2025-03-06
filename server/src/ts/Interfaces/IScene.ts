@@ -5,11 +5,11 @@ import { ISceneSettings } from './ISceneSettings.ts';
 import { Quaternion, Vector3 } from 'three';
 
 export interface IScene {
-    players: Map<string, Player>;
-    npcs: Array<Npc>;
-    settings: ISceneSettings
+	players: Map<string, Player>;
+	npcs: Array<Npc>;
+	settings: ISceneSettings;
 
-    addPlayer(player: Player): void;
-    removePlayer(playerId: string): void;
-    getState(currentUserId: string): ISceneState;
+	addPlayer(player: Player): void;
+	removePlayer(playerId: string): void;
+	getState(currentUserId: string): ISceneState;
 }

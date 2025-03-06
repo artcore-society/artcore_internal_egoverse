@@ -1,3 +1,3 @@
 export interface ISceneSettings {
-    color: string;
+	color: string;
 }
