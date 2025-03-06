@@ -112,6 +112,10 @@ export default class ExperienceManager {
 
 			// Add npcs if they're not present in active scene
 			data.npcs.forEach((npc) => {
+				if (this.activeScene?.npcs.find((n) => n.username === npc.username)) {
+					return;
+				}
+
 				this.activeScene?.addNpc(
 					npc.username,
 					npc.modelId,
