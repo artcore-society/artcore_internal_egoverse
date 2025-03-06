@@ -112,8 +112,6 @@ export class GameService {
 				return [key as SceneKey, scene];
 			})
 		);
-
-		console.log(this.scenes);
 	}
 
 	/**
