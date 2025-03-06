@@ -60,7 +60,7 @@ export class GameService {
 			new Npc('Bart', 1, new Vector3(1.5, 0, -2), this.degreesToQuaternion(145))
 		]);
 		scenesNpcs.set(SceneKey.MEETING_ROOM, [new Npc('Theo', 1, new Vector3(1.5, 0, -2), this.degreesToQuaternion(145))]);
-		scenesNpcs.set(SceneKey.CHAT_ROOM, [new Npc('Walter', 1, new Vector3(1, 0, -3), this.degreesToQuaternion(135))]);
+		scenesNpcs.set(SceneKey.CHAT_ROOM, [new Npc('Walter', 1, new Vector3(0.5, 0, -3), this.degreesToQuaternion(175))]);
 
 		// Creates scene instances and stores them in the map.
 		this.scenes = new Map(
