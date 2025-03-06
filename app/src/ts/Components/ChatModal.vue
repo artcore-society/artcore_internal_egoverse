@@ -11,7 +11,7 @@ import Modal from './Modal.vue';
 const props = defineProps<{
 	show: boolean;
 	selectedChatUserId: string | null;
-	chats: Record<string, Array<{ message: string; avatarType: string }>>;
+	chats: Record<string, Array<{ message: string; isCurrentPlayer: boolean }>>;
 }>();
 
 // Emit events

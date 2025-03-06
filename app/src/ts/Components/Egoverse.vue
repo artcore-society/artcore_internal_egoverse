@@ -5,8 +5,6 @@ import { SocketEvent } from '../Enums/SocketEvent.ts';
 import { EventService } from '../Services/EventService.ts';
 import { useAvatarStore } from '../Stores/AvatarStore.ts';
 import { CustomEventKey } from '../Enums/CustomEventKey.ts';
-import { LandingAreaScene } from '../Classes/LandingAreaScene';
-import { MeetingRoomScene } from '../Classes/MeetingRoomScene';
 import { ExperienceSocket } from '../Classes/ExperienceSocket.ts';
 import { ISocketMessageData } from '../Interfaces/ISocketMessageData.ts';
 import { ComponentPublicInstance, onBeforeUnmount, onMounted, Ref, ref, watch } from 'vue';
@@ -23,7 +21,8 @@ import ChatModal from './ChatModal.vue';
 const { username, modelId } = useAvatarStore();
 
 // Set variables
-const chats: Ref<Record<string, Array<{ message: string; avatarType: string }>>> = ref({});
+const audio: Ref<HTMLAudioElement | null> = ref(null);
+const chats: Ref<Record<string, Array<{ message: string; isCurrentPlayer: boolean }>>> = ref({});
 const selectedChatUserId: Ref<string | null> = ref(null);
 const isChatModalVisible: Ref<boolean> = ref(false);
 const isReady: Ref<boolean> = ref(false);
@@ -58,6 +57,30 @@ function transitionToScene(sceneKey: SceneKey): void {
 function setReadyState(): void {
 	// Set ready state
 	isReady.value = true;
+}
+
+function playAudio(src: string) {
+	if (!audio.value) {
+		return;
+	}
+
+	// Set src
+	audio.value.src = src;
+
+	// Unmute
+	audio.value.muted = false;
+
+	// Reset current time
+	audio.value.currentTime = 0;
+
+	// Set audio level
+	audio.value.volume = 0.4;
+
+	// Load the audio
+	audio.value.load();
+
+	// Play
+	audio.value.play();
 }
 
 function submitMessage(message: string) {
@@ -183,9 +206,9 @@ onMounted(() => {
 		// Initialize the experience manager
 		ExperienceManager.instance.init(canvas.value, username, modelId);
 
-		// Listen for ready event (triggers when backend sends scene data)
+		// Listen for events
 		EventService.listen(CustomEventKey.READY, setReadyState);
-
+		EventService.listen(CustomEventKey.PLAY_AUDIO, playAudio);
 		document.addEventListener('keydown', (event: KeyboardEvent) => onKeyDown(event));
 		document.addEventListener('keyup', (event: KeyboardEvent) => onKeyUp(event));
 	}
@@ -198,6 +221,7 @@ onBeforeUnmount(() => {
 
 	// Remove listeners
 	EventService.remove(CustomEventKey.READY, setReadyState);
+	EventService.remove(CustomEventKey.PLAY_AUDIO, playAudio);
 	document.removeEventListener('keydown', (event: KeyboardEvent) => onKeyDown(event));
 	document.removeEventListener('keyup', (event: KeyboardEvent) => onKeyUp(event));
 });
@@ -256,5 +280,7 @@ onBeforeUnmount(() => {
 		</div>
 
 		<canvas ref="canvas" class="h-full w-full" />
+
+		<audio ref="audio" muted preload="auto" />
 	</div>
 </template>

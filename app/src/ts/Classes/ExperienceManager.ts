@@ -548,6 +548,9 @@ export default class ExperienceManager {
 		if (this.hoveredNpc) {
 			// Play talking animation
 			this.hoveredNpc.startDialog();
+
+			// Dispatch play audio event
+			EventService.dispatch(CustomEventKey.PLAY_AUDIO, '/assets/audio/talk.mp3');
 		}
 	}
 

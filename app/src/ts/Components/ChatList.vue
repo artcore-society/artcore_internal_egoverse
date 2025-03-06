@@ -10,7 +10,7 @@ const emit = defineEmits<{
 
 // Define props
 const props = defineProps<{
-	chats: Record<string, Array<{ message: string; avatarType: string }>>;
+	chats: Record<string, Array<{ message: string; isCurrentPlayer: boolean }>>;
 }>();
 
 // Set computed variable
