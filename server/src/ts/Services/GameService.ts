@@ -1,5 +1,6 @@
 import { Npc } from '../Classes/Npc.ts';
 import { Scene } from '../Classes/Scene';
+import { faker } from '@faker-js/faker';
 import { Player } from '../Classes/Player';
 import { SceneKey } from '../Enums/SceneKey';
 import { SocketEvent } from '../Enums/SocketEvent';
@@ -56,11 +57,15 @@ export class GameService {
 		// Define scene npc characters
 		const scenesNpcs: Map<SceneKey, Array<Npc>> = new Map();
 		scenesNpcs.set(SceneKey.LANDING_AREA, [
-			new Npc('Peter', 1, new Vector3(-2, 0, -4), this.degreesToQuaternion(215)),
-			new Npc('Petra', 2, new Vector3(1.5, 0, -2), this.degreesToQuaternion(145))
+			new Npc(faker.person.firstName(), 1, new Vector3(-2, 0, -4), this.degreesToQuaternion(215)),
+			new Npc(faker.person.firstName(), 2, new Vector3(1.5, 0, -2), this.degreesToQuaternion(145))
 		]);
-		scenesNpcs.set(SceneKey.MEETING_ROOM, [new Npc('Theo', 1, new Vector3(1.5, 0, -2), this.degreesToQuaternion(145))]);
-		scenesNpcs.set(SceneKey.CHAT_ROOM, [new Npc('Suzy', 2, new Vector3(0.5, 0, -3), this.degreesToQuaternion(175))]);
+		scenesNpcs.set(SceneKey.MEETING_ROOM, [
+			new Npc(faker.person.firstName(), 1, new Vector3(1.5, 0, -2), this.degreesToQuaternion(145))
+		]);
+		scenesNpcs.set(SceneKey.CHAT_ROOM, [
+			new Npc(faker.person.firstName(), 2, new Vector3(0.5, 0, -3), this.degreesToQuaternion(175))
+		]);
 
 		// Creates scene instances and stores them in the map.
 		this.scenes = new Map(
@@ -69,7 +74,9 @@ export class GameService {
 
 				// Add npcs to scene
 				const npcs = scenesNpcs.get(key) ?? null;
-				npcs?.forEach((npc) => scene.addNpc(npc));
+				if (npcs && npcs.length > 0) {
+					npcs.forEach((npc) => scene.addNpc(npc));
+				}
 
 				// Update scene settings
 				const sceneSetting = scenesSettings.get(key) ?? null;
