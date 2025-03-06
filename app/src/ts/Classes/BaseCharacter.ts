@@ -122,7 +122,7 @@ export default class BaseCharacter implements IBaseCharacter {
 		}
 
 		// Load font
-		const font = await ThreeLoaders.loadFont('/assets/fonts/helvetiker_regular.typeface.json');
+		const font = await ThreeLoaders.loadFont('/assets/fonts/rubik.json');
 
 		// Define color
 		const color = 0x006699;
