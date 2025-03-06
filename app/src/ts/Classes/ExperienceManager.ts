@@ -119,6 +119,7 @@ export default class ExperienceManager {
 				this.activeScene?.addNpc(
 					npc.username,
 					npc.modelId,
+					npc.dialog,
 					new Vector3(...npc.position),
 					new Quaternion(...npc.quaternion)
 				);

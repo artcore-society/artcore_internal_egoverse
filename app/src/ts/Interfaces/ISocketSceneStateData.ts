@@ -1,3 +1,4 @@
+import { IDialog } from './IDialog.ts';
 import { Vector3, Quaternion } from 'three';
 
 export interface ISocketSceneStateData {
@@ -15,6 +16,7 @@ export interface ISocketSceneStateData {
 		sceneKey: string;
 		position: Vector3;
 		quaternion: Quaternion;
+		dialog: IDialog;
 	}>;
 	visitors: Array<{
 		id: string;

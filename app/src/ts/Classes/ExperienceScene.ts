@@ -1,4 +1,5 @@
 import { gsap } from 'gsap';
+import { IDialog } from '../Interfaces/IDialog.ts';
 import { IPlayer } from '../Interfaces/IPlayer.ts';
 import { SceneKey } from '../Enums/SceneKey.ts';
 import { ModelPrefix } from '../Enums/ModelPrefix.ts';
@@ -115,11 +116,12 @@ export default class ExperienceScene implements IExperienceScene {
 	public addNpc(
 		username: string,
 		modelId: number,
+		dialog: IDialog,
 		spawnPosition: Vector3 = new Vector3(),
 		spawnRotation: Quaternion = new Quaternion()
 	): void {
 		// Create NPC with the computed quaternion
-		const npc = new Npc(username, ModelPrefix.NPC, modelId, this, this.camera, spawnPosition, spawnRotation);
+		const npc = new Npc(username, ModelPrefix.NPC, modelId, dialog, this, this.camera, spawnPosition, spawnRotation);
 
 		// Add NPC to the list
 		this.npcs.push(npc);

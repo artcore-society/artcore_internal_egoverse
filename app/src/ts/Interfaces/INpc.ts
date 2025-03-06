@@ -1,5 +1,5 @@
-import ExperienceCamera from '../Classes/ExperienceCamera.ts';
+import { IDialog } from './IDialog.ts';
 
 export interface INpc {
-	camera: ExperienceCamera;
+	dialog: IDialog;
 }

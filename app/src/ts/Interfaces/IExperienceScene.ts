@@ -1,3 +1,4 @@
+import { IDialog } from './IDialog.ts';
 import { SceneKey } from '../Enums/SceneKey.ts';
 import { ISceneSettings } from './ISceneSettings.ts';
 import { Object3D, Quaternion, Scene, Vector3 } from 'three';
@@ -28,7 +29,7 @@ export interface IExperienceScene {
 	removeVisitor(userId: string): void;
 	addCurrentPlayer(username: string, modelId: number): void;
 	removeCurrentPlayer(): void;
-	addNpc(username: string, modelId: number, spawnPosition: Vector3, spawnRotation: Quaternion): void;
+	addNpc(username: string, modelId: number, dialog: IDialog, spawnPosition: Vector3, spawnRotation: Quaternion): void;
 	update(delta: number): void;
 	destroy(): void;
 }
