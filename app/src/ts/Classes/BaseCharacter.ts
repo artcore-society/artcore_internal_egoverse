@@ -60,11 +60,8 @@ export default class BaseCharacter implements IBaseCharacter {
 	}
 
 	async init(): Promise<void> {
-		// Load model
+		// Create the character
 		await this.load();
-
-		// Add username label
-		this.addUsernameLabel();
 	}
 
 	async load(): Promise<void> {
@@ -107,12 +104,15 @@ export default class BaseCharacter implements IBaseCharacter {
 					y: 1,
 					z: 1,
 					ease: 'back.out',
-					duration: 1
+					duration: 1,
+					onComplete: () => {
+						// Add username label
+						this.addUsernameLabel();
+					}
 				}
 			);
 		} catch (error) {
 			console.error(error);
-			throw new Error('Something went wrong loading the player model');
 		}
 	}
 
@@ -141,9 +141,11 @@ export default class BaseCharacter implements IBaseCharacter {
 		geometry.computeBoundingBox();
 
 		if (geometry && geometry.boundingBox && geometry.boundingBox.max && geometry.boundingBox.min) {
-			// Center align the username labels
+			// Center align the username labels on the x and z axes
 			const xMid = -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
-			geometry.translate(xMid, 0, 0);
+			const zMid = -0.5 * (geometry.boundingBox.max.z - geometry.boundingBox.min.z);
+
+			geometry.translate(xMid, 0, zMid); // Apply translation to both x and z axes
 		}
 
 		// Create mesh
@@ -151,22 +153,51 @@ export default class BaseCharacter implements IBaseCharacter {
 
 		// Get model height
 		const bbox = new Box3();
-		this.model.traverse((child: Object3D) => {
-			const mesh = child as Mesh;
-			if (mesh.geometry) {
-				mesh.geometry.computeBoundingBox();
-				bbox.expandByObject(mesh);
-			}
-		});
+		bbox.setFromObject(this.model, true);
 
 		// Calculate model height
 		const modelHeight = bbox.max.y - bbox.min.y;
 
+		// Define target y position
+		const targetPositionY = modelHeight + 0.1;
+
 		// Set y position right above model height using offset
-		this.usernameLabel.position.y = modelHeight + 0.002;
+		this.usernameLabel.position.y = targetPositionY;
 
 		// Add to scene
 		this.experienceScene.scene.add(this.usernameLabel);
+
+		// Make sure all tweens are killed first
+		gsap.killTweensOf(this.usernameLabel.scale);
+		gsap.killTweensOf(this.usernameLabel.position);
+
+		// Create timeline
+		const tl: GSAPTimeline = gsap.timeline();
+
+		// Animate in character
+		tl.fromTo(
+			this.usernameLabel.scale,
+			{ x: 0, y: 0, z: 0 },
+			{
+				x: 1,
+				y: 1,
+				z: 1,
+				ease: 'back.out',
+				duration: 1
+			},
+			'0'
+		).fromTo(
+			this.usernameLabel.position,
+			{ x: 0, y: targetPositionY + 0.5, z: 0 },
+			{
+				x: 0,
+				y: targetPositionY,
+				z: 0,
+				ease: 'back.out',
+				duration: 1
+			},
+			'0'
+		);
 	}
 
 	update(delta: number): void {
@@ -204,6 +235,11 @@ export default class BaseCharacter implements IBaseCharacter {
 				ease: 'back.out',
 				duration: 1,
 				onComplete: () => {
+					if (this.usernameLabel) {
+						// Remove username label from experienceScene
+						this.experienceScene.scene.remove(this.usernameLabel);
+					}
+
 					if (this.model) {
 						// Remove model from experienceScene
 						this.experienceScene.scene.remove(this.model);

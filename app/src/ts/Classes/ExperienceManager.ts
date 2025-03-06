@@ -197,11 +197,14 @@ export default class ExperienceManager {
 		ExperienceSocket.on<ISocketClientUpdatePlayerData>(SocketEvent.CLIENT_UPDATE_PLAYER, (data) => {
 			// Update player in target scene
 			if (this.activeScene && this.activeScene.players && this.activeScene.sceneKey === data.sceneKey) {
-				// Update the mixer of the visitor player
-				this.activeScene.players[data.visitorId]?.mixer?.update(data.delta);
+				const player = this.activeScene.players[data.visitorId];
+				if (player && player.controls) {
+					// Update the keys press object
+					player.controls.keysPressed = data.keysPressed;
 
-				// Update the controls of the visitor player
-				this.activeScene.players[data.visitorId]?.controls?.update(data.delta, data.keysPressed);
+					// Update the visitor
+					player.update(data.delta);
+				}
 			}
 		});
 
@@ -428,8 +431,16 @@ export default class ExperienceManager {
 				cachedGltf.model.position.copy(spawnPosition);
 				cachedGltf.model.quaternion.copy(spawnRotation);
 
+				const clonedModel = clone(cachedGltf.model);
+				clonedModel.position.copy(spawnPosition);
+				clonedModel.quaternion.copy(spawnRotation);
+				clonedModel.scale.set(1, 1, 1);
+
+				// Ensure matrix world is updated
+				clonedModel.updateMatrixWorld(true);
+
 				// Resolve
-				resolve({ model: clone(cachedGltf.model), animations: cachedGltf.animations });
+				resolve({ model: clonedModel, animations: cachedGltf.animations });
 
 				return;
 			}
