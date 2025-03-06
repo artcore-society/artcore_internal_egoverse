@@ -18,6 +18,7 @@ export interface IBaseCharacter {
 	animationsMap: Map<string, AnimationAction>;
 	spawnPosition: Vector3;
 	spawnRotation: Quaternion;
+	modelHeight: number | null;
 
 	init(): Promise<void>;
 	load(): Promise<void>;

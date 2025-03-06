@@ -1,28 +1,16 @@
 import { gsap } from 'gsap';
 import { ModelPrefix } from '../Enums/ModelPrefix.ts';
-import { ThreeLoaders } from './ThreeLoaders.ts';
 import { AnimationName } from '../Enums/AnimationName.ts';
 import { IBaseCharacter } from '../Interfaces/IBaseCharacter.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
-import {
-	AnimationAction,
-	AnimationClip,
-	AnimationMixer,
-	Box3,
-	DoubleSide,
-	Mesh,
-	MeshBasicMaterial,
-	Object3D,
-	Quaternion,
-	ShapeGeometry,
-	Vector3
-} from 'three';
+import { AnimationAction, AnimationClip, AnimationMixer, Box3, Mesh, Object3D, Quaternion, Vector3 } from 'three';
 import ExperienceScene from './ExperienceScene.ts';
 import ExperienceManager from './ExperienceManager.ts';
 import PlayerControls from './PlayerControls.ts';
 import NpcControls from './NpcControls.ts';
 import ExperienceCamera from './ExperienceCamera.ts';
 import Player from './Player.ts';
+import Text3D from './Text3D.ts';
 
 export default class BaseCharacter implements IBaseCharacter {
 	public animationsMap: Map<string, AnimationAction>;
@@ -37,6 +25,7 @@ export default class BaseCharacter implements IBaseCharacter {
 	public spawnRotation: Quaternion;
 	public username: string;
 	public usernameLabel: Object3D | null = null;
+	public modelHeight: number | null = null;
 
 	constructor(
 		username: string,
@@ -121,45 +110,18 @@ export default class BaseCharacter implements IBaseCharacter {
 			return;
 		}
 
-		// Load font
-		const font = await ThreeLoaders.loadFont('/assets/fonts/rubik.json');
-
-		// Define color
-		const color = 0x006699;
-
-		// Create material
-		const matLite = new MeshBasicMaterial({
-			color: color,
-			transparent: true,
-			opacity: 1,
-			side: DoubleSide
-		});
-
-		// Create font shapes and geometry from it
-		const shapes = font.generateShapes(this.username, 0.1);
-		const geometry = new ShapeGeometry(shapes);
-		geometry.computeBoundingBox();
-
-		if (geometry && geometry.boundingBox && geometry.boundingBox.max && geometry.boundingBox.min) {
-			// Center align the username labels on the x and z axes
-			const xMid = -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
-			const zMid = -0.5 * (geometry.boundingBox.max.z - geometry.boundingBox.min.z);
-
-			geometry.translate(xMid, 0, zMid); // Apply translation to both x and z axes
-		}
-
-		// Create mesh
-		this.usernameLabel = new Mesh(geometry, matLite);
+		// Create 3D text
+		this.usernameLabel = await Text3D.createText(this.username, '/assets/fonts/rubik.json');
 
 		// Get model height
 		const bbox = new Box3();
 		bbox.setFromObject(this.model, true);
 
 		// Calculate model height
-		const modelHeight = bbox.max.y - bbox.min.y;
+		this.modelHeight = bbox.max.y - bbox.min.y;
 
 		// Define target y position
-		const targetPositionY = modelHeight + 0.1;
+		const targetPositionY = this.modelHeight + 0.1;
 
 		// Set y position right above model height using offset
 		this.usernameLabel.position.y = targetPositionY;
