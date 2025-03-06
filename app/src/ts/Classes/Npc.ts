@@ -78,9 +78,10 @@ export default class Npc extends BaseCharacter implements INpc {
 			await wait(4);
 
 			// Animate text disappearance (reverse)
-			await tl.reverse().then(() => {
-				this.experienceScene.scene.remove(textMesh);
-			});
+			await tl.reverse();
+
+			// Remove mesh from scene
+			this.experienceScene.scene.remove(textMesh);
 
 			// Wait
 			await wait(1);
