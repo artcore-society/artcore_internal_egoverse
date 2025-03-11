@@ -12,6 +12,7 @@ import NpcControls from './NpcControls.ts';
 import ExperienceCamera from './ExperienceCamera.ts';
 import Player from './Player.ts';
 import Text3D from './Text3D.ts';
+import { copyQuaternionToCannon } from '../Helpers';
 
 export default class BaseCharacter implements IBaseCharacter {
 	public animationsMap: Map<string, AnimationAction>;
@@ -197,8 +198,8 @@ export default class BaseCharacter implements IBaseCharacter {
 			this.physicsBody.velocity.y = 0;
 			this.physicsBody.velocity.z = 0;
 
-			// Sync the rotation and position of the avatar object with physics
-			this.physicsBody.quaternion.copy(this.model.quaternion);
+			// Sync the rotation and position of the character model with physics
+			this.physicsBody.quaternion.copy(copyQuaternionToCannon(this.model.quaternion));
 			this.model.position.x = this.physicsBody.position.x;
 			this.model.position.z = this.physicsBody.position.z;
 		}
