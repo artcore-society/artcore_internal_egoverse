@@ -83,10 +83,12 @@ export default class ExperienceScene implements IExperienceScene {
 		// Setup environment
 		this.setupEnvironment();
 
-		// Set debugger
-		this.cannonDebugger = CannonDebugger(this.scene, ExperienceManager.instance.physicsWorld, {
-			color: 'green'
-		});
+		if (import.meta.env['VITE_ENABLE_PHYSICS_DEBUG'] === 'true') {
+			// Set debugger
+			this.cannonDebugger = CannonDebugger(this.scene, ExperienceManager.instance.physicsWorld, {
+				color: 'green'
+			});
+		}
 	}
 
 	public get currentPlayer() {
