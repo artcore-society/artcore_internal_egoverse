@@ -2,7 +2,7 @@ import { IDialog } from './IDialog.ts';
 import { SceneKey } from '../Enums/SceneKey.ts';
 import { CameraPov } from '../Enums/CameraPov.ts';
 import { ISceneSettings } from './ISceneSettings.ts';
-import { Object3D, Quaternion, Scene, Vector3 } from 'three';
+import { AnimationMixer, Object3D, Quaternion, Scene, Vector3 } from 'three';
 import ExperienceCamera from '../Classes/ExperienceCamera.ts';
 import Player from '../Classes/Player.ts';
 import Npc from '../Classes/Npc.ts';
@@ -18,6 +18,7 @@ export interface IExperienceScene {
 	npcs: Array<Npc>;
 	currentCameraPov: CameraPov;
 	environment: Object3D;
+	mixer: AnimationMixer | null;
 
 	readonly currentPlayer: Player | undefined;
 

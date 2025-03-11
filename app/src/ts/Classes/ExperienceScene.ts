@@ -11,6 +11,7 @@ import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { ICameraPovOptions } from '../Interfaces/ICameraPovOptions.ts';
 import {
 	AmbientLight,
+	AnimationMixer,
 	Color,
 	DirectionalLight,
 	Fog,
@@ -40,6 +41,7 @@ export default class ExperienceScene implements IExperienceScene {
 	public npcs: Array<Npc> = [];
 	public currentCameraPov: CameraPov = CameraPov.THIRD_PERSON;
 	public environment: Object3D;
+	public mixer: AnimationMixer | null = null;
 	private readonly cameraPovOptions: Array<ICameraPovOptions> = [];
 
 	constructor(canvas: HTMLCanvasElement, sceneKey: SceneKey, settings: ISceneSettings) {
@@ -119,13 +121,26 @@ export default class ExperienceScene implements IExperienceScene {
 	private async setupEnvironment(): Promise<void> {
 		if (this.settings && this.settings.environment) {
 			// Load the environment model
-			const { model } = await ExperienceManager.instance.getModel(
+			const { model, animations } = await ExperienceManager.instance.getModel(
 				this.settings.environment.modelPrefix,
 				this.settings.environment.modelId,
 				new Vector3(...this.settings.environment.spawnPosition),
 				new Quaternion(...this.settings.environment.spawnRotation),
 				new Vector3(...this.settings.environment.spawnScale)
 			);
+
+			if (animations.length > 0) {
+				// Set animation mixer
+				this.mixer = new AnimationMixer(model);
+
+				animations.forEach((animation) => {
+					// Create clip action
+					const clipAction = this.mixer?.clipAction(animation);
+
+					// play
+					clipAction?.play();
+				});
+			}
 
 			// Add to scene
 			this.scene.add(model);
@@ -287,6 +302,11 @@ export default class ExperienceScene implements IExperienceScene {
 
 		// Update npc characters
 		this.npcs.forEach((npc) => npc.update(delta));
+
+		if (this.mixer) {
+			// Update the mixer
+			this.mixer.update(delta);
+		}
 	}
 
 	public destroy(): void {

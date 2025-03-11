@@ -66,9 +66,9 @@ export class GameService {
 			floorColor: 'Blue',
 			environment: {
 				modelPrefix: ModelPrefix.ENVIRONMENT,
-				modelId: 1,
-				spawnScale: new Vector3(0.65, 0.65, 0.65).toArray(),
-				spawnPosition: new Vector3(0, 0, -10).toArray(),
+				modelId: 2,
+				spawnScale: new Vector3(1, 1, 1).toArray(),
+				spawnPosition: new Vector3(0, 0.05, 0).toArray(),
 				spawnRotation: new Quaternion().toArray()
 			}
 		});
@@ -78,7 +78,7 @@ export class GameService {
 				modelPrefix: ModelPrefix.ENVIRONMENT,
 				modelId: 1,
 				spawnScale: new Vector3(0.65, 0.65, 0.65).toArray(),
-				spawnPosition: new Vector3(0, 0, -10).toArray(),
+				spawnPosition: new Vector3(0, 0.1, -10).toArray(),
 				spawnRotation: new Quaternion().toArray()
 			}
 		});
@@ -280,8 +280,8 @@ export class GameService {
 			id: player.id,
 			username: player.username,
 			modelId: player.modelId,
-			position: player.position.toArray(),
-			quaternion: player.quaternion.toArray(),
+			spawnPosition: player.position.toArray(),
+			spawnRotation: player.quaternion.toArray(),
 			sceneKey: newSceneKey
 		});
 
