@@ -65,6 +65,9 @@ export default class BaseCharacter implements IBaseCharacter {
 			// Set model
 			this.model = model;
 
+			// Update the name attribute
+			this.model.name = this.username;
+
 			// Filter out the T pose animation
 			const filteredAnimations = [
 				...animations.filter((animation: AnimationClip) => animation.name !== AnimationName.TPOSE)

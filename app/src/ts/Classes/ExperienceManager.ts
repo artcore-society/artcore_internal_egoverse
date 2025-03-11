@@ -402,7 +402,7 @@ export default class ExperienceManager {
 		let hoveredPlayerSocketId: string | null = null;
 
 		for (const [socketId, player] of Object.entries(players)) {
-			if (player.model?.uuid === characterIntersect.uuid) {
+			if (player.username === characterIntersect.name) {
 				if (!player.isCurrent) {
 					this.hoveredPlayer = player;
 					hoveredPlayerSocketId = socketId;
@@ -413,7 +413,7 @@ export default class ExperienceManager {
 
 		if (!this.hoveredPlayer) {
 			for (const npc of npcs) {
-				if (npc.model?.uuid === characterIntersect.uuid) {
+				if (npc.username === characterIntersect.name) {
 					this.hoveredNpc = npc;
 					break; // Found an NPC, exit early
 				}
@@ -442,10 +442,13 @@ export default class ExperienceManager {
 				cachedGltf.model.position.copy(spawnPosition);
 				cachedGltf.model.quaternion.copy(spawnRotation);
 
-				const clonedModel = clone(cachedGltf.model);
+				const clonedModel: IExtendedObject3D = clone(cachedGltf.model);
 				clonedModel.position.copy(spawnPosition);
 				clonedModel.quaternion.copy(spawnRotation);
 				clonedModel.scale.copy(spawnScale);
+
+				if (modelPrefix === ModelPrefix.PLAYER) clonedModel.isPlayer = true;
+				if (modelPrefix === ModelPrefix.NPC) clonedModel.isNpc = true;
 
 				// Ensure matrix world is updated
 				clonedModel.updateMatrixWorld(true);
