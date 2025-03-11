@@ -83,8 +83,6 @@ export default class ExperienceManager {
 		// Setup stats
 		this.stats.showPanel(0);
 		if (!document.body.contains(this.stats.dom)) {
-			this.stats.dom.style.right = '0';
-			this.stats.dom.style.left = 'unset';
 			document.body.appendChild(this.stats.dom);
 		}
 	}

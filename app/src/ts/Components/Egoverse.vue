@@ -242,7 +242,7 @@ onBeforeUnmount(() => {
 
 <template>
 	<div class="fixed inset-0 bg-white">
-		<div class="absolute top-5 left-5 z-10 flex items-center justify-center gap-2">
+		<div class="absolute top-5 right-5 z-10 flex items-center justify-center gap-2">
 			<Loader v-if="!isReady" />
 
 			<PrimaryButton
