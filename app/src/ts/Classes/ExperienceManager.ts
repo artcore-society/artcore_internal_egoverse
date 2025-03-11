@@ -150,7 +150,12 @@ export default class ExperienceManager {
 
 			if (data.id === this.userId) {
 				// Add current player
-				this.activeScene?.addCurrentPlayer(data.username, parseInt(data.modelId));
+				this.activeScene?.addCurrentPlayer(
+					data.username,
+					parseInt(data.modelId),
+					new Vector3(...data.spawnPosition),
+					new Quaternion(...data.spawnRotation)
+				);
 
 				return;
 			}
@@ -160,8 +165,8 @@ export default class ExperienceManager {
 				data.id,
 				data.username,
 				parseInt(data.modelId),
-				new Vector3(...data.position),
-				new Quaternion(...data.quaternion)
+				new Vector3(...data.spawnPosition),
+				new Quaternion(...data.spawnRotation)
 			);
 		});
 
@@ -424,8 +429,9 @@ export default class ExperienceManager {
 	public getModel(
 		modelPrefix: ModelPrefix,
 		modelId: number,
-		spawnPosition: Vector3,
-		spawnRotation: Quaternion
+		spawnPosition: Vector3 = new Vector3(),
+		spawnRotation: Quaternion = new Quaternion(),
+		spawnScale: Vector3 = new Vector3()
 	): Promise<IModelCacheEntry> {
 		return new Promise(async (resolve, reject) => {
 			if (this.modelCache.has(`${modelPrefix}-${modelId}`)) {
@@ -439,7 +445,7 @@ export default class ExperienceManager {
 				const clonedModel = clone(cachedGltf.model);
 				clonedModel.position.copy(spawnPosition);
 				clonedModel.quaternion.copy(spawnRotation);
-				clonedModel.scale.set(1, 1, 1);
+				clonedModel.scale.copy(spawnScale);
 
 				// Ensure matrix world is updated
 				clonedModel.updateMatrixWorld(true);
@@ -460,6 +466,7 @@ export default class ExperienceManager {
 				if (modelPrefix === ModelPrefix.NPC) model.isNpc = true;
 				model.position.copy(spawnPosition);
 				model.quaternion.copy(spawnRotation);
+				model.scale.copy(spawnScale);
 				model.castShadow = true;
 				model.receiveShadow = true;
 

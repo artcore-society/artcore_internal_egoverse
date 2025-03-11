@@ -17,6 +17,7 @@ export interface IExperienceScene {
 	players: { [key: string]: Player };
 	npcs: Array<Npc>;
 	currentCameraPov: CameraPov;
+	environment: Object3D;
 
 	readonly currentPlayer: Player | undefined;
 
@@ -29,7 +30,7 @@ export interface IExperienceScene {
 		spawnRotation?: Quaternion
 	): void;
 	removeVisitor(userId: string): void;
-	addCurrentPlayer(username: string, modelId: number): void;
+	addCurrentPlayer(username: string, modelId: number, spawnPosition: Vector3, spawnRotation: Quaternion): void;
 	removeCurrentPlayer(): void;
 	addNpc(username: string, modelId: number, dialog: IDialog, spawnPosition: Vector3, spawnRotation: Quaternion): void;
 	setCameraPov(pov: CameraPov): void;

@@ -8,6 +8,7 @@ import { Server, Socket } from 'socket.io';
 import { ISceneSettings } from '../Interfaces/ISceneSettings';
 import { Quaternion, Vector3 } from 'three';
 import Dialog from '../Classes/Dialog.ts';
+import { ModelPrefix } from '../Enums/ModelPrefix.ts';
 
 export class GameService {
 	private static _instance: GameService;
@@ -51,9 +52,36 @@ export class GameService {
 	private initScenes() {
 		// Define scene settings
 		const scenesSettings: Map<SceneKey, ISceneSettings> = new Map();
-		scenesSettings.set(SceneKey.LANDING_AREA, { floorColor: 'Red' });
-		scenesSettings.set(SceneKey.MEETING_ROOM, { floorColor: 'Blue' });
-		scenesSettings.set(SceneKey.CHAT_ROOM, { floorColor: 'Green' });
+		scenesSettings.set(SceneKey.LANDING_AREA, {
+			floorColor: 'Red',
+			environment: {
+				modelPrefix: ModelPrefix.ENVIRONMENT,
+				modelId: 1,
+				spawnScale: new Vector3(0.65, 0.65, 0.65).toArray(),
+				spawnPosition: new Vector3(0, 0, -10).toArray(),
+				spawnRotation: new Quaternion().toArray()
+			}
+		});
+		scenesSettings.set(SceneKey.MEETING_ROOM, {
+			floorColor: 'Blue',
+			environment: {
+				modelPrefix: ModelPrefix.ENVIRONMENT,
+				modelId: 1,
+				spawnScale: new Vector3(0.65, 0.65, 0.65).toArray(),
+				spawnPosition: new Vector3(0, 0, -10).toArray(),
+				spawnRotation: new Quaternion().toArray()
+			}
+		});
+		scenesSettings.set(SceneKey.CHAT_ROOM, {
+			floorColor: 'Green',
+			environment: {
+				modelPrefix: ModelPrefix.ENVIRONMENT,
+				modelId: 1,
+				spawnScale: new Vector3(0.65, 0.65, 0.65).toArray(),
+				spawnPosition: new Vector3(0, 0, -10).toArray(),
+				spawnRotation: new Quaternion().toArray()
+			}
+		});
 
 		// Define scene NPC characters with unique dialogs
 		const scenesNpcs: Map<SceneKey, Array<Npc>> = new Map();
@@ -62,14 +90,14 @@ export class GameService {
 				`NPC ${faker.person.firstName()}`,
 				1,
 				this.generateUniqueDialog(),
-				new Vector3(-2, 0, -4),
+				new Vector3(-2, 0.05, -4),
 				this.degreesToQuaternion(215)
 			),
 			new Npc(
 				`NPC ${faker.person.firstName()}`,
 				2,
 				this.generateUniqueDialog(),
-				new Vector3(1.5, 0, -2),
+				new Vector3(1.5, 0.05, -2),
 				this.degreesToQuaternion(145)
 			)
 		]);
@@ -78,7 +106,7 @@ export class GameService {
 				`NPC ${faker.person.firstName()}`,
 				1,
 				this.generateUniqueDialog(),
-				new Vector3(1.5, 0, -2),
+				new Vector3(1.5, 0.05, -2),
 				this.degreesToQuaternion(145)
 			)
 		]);
@@ -87,7 +115,7 @@ export class GameService {
 				`NPC ${faker.person.firstName()}`,
 				2,
 				this.generateUniqueDialog(),
-				new Vector3(0.5, 0, -3),
+				new Vector3(0.5, 0.05, -3),
 				this.degreesToQuaternion(175)
 			)
 		]);
@@ -164,7 +192,7 @@ export class GameService {
 
 		// Assigns the player to the specified scene.
 		const scene = this.scenes.get(sceneKey)!;
-		const player = new Player(socket.id, username, modelId, sceneKey);
+		const player = new Player(socket.id, username, modelId, sceneKey, new Vector3(0, 0.05, 0));
 		scene.addPlayer(player);
 		socket.join(sceneKey);
 
@@ -184,8 +212,8 @@ export class GameService {
 			id: player.id,
 			username: player.username,
 			modelId: player.modelId,
-			position: player.position.toArray(),
-			quaternion: [player.quaternion.x, player.quaternion.y, player.quaternion.z, player.quaternion.w]
+			spawnPosition: player.position.toArray(),
+			spawnRotation: player.quaternion.toArray()
 		});
 
 		// Sets up event listeners for player interactions.

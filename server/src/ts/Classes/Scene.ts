@@ -2,8 +2,10 @@ import { Npc } from './Npc.ts';
 import { Player } from './Player.ts';
 import { IScene } from '../Interfaces/IScene';
 import { SceneKey } from '../Enums/SceneKey.ts';
+import { ModelPrefix } from '../Enums/ModelPrefix.ts';
 import { ISceneState } from '../Interfaces/ISceneState.ts';
 import { ISceneSettings } from '../Interfaces/ISceneSettings.ts';
+import { Quaternion, Vector3 } from 'three';
 
 export class Scene implements IScene {
 	sceneKey: SceneKey;
@@ -14,7 +16,16 @@ export class Scene implements IScene {
 	constructor(sceneKey: SceneKey) {
 		this.sceneKey = sceneKey;
 		this.npcs = [];
-		this.settings = { floorColor: 'Blue' };
+		this.settings = {
+			floorColor: 'Blue',
+			environment: {
+				modelPrefix: ModelPrefix.ENVIRONMENT,
+				modelId: 1,
+				spawnRotation: new Quaternion(),
+				spawnPosition: new Vector3(),
+				spawnScale: new Vector3()
+			}
+		};
 		this.players = new Map();
 	}
 

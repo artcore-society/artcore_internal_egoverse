@@ -39,14 +39,16 @@ export default class ExperienceScene implements IExperienceScene {
 	public players: { [key: string]: Player } = {};
 	public npcs: Array<Npc> = [];
 	public currentCameraPov: CameraPov = CameraPov.THIRD_PERSON;
+	public environment: Object3D;
 	private readonly cameraPovOptions: Array<ICameraPovOptions> = [];
 
-	constructor(canvas: HTMLCanvasElement, sceneKey: SceneKey, settings: ISceneSettings = { floorColor: 'Blue' }) {
+	constructor(canvas: HTMLCanvasElement, sceneKey: SceneKey, settings: ISceneSettings) {
 		this.scene = new Scene();
 		this.sceneKey = sceneKey;
 		this.settings = settings;
 		this.camera = new ExperienceCamera(this.scene, canvas);
 		this.cameraParent = new Object3D();
+		this.environment = new Object3D();
 		this.updateAction = null;
 		this.cameraPovOptions = [
 			{
@@ -80,6 +82,9 @@ export default class ExperienceScene implements IExperienceScene {
 
 		// Setup floor
 		this.setupFloor();
+
+		// Setup environment
+		this.setupEnvironment();
 	}
 
 	public get currentPlayer() {
@@ -109,6 +114,22 @@ export default class ExperienceScene implements IExperienceScene {
 		// Rotate the plane to lay flat (XZ plane)
 		plane.rotation.x = -Math.PI / 2;
 		this.scene.add(plane);
+	}
+
+	private async setupEnvironment(): Promise<void> {
+		if (this.settings && this.settings.environment) {
+			// Load the environment model
+			const { model } = await ExperienceManager.instance.getModel(
+				this.settings.environment.modelPrefix,
+				this.settings.environment.modelId,
+				new Vector3(...this.settings.environment.spawnPosition),
+				new Quaternion(...this.settings.environment.spawnRotation),
+				new Vector3(...this.settings.environment.spawnScale)
+			);
+
+			// Add to scene
+			this.scene.add(model);
+		}
 	}
 
 	private setupLighting(): void {
@@ -165,7 +186,12 @@ export default class ExperienceScene implements IExperienceScene {
 		});
 	}
 
-	public addCurrentPlayer(username: string, modelId: number) {
+	public addCurrentPlayer(
+		username: string,
+		modelId: number,
+		spawnPosition: Vector3 = new Vector3(),
+		spawnRotation: Quaternion = new Quaternion()
+	) {
 		if (this.currentPlayer) {
 			return;
 		}
@@ -177,7 +203,9 @@ export default class ExperienceScene implements IExperienceScene {
 			modelId,
 			this,
 			this.camera,
-			true
+			true,
+			spawnPosition,
+			spawnRotation
 		);
 	}
 
