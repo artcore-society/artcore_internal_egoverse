@@ -57,7 +57,7 @@ export class GameService {
 				modelPrefix: ModelPrefix.ENVIRONMENT,
 				modelId: 1,
 				spawnScale: new Vector3(0.65, 0.65, 0.65).toArray(),
-				spawnPosition: new Vector3(0, 0, -10).toArray(),
+				spawnPosition: new Vector3(0, -0.1, -10).toArray(),
 				spawnRotation: new Quaternion().toArray()
 			}
 		});
@@ -87,14 +87,14 @@ export class GameService {
 				`NPC ${faker.person.firstName()}`,
 				1,
 				this.generateUniqueDialog(),
-				new Vector3(-2, 0.05, -4),
+				new Vector3(-2, 0.02, -4),
 				this.degreesToQuaternion(215)
 			),
 			new Npc(
 				`NPC ${faker.person.firstName()}`,
 				2,
 				this.generateUniqueDialog(),
-				new Vector3(1.5, 0.05, -2),
+				new Vector3(1.5, 0.02, -2),
 				this.degreesToQuaternion(145)
 			)
 		]);
@@ -103,7 +103,7 @@ export class GameService {
 				`NPC ${faker.person.firstName()}`,
 				1,
 				this.generateUniqueDialog(),
-				new Vector3(1.5, 0.05, -2),
+				new Vector3(1.5, 0.02, -2),
 				this.degreesToQuaternion(145)
 			)
 		]);
@@ -112,7 +112,7 @@ export class GameService {
 				`NPC ${faker.person.firstName()}`,
 				2,
 				this.generateUniqueDialog(),
-				new Vector3(0.5, 0.05, -3),
+				new Vector3(0.5, 0.02, -3),
 				this.degreesToQuaternion(175)
 			)
 		]);
