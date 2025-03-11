@@ -246,24 +246,24 @@ onBeforeUnmount(() => {
 			<Loader v-if="!isReady" />
 
 			<PrimaryButton
-				:ref="(el) => (areaButtons[SceneKey.LANDING_AREA] = (el as ComponentPublicInstance).$el as HTMLElement)"
-				@click="transitionToScene(SceneKey.LANDING_AREA)"
+				:ref="(el) => (areaButtons[SceneKey.FIRST_AREA] = (el as ComponentPublicInstance).$el as HTMLElement)"
+				@click="transitionToScene(SceneKey.FIRST_AREA)"
 			>
-				Landing Area
+				Local Park
 			</PrimaryButton>
 
 			<PrimaryButton
-				:ref="(el) => (areaButtons[SceneKey.MEETING_ROOM] = (el as ComponentPublicInstance).$el as HTMLElement)"
-				@click="transitionToScene(SceneKey.MEETING_ROOM)"
+				:ref="(el) => (areaButtons[SceneKey.SECOND_AREA] = (el as ComponentPublicInstance).$el as HTMLElement)"
+				@click="transitionToScene(SceneKey.SECOND_AREA)"
 			>
-				Meeting Room
+				Camping Site
 			</PrimaryButton>
 
 			<PrimaryButton
-				:ref="(el) => (areaButtons[SceneKey.CHAT_ROOM] = (el as ComponentPublicInstance).$el as HTMLElement)"
-				@click="transitionToScene(SceneKey.CHAT_ROOM)"
+				:ref="(el) => (areaButtons[SceneKey.THIRD_AREA] = (el as ComponentPublicInstance).$el as HTMLElement)"
+				@click="transitionToScene(SceneKey.THIRD_AREA)"
 			>
-				Chat Room
+				Incredibles Battle
 			</PrimaryButton>
 		</div>
 

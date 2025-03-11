@@ -52,7 +52,7 @@ export class GameService {
 	private initScenes() {
 		// Define scene settings
 		const scenesSettings: Map<SceneKey, ISceneSettings> = new Map();
-		scenesSettings.set(SceneKey.LANDING_AREA, {
+		scenesSettings.set(SceneKey.FIRST_AREA, {
 			environment: {
 				modelPrefix: ModelPrefix.ENVIRONMENT,
 				modelId: 1,
@@ -61,7 +61,7 @@ export class GameService {
 				spawnRotation: new Quaternion().toArray()
 			}
 		});
-		scenesSettings.set(SceneKey.MEETING_ROOM, {
+		scenesSettings.set(SceneKey.SECOND_AREA, {
 			environment: {
 				modelPrefix: ModelPrefix.ENVIRONMENT,
 				modelId: 2,
@@ -70,7 +70,7 @@ export class GameService {
 				spawnRotation: new Quaternion().toArray()
 			}
 		});
-		scenesSettings.set(SceneKey.CHAT_ROOM, {
+		scenesSettings.set(SceneKey.THIRD_AREA, {
 			environment: {
 				modelPrefix: ModelPrefix.ENVIRONMENT,
 				modelId: 3,
@@ -82,7 +82,7 @@ export class GameService {
 
 		// Define scene NPC characters with unique dialogs
 		const scenesNpcs: Map<SceneKey, Array<Npc>> = new Map();
-		scenesNpcs.set(SceneKey.LANDING_AREA, [
+		scenesNpcs.set(SceneKey.FIRST_AREA, [
 			new Npc(
 				`NPC ${faker.person.firstName()}`,
 				1,
@@ -98,7 +98,7 @@ export class GameService {
 				this.degreesToQuaternion(145)
 			)
 		]);
-		scenesNpcs.set(SceneKey.MEETING_ROOM, [
+		scenesNpcs.set(SceneKey.SECOND_AREA, [
 			new Npc(
 				`NPC ${faker.person.firstName()}`,
 				1,
@@ -107,7 +107,7 @@ export class GameService {
 				this.degreesToQuaternion(145)
 			)
 		]);
-		scenesNpcs.set(SceneKey.CHAT_ROOM, [
+		scenesNpcs.set(SceneKey.THIRD_AREA, [
 			new Npc(
 				`NPC ${faker.person.firstName()}`,
 				2,
@@ -171,7 +171,7 @@ export class GameService {
 
 		const username = this.sanitizeInput(socket.handshake.query.username as string);
 		const modelId = parseInt(<string>socket.handshake.query.modelId) || 1;
-		const sceneKey = (this.sanitizeInput(socket.handshake.query.sceneKey) as SceneKey) || SceneKey.LANDING_AREA;
+		const sceneKey = (this.sanitizeInput(socket.handshake.query.sceneKey) as SceneKey) || SceneKey.FIRST_AREA;
 
 		// Validate username and scene key.
 		if (!username || !sceneKey) {

@@ -1,5 +1,5 @@
 export enum SceneKey {
-	LANDING_AREA = 'landing-area',
-	MEETING_ROOM = 'meeting-room',
-	CHAT_ROOM = 'chat-room'
+	FIRST_AREA = 'first-area',
+	SECOND_AREA = 'second-area',
+	THIRD_AREA = 'third-area'
 }

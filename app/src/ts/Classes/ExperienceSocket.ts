@@ -17,7 +17,7 @@ export class ExperienceSocket {
 			query: {
 				username: ExperienceManager.instance.username ?? 'Default username',
 				modelId: modelId ?? 1,
-				sceneKey: ExperienceManager.instance.activeScene?.sceneKey ?? SceneKey.LANDING_AREA
+				sceneKey: ExperienceManager.instance.activeScene?.sceneKey ?? SceneKey.FIRST_AREA
 			}
 		});
 	}
