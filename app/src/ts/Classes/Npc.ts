@@ -48,10 +48,10 @@ export default class Npc extends BaseCharacter implements INpc {
 		this.controls.playAnimation(AnimationName.TALKING);
 
 		// Config
-		const textSize = 0.2;
+		const textSize = 0.05;
 		const textColor = 0x000000;
 		const fontUrl = '/assets/fonts/rubik.json';
-		const targetPositionY = this.modelHeight ? this.modelHeight + 0.5 : 4;
+		const targetPositionY = this.modelHeight ? this.modelHeight + 0.4 : 4;
 
 		// Generate messages
 		for (const message of this.dialog.messages) {
@@ -69,13 +69,13 @@ export default class Npc extends BaseCharacter implements INpc {
 			const tl: GSAPTimeline = gsap.timeline();
 			tl.fromTo(textMesh.scale, { x: 0, y: 0, z: 0 }, { x: 1, y: 1, z: 1, ease: 'sine.inOut', duration: 0.8 }).fromTo(
 				textMesh.position,
-				{ y: targetPositionY + 0.5 },
+				{ y: targetPositionY + 0.15 },
 				{ y: targetPositionY, ease: 'sine.inOut', duration: 0.8 },
 				'0'
 			);
 
 			// Wait
-			await wait(4);
+			await wait(2);
 
 			// Animate text disappearance (reverse)
 			await tl.reverse();

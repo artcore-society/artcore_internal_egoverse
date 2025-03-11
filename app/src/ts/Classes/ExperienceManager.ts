@@ -47,7 +47,7 @@ export default class ExperienceManager {
 	private needsRaycast: boolean = false;
 	private stats: Stats = new Stats();
 	private raycastThrottle: number = 0;
-	private static readonly RAYCAST_INTERVAL: number = 10; // Runs every 10 frames
+	private static readonly RAYCAST_INTERVAL: number = 5; // Runs every 5 frames
 
 	private constructor() {}
 
