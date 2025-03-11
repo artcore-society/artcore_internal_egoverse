@@ -13,6 +13,7 @@ import ExperienceCamera from './ExperienceCamera.ts';
 import Player from './Player.ts';
 import Text3D from './Text3D.ts';
 import { copyQuaternionToCannon } from '../Helpers';
+import { PhysicsCollisionGroup } from '../Enums/PhysicsCollisionGroup.ts';
 
 export default class BaseCharacter implements IBaseCharacter {
 	public animationsMap: Map<string, AnimationAction>;
@@ -178,10 +179,10 @@ export default class BaseCharacter implements IBaseCharacter {
 		this.physicsBody = new Body({
 			mass: 5,
 			shape: avatarShape,
-			collisionFilterGroup: 4, //Set collision group
-			collisionFilterMask: 1 | 2 | 3 //This body can only collide with bodies from these groups
+			collisionFilterGroup: PhysicsCollisionGroup.CHARACTER, // Set collision group
+			collisionFilterMask: PhysicsCollisionGroup.FLOOR | PhysicsCollisionGroup.WALL // This body can only collide with bodies from these groups
 		});
-		this.physicsBody.allowSleep = false; //IMPORTANT to keep calculating the collisions => ONLY APPLY HERE
+		this.physicsBody.allowSleep = false; // IMPORTANT to keep calculating the collisions => ONLY APPLY HERE
 		this.physicsBody.position.x = this.model.position.x;
 		this.physicsBody.position.y = radius;
 		this.physicsBody.position.z = this.model.position.z;

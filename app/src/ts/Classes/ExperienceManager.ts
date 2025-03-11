@@ -24,6 +24,7 @@ import Player from './Player.ts';
 import ExperienceScene from './ExperienceScene.ts';
 import Npc from './Npc.ts';
 import Stats from 'stats.js';
+import { PhysicsCollisionGroup } from '../Enums/PhysicsCollisionGroup.ts';
 
 export default class ExperienceManager {
 	private static _instance: ExperienceManager | null = null;
@@ -340,8 +341,8 @@ export default class ExperienceManager {
 			shape: new Plane(),
 			position: new Vec3(0, 0, 0),
 			type: Body.STATIC,
-			collisionFilterGroup: 1, // Set collision group
-			collisionFilterMask: 1 | 2 | 3 | 4 // This body can only collide with bodies from these groups
+			collisionFilterGroup: PhysicsCollisionGroup.FLOOR, // Set collision group
+			collisionFilterMask: PhysicsCollisionGroup.CHARACTER | PhysicsCollisionGroup.WALL // This body can only collide with bodies from these groups
 		});
 		floorBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
 		this.physicsWorld.addBody(floorBody);
