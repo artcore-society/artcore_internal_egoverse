@@ -53,7 +53,6 @@ export class GameService {
 		// Define scene settings
 		const scenesSettings: Map<SceneKey, ISceneSettings> = new Map();
 		scenesSettings.set(SceneKey.LANDING_AREA, {
-			floorColor: 'Red',
 			environment: {
 				modelPrefix: ModelPrefix.ENVIRONMENT,
 				modelId: 1,
@@ -63,22 +62,20 @@ export class GameService {
 			}
 		});
 		scenesSettings.set(SceneKey.MEETING_ROOM, {
-			floorColor: 'Blue',
 			environment: {
 				modelPrefix: ModelPrefix.ENVIRONMENT,
 				modelId: 2,
 				spawnScale: new Vector3(1, 1, 1).toArray(),
-				spawnPosition: new Vector3(0, 0.05, 0).toArray(),
+				spawnPosition: new Vector3(0, 0, 0).toArray(),
 				spawnRotation: new Quaternion().toArray()
 			}
 		});
 		scenesSettings.set(SceneKey.CHAT_ROOM, {
-			floorColor: 'Green',
 			environment: {
 				modelPrefix: ModelPrefix.ENVIRONMENT,
-				modelId: 1,
-				spawnScale: new Vector3(0.65, 0.65, 0.65).toArray(),
-				spawnPosition: new Vector3(0, 0.1, -10).toArray(),
+				modelId: 3,
+				spawnScale: new Vector3(0.85, 0.85, 0.85).toArray(),
+				spawnPosition: new Vector3(0, 0, 0).toArray(),
 				spawnRotation: new Quaternion().toArray()
 			}
 		});

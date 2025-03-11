@@ -22,7 +22,6 @@ export interface IExperienceScene {
 
 	readonly currentPlayer: Player | undefined;
 
-	setupFloor(color: number): void;
 	addVisitor(
 		userId: string,
 		username: string,

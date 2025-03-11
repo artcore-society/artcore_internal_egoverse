@@ -12,15 +12,11 @@ import { ICameraPovOptions } from '../Interfaces/ICameraPovOptions.ts';
 import {
 	AmbientLight,
 	AnimationMixer,
-	Color,
 	DirectionalLight,
 	Fog,
 	HemisphereLight,
-	Mesh,
-	MeshStandardMaterial,
 	Object3D,
 	OrthographicCamera,
-	PlaneGeometry,
 	Quaternion,
 	Scene,
 	Vector3
@@ -82,9 +78,6 @@ export default class ExperienceScene implements IExperienceScene {
 		// Setup lighting
 		this.setupLighting();
 
-		// Setup floor
-		this.setupFloor();
-
 		// Setup environment
 		this.setupEnvironment();
 	}
@@ -95,27 +88,6 @@ export default class ExperienceScene implements IExperienceScene {
 		}
 
 		return Object.values(this.players).find((player: IPlayer) => player.isCurrent);
-	}
-
-	public setupFloor(): void {
-		// Create a large plane
-		const geometry = new PlaneGeometry(500, 500, 10, 10);
-
-		// Create material with all maps
-		const material = new MeshStandardMaterial({
-			color: new Color(this.settings.floorColor)
-		});
-
-		// Create plane
-		const plane = new Mesh(geometry, material);
-
-		// Setup shadows
-		plane.castShadow = true;
-		plane.receiveShadow = true;
-
-		// Rotate the plane to lay flat (XZ plane)
-		plane.rotation.x = -Math.PI / 2;
-		this.scene.add(plane);
 	}
 
 	private async setupEnvironment(): Promise<void> {

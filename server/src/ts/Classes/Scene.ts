@@ -17,7 +17,6 @@ export class Scene implements IScene {
 		this.sceneKey = sceneKey;
 		this.npcs = [];
 		this.settings = {
-			floorColor: 'Blue',
 			environment: {
 				modelPrefix: ModelPrefix.ENVIRONMENT,
 				modelId: 1,
