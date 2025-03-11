@@ -13,6 +13,8 @@
   "dependencies": {
     "@tailwindcss/postcss": "^4.0.5",
     "@tailwindcss/vite": "^4.0.5",
+    "cannon-es": "^0.20.0",
+    "cannon-es-debugger": "^1.0.0",
     "gsap": "^3.12.7",
     "pinia": "^3.0.1",
     "postcss": "^8.5.1",

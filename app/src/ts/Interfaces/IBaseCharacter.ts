@@ -1,3 +1,4 @@
+import { Body } from 'cannon-es';
 import { ModelPrefix } from '../Enums/ModelPrefix.ts';
 import { IExperienceScene } from './IExperienceScene.ts';
 import { AnimationAction, AnimationMixer, Object3D, Quaternion, Vector3 } from 'three';
@@ -19,6 +20,7 @@ export interface IBaseCharacter {
 	spawnPosition: Vector3;
 	spawnRotation: Quaternion;
 	modelHeight: number | null;
+	physicsBody: Body | null;
 
 	init(): Promise<void>;
 	load(): Promise<void>;

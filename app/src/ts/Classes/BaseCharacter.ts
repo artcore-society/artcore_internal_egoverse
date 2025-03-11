@@ -1,5 +1,6 @@
 import { gsap } from 'gsap';
 import { ModelPrefix } from '../Enums/ModelPrefix.ts';
+import { Body, Sphere } from 'cannon-es';
 import { AnimationName } from '../Enums/AnimationName.ts';
 import { IBaseCharacter } from '../Interfaces/IBaseCharacter.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
@@ -26,6 +27,7 @@ export default class BaseCharacter implements IBaseCharacter {
 	public username: string;
 	public usernameLabel: Object3D | null = null;
 	public modelHeight: number | null = null;
+	public physicsBody: Body | null = null;
 
 	constructor(
 		username: string,
@@ -100,6 +102,9 @@ export default class BaseCharacter implements IBaseCharacter {
 					onComplete: () => {
 						// Add username label
 						this.addUsernameLabel();
+
+						// Setup physics body of character
+						this.setupPhysicsBody();
 					}
 				}
 			);
@@ -165,9 +170,38 @@ export default class BaseCharacter implements IBaseCharacter {
 		);
 	}
 
+	setupPhysicsBody() {
+		// Add physics
+		const radius = 0.9;
+		const avatarShape = new Sphere(radius);
+		this.physicsBody = new Body({
+			mass: 5,
+			shape: avatarShape,
+			collisionFilterGroup: 4, //Set collision group
+			collisionFilterMask: 1 | 2 | 3 //This body can only collide with bodies from these groups
+		});
+		this.physicsBody.allowSleep = false; //IMPORTANT to keep calculating the collisions => ONLY APPLY HERE
+		this.physicsBody.position.x = this.model.position.x;
+		this.physicsBody.position.y = radius;
+		this.physicsBody.position.z = this.model.position.z;
+		ExperienceManager.instance.physicsWorld.addBody(this.physicsBody);
+	}
+
 	update(delta: number): void {
 		// Update the mixer
 		this.mixer.update(delta);
+
+		if (this.physicsBody && this.model) {
+			// Make sure velocity is always 0 to prevent issues
+			this.physicsBody.velocity.x = 0;
+			this.physicsBody.velocity.y = 0;
+			this.physicsBody.velocity.z = 0;
+
+			// Sync the rotation and position of the avatar object with physics
+			this.physicsBody.quaternion.copy(this.model.quaternion);
+			this.model.position.x = this.physicsBody.position.x;
+			this.model.position.z = this.physicsBody.position.z;
+		}
 
 		// Sync position of avatar label with character position
 		if (this.usernameLabel) {

@@ -25,6 +25,7 @@ import ExperienceCamera from './ExperienceCamera.ts';
 import Player from './Player.ts';
 import ExperienceManager from './ExperienceManager.ts';
 import Npc from './Npc.ts';
+import CannonDebugger from 'cannon-es-debugger';
 
 export default class ExperienceScene implements IExperienceScene {
 	public readonly scene: Scene;
@@ -38,6 +39,7 @@ export default class ExperienceScene implements IExperienceScene {
 	public currentCameraPov: CameraPov = CameraPov.THIRD_PERSON;
 	public environment: Object3D;
 	public mixer: AnimationMixer | null = null;
+	private cannonDebugger: { update: () => void } | null = null;
 	private readonly cameraPovOptions: Array<ICameraPovOptions> = [];
 
 	constructor(canvas: HTMLCanvasElement, sceneKey: SceneKey, settings: ISceneSettings) {
@@ -80,6 +82,11 @@ export default class ExperienceScene implements IExperienceScene {
 
 		// Setup environment
 		this.setupEnvironment();
+
+		// Set debugger
+		this.cannonDebugger = CannonDebugger(this.scene, ExperienceManager.instance.physicsWorld, {
+			color: 'green'
+		});
 	}
 
 	public get currentPlayer() {
@@ -278,6 +285,11 @@ export default class ExperienceScene implements IExperienceScene {
 		if (this.mixer) {
 			// Update the mixer
 			this.mixer.update(delta);
+		}
+
+		if (this.cannonDebugger) {
+			// Update cannon debugger
+			this.cannonDebugger.update();
 		}
 	}
 

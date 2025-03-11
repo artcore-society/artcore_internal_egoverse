@@ -194,8 +194,8 @@ export default class BaseCharacterControls implements IBaseCharacterControls {
 			const moveZ = this.walkDirection.z * velocity * delta;
 
 			// Update player position
-			this.character.model.position.x += moveX;
-			this.character.model.position.z += moveZ;
+			this.character.physicsBody!.position.x += moveX;
+			this.character.physicsBody!.position.z += moveZ;
 
 			if (this.character instanceof Player && this.character.isCurrent) {
 				// Sync camera with current player
