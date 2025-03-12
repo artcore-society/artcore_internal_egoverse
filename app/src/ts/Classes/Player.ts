@@ -9,6 +9,7 @@ import ParticleSystem from './ParticleSystem.ts';
 
 export default class Player extends BaseCharacter implements IPlayer {
 	public isCurrent: boolean = false;
+	public particleSystem: ParticleSystem | null = null;
 
 	constructor(
 		username: string,
@@ -40,7 +41,7 @@ export default class Player extends BaseCharacter implements IPlayer {
 		}
 
 		// Setup fart particle effect
-		const fartEffect = new ParticleSystem({
+		this.particleSystem = new ParticleSystem({
 			camera,
 			// Assuming the bum is located slightly behind the player model, with a slight offset on the y-axis.
 			emitPosition: this.model.position,
@@ -51,7 +52,7 @@ export default class Player extends BaseCharacter implements IPlayer {
 
 		// Set render action
 		this.setRenderAction((delta) => {
-			if (!this.model) {
+			if (!this.model || !this.particleSystem) {
 				return;
 			}
 
@@ -59,10 +60,10 @@ export default class Player extends BaseCharacter implements IPlayer {
 			const particlesEmitPosition = this.getParticlesEmitPosition();
 
 			// Update the emit position of the effect
-			fartEffect.params.emitPosition.copy(particlesEmitPosition);
+			this.particleSystem.params.emitPosition.copy(particlesEmitPosition);
 
 			// Update the fart effect
-			fartEffect.update(delta);
+			this.particleSystem.update(delta);
 		});
 	}
 

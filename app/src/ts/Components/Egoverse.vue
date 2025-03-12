@@ -17,6 +17,7 @@ import KeybindingsModal from './KeybindingsModal.vue';
 import ChatList from './ChatList.vue';
 import ChatModal from './ChatModal.vue';
 import { CameraPov } from '../Enums/CameraPov.ts';
+import { wait } from '../Helpers';
 
 // Avatar store
 const { username, modelId } = useAvatarStore();
@@ -141,13 +142,39 @@ function closeChatModal() {
 	selectedChatUserId.value = null;
 }
 
-function onKeyDown(event: KeyboardEvent) {
+async function onKeyDown(event: KeyboardEvent) {
 	// Save pressed key
 	keysPressed[event.code as KeyboardKey] = true;
+
+	if (keysPressed[KeyboardKey.KeyF]) {
+		// Get particle system
+		const particleSystem = ExperienceManager.instance.activeScene!.currentPlayer!.particleSystem ?? null;
+
+		if (!particleSystem) {
+			return;
+		}
+
+		// Dispatch play audio event
+		EventService.dispatch(CustomEventKey.PLAY_AUDIO, '/assets/audio/fart.mp3');
+
+		// Wait for set duration in seconds
+		await wait(0.2);
+
+		// Make active player particle fart system alive for 1 second
+		particleSystem.isAlive = true;
+
+		// Wait for set duration in seconds
+		await wait(0.2);
+
+		// Reset alive state
+		particleSystem.isAlive = false;
+	}
 
 	if (keysPressed[KeyboardKey.KeyT]) {
 		// Set ref
 		isEmoteSelectorVisible.value = !isEmoteSelectorVisible.value;
+
+		return;
 	}
 
 	if (keysPressed[KeyboardKey.KeyV] && ExperienceManager.instance.activeScene) {
@@ -159,11 +186,15 @@ function onKeyDown(event: KeyboardEvent) {
 
 		// Toggle camera pov
 		ExperienceManager.instance.activeScene.setCameraPov(targetPov);
+
+		return;
 	}
 
 	if (keysPressed[KeyboardKey.ShiftLeft] && keysPressed[KeyboardKey.KeyM]) {
 		// Set ref
 		isKeyBindingsModalVisible.value = !isKeyBindingsModalVisible.value;
+
+		return;
 	}
 }
 

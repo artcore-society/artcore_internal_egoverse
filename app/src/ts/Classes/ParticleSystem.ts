@@ -1,3 +1,7 @@
+import { IParticle } from '../Interfaces/IParticle.ts';
+import { ThreeLoaders } from './ThreeLoaders.ts';
+import { ILinearSpline } from '../Interfaces/ILinearSpline.ts';
+import { IParticleSystem } from '../Interfaces/IParticleSystem.ts';
 import {
 	Vector3,
 	Color,
@@ -12,11 +16,8 @@ import {
 } from 'three';
 import vertexShader from '../Shaders/ParticleSystem/vertexShader.glsl';
 import fragmentShader from '../Shaders/ParticleSystem/fragmentShader.glsl';
-import { ThreeLoaders } from './ThreeLoaders.ts';
-import { IParticle } from '../Interfaces/IParticle.ts';
-import { ILinearSpline } from '../Interfaces/ILinearSpline.ts';
 
-export default class ParticleSystem {
+export default class ParticleSystem implements IParticleSystem {
 	private particles: IParticle[] = [];
 	private geometry: BufferGeometry | null = null;
 	private material: ShaderMaterial | null = null;
@@ -25,6 +26,7 @@ export default class ParticleSystem {
 	private colorSpline: ILinearSpline<Color> | null = null;
 	private sizeSpline: ILinearSpline<number> | null = null;
 	private timeAccumulator: number = 0.0;
+	public isAlive: boolean = false;
 
 	constructor(
 		public params: {
@@ -218,8 +220,15 @@ export default class ParticleSystem {
 	 * @param timeElapsed The time elapsed since the last update.
 	 */
 	public update(timeElapsed: number): void {
-		this.addParticles(timeElapsed);
+		if (this.isAlive) {
+			// Add new particles
+			this.addParticles(timeElapsed);
+		}
+
+		// Update the particles
 		this.updateParticles(timeElapsed);
+
+		// Update the geometry
 		this.updateGeometry();
 	}
 }
