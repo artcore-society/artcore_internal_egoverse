@@ -35,6 +35,10 @@ export default class Player extends BaseCharacter implements IPlayer {
 			}
 		});
 
+		if (!this.isCurrent) {
+			return;
+		}
+
 		// Setup fart particle effect
 		const fartEffect = new ParticleSystem({
 			camera,
