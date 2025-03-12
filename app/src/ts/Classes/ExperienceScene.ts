@@ -7,6 +7,12 @@ import { ModelPrefix } from '../Enums/ModelPrefix.ts';
 import { getChildren } from '../Helpers';
 import { SocketEvent } from '../Enums/SocketEvent.ts';
 import { ISceneSettings } from '../Interfaces/ISceneSettings.ts';
+import { ExperienceSocket } from './ExperienceSocket.ts';
+import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
+import { ICameraPovOptions } from '../Interfaces/ICameraPovOptions.ts';
+import { PhysicsObjectShape } from '../Enums/PhysicsObjectShape.ts';
+import { IPhysicsObjectEntry } from '../Interfaces/IPhysicsObjectEntry.ts';
+import { PhysicsCollisionGroup } from '../Enums/PhysicsCollisionGroup.ts';
 import {
 	World,
 	SAPBroadphase,
@@ -19,10 +25,6 @@ import {
 	Box,
 	Quaternion as CannonQuaternion
 } from 'cannon-es';
-import { PhysicsCollisionGroup } from '../Enums/PhysicsCollisionGroup.ts';
-import { ExperienceSocket } from './ExperienceSocket.ts';
-import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
-import { ICameraPovOptions } from '../Interfaces/ICameraPovOptions.ts';
 import {
 	AmbientLight,
 	AnimationMixer,
@@ -41,8 +43,6 @@ import Player from './Player.ts';
 import ExperienceManager from './ExperienceManager.ts';
 import Npc from './Npc.ts';
 import CannonDebugger from 'cannon-es-debugger';
-import { IPhysicsObjectEntry } from '../Interfaces/IPhysicsObjectEntry.ts';
-import { PhysicsObjectShape } from '../Enums/PhysicsObjectShape.ts';
 
 export default class ExperienceScene implements IExperienceScene {
 	public readonly scene: Scene;

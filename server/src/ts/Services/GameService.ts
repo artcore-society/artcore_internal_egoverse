@@ -3,13 +3,13 @@ import { Scene } from '../Classes/Scene';
 import { faker } from '@faker-js/faker';
 import { Player } from '../Classes/Player';
 import { SceneKey } from '../Enums/SceneKey';
+import { ModelPrefix } from '../Enums/ModelPrefix.ts';
 import { SocketEvent } from '../Enums/SocketEvent';
 import { Server, Socket } from 'socket.io';
 import { ISceneSettings } from '../Interfaces/ISceneSettings';
+import { PhysicsObjectShape } from '../Enums/PhysicsObjectShape.ts';
 import { Quaternion, Vector3 } from 'three';
 import Dialog from '../Classes/Dialog.ts';
-import { ModelPrefix } from '../Enums/ModelPrefix.ts';
-import { PhysicsObjectShape } from '../Enums/PhysicsObjectShape.ts';
 
 export class GameService {
 	private static _instance: GameService;
