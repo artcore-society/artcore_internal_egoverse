@@ -7,7 +7,19 @@ import { ModelPrefix } from '../Enums/ModelPrefix.ts';
 import { getChildren } from '../Helpers';
 import { SocketEvent } from '../Enums/SocketEvent.ts';
 import { ISceneSettings } from '../Interfaces/ISceneSettings.ts';
-import { Body, Box, Quaternion as CannonQuaternion, Sphere, Vec3 } from 'cannon-es';
+import {
+	World,
+	SAPBroadphase,
+	Material,
+	ContactMaterial,
+	Body,
+	Plane,
+	Vec3,
+	Sphere,
+	Box,
+	Quaternion as CannonQuaternion
+} from 'cannon-es';
+import { PhysicsCollisionGroup } from '../Enums/PhysicsCollisionGroup.ts';
 import { ExperienceSocket } from './ExperienceSocket.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { ICameraPovOptions } from '../Interfaces/ICameraPovOptions.ts';
@@ -29,7 +41,6 @@ import Player from './Player.ts';
 import ExperienceManager from './ExperienceManager.ts';
 import Npc from './Npc.ts';
 import CannonDebugger from 'cannon-es-debugger';
-import { PhysicsCollisionGroup } from '../Enums/PhysicsCollisionGroup.ts';
 import { IPhysicsObjectEntry } from '../Interfaces/IPhysicsObjectEntry.ts';
 import { PhysicsObjectShape } from '../Enums/PhysicsObjectShape.ts';
 
@@ -45,7 +56,8 @@ export default class ExperienceScene implements IExperienceScene {
 	public currentCameraPov: CameraPov = CameraPov.THIRD_PERSON;
 	public environment: Object3D;
 	public mixer: AnimationMixer | null = null;
-	private cannonDebugger: { update: () => void } | null = null;
+	public physicsWorld: World = new World();
+	private readonly cannonDebugger: { update: () => void } | null = null;
 	private readonly cameraPovOptions: Array<ICameraPovOptions> = [];
 
 	constructor(canvas: HTMLCanvasElement, sceneKey: SceneKey, settings: ISceneSettings) {
@@ -83,6 +95,9 @@ export default class ExperienceScene implements IExperienceScene {
 		// Scene fog
 		this.scene.fog = new Fog(0xffffff, 5, 15);
 
+		// Setup physics
+		this.setupPhysics();
+
 		// Setup lighting
 		this.setupLighting();
 
@@ -91,7 +106,7 @@ export default class ExperienceScene implements IExperienceScene {
 
 		if (import.meta.env['VITE_ENABLE_PHYSICS_DEBUG'] === 'true') {
 			// Set debugger
-			this.cannonDebugger = CannonDebugger(this.scene, ExperienceManager.instance.physicsWorld, {
+			this.cannonDebugger = CannonDebugger(this.scene, this.physicsWorld, {
 				color: 'green'
 			});
 		}
@@ -184,7 +199,7 @@ export default class ExperienceScene implements IExperienceScene {
 				});
 
 				// Add body to physics world
-				ExperienceManager.instance.physicsWorld.addBody(body);
+				this.physicsWorld.addBody(body);
 			}
 		});
 	}
@@ -206,6 +221,35 @@ export default class ExperienceScene implements IExperienceScene {
 		dirLight.shadow.camera = new OrthographicCamera(-10, 10, 10, -10, 1, 1000);
 		dirLight.shadow.mapSize.set(4096, 4096);
 		this.scene.add(dirLight);
+	}
+
+	private setupPhysics() {
+		// Create physics world
+		this.physicsWorld = new World();
+		this.physicsWorld.broadphase = new SAPBroadphase(this.physicsWorld);
+		this.physicsWorld.allowSleep = true;
+		this.physicsWorld.gravity.set(0, -9.82, 0);
+
+		// Create physics materials
+		const defaultPhysicsMaterial = new Material('default');
+		const defaultPhysicsContactMaterial = new ContactMaterial(defaultPhysicsMaterial, defaultPhysicsMaterial, {
+			friction: 1,
+			restitution: 0
+		});
+		this.physicsWorld.addContactMaterial(defaultPhysicsContactMaterial);
+		this.physicsWorld.defaultContactMaterial = defaultPhysicsContactMaterial;
+
+		// Create physics floor
+		const floorBody = new Body({
+			shape: new Plane(),
+			position: new Vec3(0, 0, 0),
+			type: Body.STATIC,
+			collisionFilterGroup: PhysicsCollisionGroup.FLOOR, // Set collision group
+			collisionFilterMask:
+				PhysicsCollisionGroup.CHARACTER | PhysicsCollisionGroup.WALL | PhysicsCollisionGroup.SCENE_OBJECT // This body can only collide with bodies from these groups
+		});
+		floorBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+		this.physicsWorld.addBody(floorBody);
 	}
 
 	public addNpc(
@@ -354,6 +398,9 @@ export default class ExperienceScene implements IExperienceScene {
 			// Update cannon debugger
 			this.cannonDebugger.update();
 		}
+
+		// Update physics world (fps, delta time, catch up steps for potential delay)
+		this.physicsWorld.step(1 / 60, delta, 3);
 	}
 
 	public destroy(): void {

@@ -187,7 +187,7 @@ export default class BaseCharacter implements IBaseCharacter {
 		this.physicsBody.position.x = this.model.position.x;
 		this.physicsBody.position.y = this.physicsCharacterSphereRadius;
 		this.physicsBody.position.z = this.model.position.z;
-		ExperienceManager.instance.physicsWorld.addBody(this.physicsBody);
+		ExperienceManager.instance.activeScene!.physicsWorld.addBody(this.physicsBody);
 	}
 
 	update(delta: number): void {
@@ -246,6 +246,11 @@ export default class BaseCharacter implements IBaseCharacter {
 					if (this.model) {
 						// Remove model from experienceScene
 						this.experienceScene.scene.remove(this.model);
+					}
+
+					if (this.physicsBody) {
+						// Remove physics body
+						this.experienceScene.physicsWorld.removeBody(this.physicsBody);
 					}
 				}
 			});

@@ -6,6 +6,7 @@ import { AnimationMixer, Object3D, Quaternion, Scene, Vector3 } from 'three';
 import ExperienceCamera from '../Classes/ExperienceCamera.ts';
 import Player from '../Classes/Player.ts';
 import Npc from '../Classes/Npc.ts';
+import { World } from 'cannon-es';
 
 export interface IExperienceScene {
 	scene: Scene;
@@ -19,6 +20,7 @@ export interface IExperienceScene {
 	currentCameraPov: CameraPov;
 	environment: Object3D;
 	mixer: AnimationMixer | null;
+	physicsWorld: World;
 
 	readonly currentPlayer: Player | undefined;
 

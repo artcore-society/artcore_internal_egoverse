@@ -17,14 +17,12 @@ import { ISocketMessageData } from '../Interfaces/ISocketMessageData.ts';
 import { ISocketSceneStateData } from '../Interfaces/ISocketSceneStateData.ts';
 import { ISocketTriggerEmoteData } from '../Interfaces/ISocketTriggerEmoteData.ts';
 import { ISocketClientUpdatePlayerData } from '../Interfaces/ISocketClientUpdatePlayerData.ts';
-import { World, SAPBroadphase, Material, ContactMaterial, Body, Plane, Vec3 } from 'cannon-es';
 import { Clock, DefaultLoadingManager, LoadingManager, Quaternion, Raycaster, Vector2, Vector3 } from 'three';
 import ExperienceRenderer from './ExperienceRenderer.ts';
 import Player from './Player.ts';
 import ExperienceScene from './ExperienceScene.ts';
 import Npc from './Npc.ts';
 import Stats from 'stats.js';
-import { PhysicsCollisionGroup } from '../Enums/PhysicsCollisionGroup.ts';
 
 export default class ExperienceManager {
 	private static _instance: ExperienceManager | null = null;
@@ -45,7 +43,6 @@ export default class ExperienceManager {
 	public selectedPlayer: Ref<Player | null> = ref(null);
 	public incomingVisitorMessageData: Ref<ISocketMessageData> = ref({ message: null, senderUserId: null });
 	public isInteractive: boolean = true;
-	public physicsWorld: World = new World();
 	private modelCache: Map<string, IModelCacheEntry> = new Map();
 	private needsRaycast: boolean = false;
 	private stats: Stats = new Stats();
@@ -73,9 +70,6 @@ export default class ExperienceManager {
 		this.username = username;
 		this.modelId = modelId;
 		this.updateSceneCamerasAndRenderSize();
-
-		// Setup physics
-		this.setupPhysics();
 
 		// Add event listeners
 		this.addEventListeners();
@@ -320,35 +314,6 @@ export default class ExperienceManager {
 		});
 	}
 
-	private setupPhysics() {
-		// Create physics world
-		this.physicsWorld = new World();
-		this.physicsWorld.broadphase = new SAPBroadphase(this.physicsWorld);
-		this.physicsWorld.allowSleep = true;
-		this.physicsWorld.gravity.set(0, -9.82, 0);
-
-		// Create physics materials
-		const defaultPhysicsMaterial = new Material('default');
-		const defaultPhysicsContactMaterial = new ContactMaterial(defaultPhysicsMaterial, defaultPhysicsMaterial, {
-			friction: 1,
-			restitution: 0
-		});
-		this.physicsWorld.addContactMaterial(defaultPhysicsContactMaterial);
-		this.physicsWorld.defaultContactMaterial = defaultPhysicsContactMaterial;
-
-		// Create physics floor
-		const floorBody = new Body({
-			shape: new Plane(),
-			position: new Vec3(0, 0, 0),
-			type: Body.STATIC,
-			collisionFilterGroup: PhysicsCollisionGroup.FLOOR, // Set collision group
-			collisionFilterMask:
-				PhysicsCollisionGroup.CHARACTER | PhysicsCollisionGroup.WALL | PhysicsCollisionGroup.SCENE_OBJECT // This body can only collide with bodies from these groups
-		});
-		floorBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
-		this.physicsWorld.addBody(floorBody);
-	}
-
 	private addEventListeners() {
 		window.addEventListener('resize', () => this.resize());
 
@@ -541,9 +506,6 @@ export default class ExperienceManager {
 				// Set needs raycast
 				this.needsRaycast = false;
 			}
-
-			// Update physics world (fps, delta time, catch up steps for potential delay)
-			this.physicsWorld.step(1 / 60, delta, 3);
 
 			// Render the renderer
 			this.renderer.render(this.activeScene.scene, this.activeScene.camera);

@@ -132,7 +132,15 @@ export class GameService {
 				spawnScale: new Vector3(1, 1, 1).toArray(),
 				spawnPosition: new Vector3(0, 0, 0).toArray(),
 				spawnRotation: new Quaternion().toArray(),
-				physicsObjects: []
+				physicsObjects: [
+					{ name: 'Bbq', shape: PhysicsObjectShape.BOX },
+					{ name: 'Car', shape: PhysicsObjectShape.BOX },
+					{ name: 'Chair1', shape: PhysicsObjectShape.BOX },
+					{ name: 'Chair2', shape: PhysicsObjectShape.BOX },
+					{ name: 'CoolBox', shape: PhysicsObjectShape.BOX },
+					{ name: 'Fire', shape: PhysicsObjectShape.SPHERE },
+					{ name: 'Tent', shape: PhysicsObjectShape.BOX }
+				]
 			}
 		});
 		scenesSettings.set(SceneKey.THIRD_AREA, {
