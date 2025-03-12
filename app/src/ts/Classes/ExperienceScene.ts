@@ -179,6 +179,16 @@ export default class ExperienceScene implements IExperienceScene {
 				const worldQuaternion = new Quaternion();
 				mesh.getWorldQuaternion(worldQuaternion);
 
+				// Determine if the mesh is laying down based on its quaternion (rotation)
+				const isLyingDown = Math.abs(worldQuaternion.x) > 0.1 || Math.abs(worldQuaternion.z) > 0.1;
+
+				// Check if mesh is laying down
+				let correctedPositionY = worldPosition.y;
+				if (isLyingDown) {
+					// If mesh is laying down, use the sizes z for the position
+					correctedPositionY = size.z / 2;
+				}
+
 				// Create CANNON body
 				let shape;
 
@@ -197,7 +207,7 @@ export default class ExperienceScene implements IExperienceScene {
 					collisionFilterGroup: PhysicsCollisionGroup.SCENE_OBJECT,
 					collisionFilterMask:
 						PhysicsCollisionGroup.FLOOR | PhysicsCollisionGroup.WALL | PhysicsCollisionGroup.CHARACTER,
-					position: new Vec3(worldPosition.x, size.y / 2, worldPosition.z),
+					position: new Vec3(worldPosition.x, correctedPositionY, worldPosition.z),
 					quaternion: new CannonQuaternion(worldQuaternion.x, worldQuaternion.y, worldQuaternion.z, worldQuaternion.w)
 				});
 

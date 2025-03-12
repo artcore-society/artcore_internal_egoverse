@@ -249,7 +249,7 @@ onBeforeUnmount(() => {
 				:ref="(el) => (areaButtons[SceneKey.FIRST_AREA] = (el as ComponentPublicInstance).$el as HTMLElement)"
 				@click="transitionToScene(SceneKey.FIRST_AREA)"
 			>
-				Local Park
+				Altar
 			</PrimaryButton>
 
 			<PrimaryButton
