@@ -58,7 +58,7 @@ export class GameService {
 				modelPrefix: ModelPrefix.ENVIRONMENT,
 				modelId: 1,
 				spawnScale: new Vector3(0.65, 0.65, 0.65).toArray(),
-				spawnPosition: new Vector3(0, -0.1, -10).toArray(),
+				spawnPosition: new Vector3(0, -0.2, -10).toArray(),
 				spawnRotation: new Quaternion().toArray(),
 				physicsObjects: [
 					{ name: 'Statue', shape: PhysicsObjectShape.BOX },
