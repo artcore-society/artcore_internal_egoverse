@@ -1,6 +1,7 @@
 import { Body } from 'cannon-es';
 import { ModelPrefix } from '../Enums/ModelPrefix.ts';
 import { IExperienceScene } from './IExperienceScene.ts';
+import { CharacterFacingDirection } from '../Enums/CharacterFacingDirection.ts';
 import { AnimationAction, AnimationMixer, Object3D, Quaternion, Vector3 } from 'three';
 import PlayerControls from '../Classes/PlayerControls.ts';
 import NpcControls from '../Classes/NpcControls.ts';
@@ -21,7 +22,11 @@ export interface IBaseCharacter {
 	spawnRotation: Quaternion;
 	modelHeight: number | null;
 	physicsBody: Body | null;
+	renderAction: ((...args: any[]) => void) | null;
 
+	readonly facingDirection: CharacterFacingDirection;
+
+	setRenderAction(action: (...args: any[]) => void): void;
 	init(): Promise<void>;
 	load(): Promise<void>;
 	update(delta: number): void;

@@ -108,14 +108,14 @@ export class GameService {
 				`NPC ${faker.person.firstName()}`,
 				1,
 				this.generateUniqueDialog(),
-				new Vector3(-2, 0.02, -4),
+				new Vector3(-2, 0.02, -4.5),
 				this.degreesToQuaternion(215)
 			),
 			new Npc(
 				`NPC ${faker.person.firstName()}`,
 				2,
 				this.generateUniqueDialog(),
-				new Vector3(1.5, 0.02, -2),
+				new Vector3(1.5, 0.02, -3.8),
 				this.degreesToQuaternion(145)
 			)
 		]);

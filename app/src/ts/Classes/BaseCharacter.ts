@@ -14,6 +14,7 @@ import NpcControls from './NpcControls.ts';
 import ExperienceCamera from './ExperienceCamera.ts';
 import Player from './Player.ts';
 import Text3D from './Text3D.ts';
+import { CharacterFacingDirection } from '../Enums/CharacterFacingDirection.ts';
 
 export default class BaseCharacter implements IBaseCharacter {
 	public animationsMap: Map<string, AnimationAction>;
@@ -30,7 +31,8 @@ export default class BaseCharacter implements IBaseCharacter {
 	public usernameLabel: Object3D | null = null;
 	public modelHeight: number | null = null;
 	public physicsBody: Body | null = null;
-	private physicsCharacterSphereRadius: number;
+	public renderAction: ((...args: any[]) => void) | null = null;
+	private readonly physicsCharacterSphereRadius: number;
 
 	constructor(
 		username: string,
@@ -52,6 +54,34 @@ export default class BaseCharacter implements IBaseCharacter {
 		this.model = new Object3D();
 		this.mixer = new AnimationMixer(new Mesh());
 		this.physicsCharacterSphereRadius = 0.9;
+	}
+
+	public get facingDirection(): CharacterFacingDirection {
+		// Create a unit vector pointing along the z-axis (forward direction)
+		const forward = new Vector3(0, 0, 1);
+
+		// Apply the quaternion to the forward vector to get the actual direction
+		forward.applyQuaternion(this.model.quaternion);
+
+		// Now, check the direction based on the resulting vector
+		if (Math.abs(forward.x) > Math.abs(forward.z) && Math.abs(forward.x) > Math.abs(forward.y)) {
+			// If the x component is the largest, check left or right
+			if (forward.x > 0) {
+				return CharacterFacingDirection.LEFT;
+			} else {
+				return CharacterFacingDirection.RIGHT;
+			}
+		} else if (Math.abs(forward.z) > Math.abs(forward.x) && Math.abs(forward.z) > Math.abs(forward.y)) {
+			// If the z component is the largest, check front or back
+			if (forward.z > 0) {
+				return CharacterFacingDirection.BACK;
+			} else {
+				return CharacterFacingDirection.FRONT;
+			}
+		}
+
+		// Default if no direction is clearly dominant
+		return CharacterFacingDirection.UNKNOWN;
 	}
 
 	async init(): Promise<void> {
@@ -190,6 +220,10 @@ export default class BaseCharacter implements IBaseCharacter {
 		ExperienceManager.instance.activeScene!.physicsWorld.addBody(this.physicsBody);
 	}
 
+	setRenderAction(action: (...args: any[]) => void): void {
+		this.renderAction = action;
+	}
+
 	update(delta: number): void {
 		// Update the mixer
 		this.mixer.update(delta);
@@ -217,6 +251,11 @@ export default class BaseCharacter implements IBaseCharacter {
 		if (this.controls && ExperienceManager.instance.isInteractive) {
 			// Update controls
 			this.controls.update(delta, this.controls.keysPressed);
+		}
+
+		if (this.renderAction) {
+			// Call custom render action
+			this.renderAction(delta);
 		}
 	}
 
