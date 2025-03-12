@@ -166,7 +166,10 @@ export default class ExperienceScene implements IExperienceScene {
 				const size = new Vector3();
 				boundingBox!.getSize(size);
 
-				// Apply the scale (assuming spawnScale is a Vector3 array [x, y, z])
+				// Apply the scale directly from the mesh
+				size.multiply(mesh.scale); // Apply mesh's scale to the size
+
+				// Optionally apply additional spawn scale
 				size.multiply(new Vector3(...this.settings.environment.spawnScale));
 
 				// Get world position and quaternion
