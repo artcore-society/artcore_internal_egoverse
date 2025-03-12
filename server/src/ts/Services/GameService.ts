@@ -97,7 +97,7 @@ export class GameService {
 				spawnScale: new Vector3(0.85, 0.85, 0.85).toArray(),
 				spawnPosition: new Vector3(0, 0, 0).toArray(),
 				spawnRotation: new Quaternion().toArray(),
-				physicsObjects: []
+				physicsObjects: [{ name: 'Robot', shape: PhysicsObjectShape.SPHERE }]
 			}
 		});
 
