@@ -1,4 +1,4 @@
-import { Quaternion as ThreeQuaternion } from 'three';
+import { Mesh, Object3D, Quaternion as ThreeQuaternion, Scene } from 'three';
 import { Quaternion as CannonQuaternion } from 'cannon-es';
 
 export function lerp(value1: number, value2: number, amount: number): number {
@@ -19,4 +19,41 @@ export function wait(seconds: number): Promise<void> {
 
 export function copyQuaternionToCannon(threeQuaternion: ThreeQuaternion): CannonQuaternion {
 	return new CannonQuaternion(threeQuaternion.x, threeQuaternion.y, threeQuaternion.z, threeQuaternion.w);
+}
+
+export function flattenChildren(array: Array<Object3D>, d: number = 1): Array<Object3D> {
+	return d > 0
+		? array.reduce<Array<Object3D>>((acc, val) => {
+				const children = Array.isArray(val.children) ? flattenChildren(val.children as Array<Object3D>, d - 1) : [];
+				return acc.concat(children.length > 0 ? children : val);
+			}, [])
+		: array.slice();
+}
+
+export function getMeshes(meshes: Array<Mesh>, names: Array<string>): Array<Mesh> {
+	return meshes.filter((mesh) => names.includes(mesh.name));
+}
+
+export const getChildren = (scene: Scene, keys: Array<string>, matching: string): Array<Object3D> => {
+	return flattenChildren(scene.children, Infinity).filter((child: Object3D) => {
+		return keys.find((key) => {
+			return isMatching(child, {
+				name: key,
+				matching
+			});
+		});
+	});
+};
+
+export function isMatching(item: Object3D, binding: { name: string; matching: string }): string | boolean | undefined {
+	const parentName = item.parent?.type === 'Group' ? item.parent.name : undefined;
+
+	switch (binding.matching) {
+		case 'partial':
+			return item.name.indexOf(binding.name) > -1 || (parentName && parentName.indexOf(binding.name) > -1);
+
+		case 'exact':
+		default:
+			return item.name === binding.name || (parentName && parentName === binding.name);
+	}
 }

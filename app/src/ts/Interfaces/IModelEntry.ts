@@ -6,4 +6,5 @@ export interface IModelEntry {
 	spawnScale: Array<number>;
 	spawnPosition: Array<number>;
 	spawnRotation: Array<number>;
+	physicsObjects: Array<IPhysicsObjectEntry>;
 }

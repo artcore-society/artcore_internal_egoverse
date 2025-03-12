@@ -9,6 +9,7 @@ import { ISceneSettings } from '../Interfaces/ISceneSettings';
 import { Quaternion, Vector3 } from 'three';
 import Dialog from '../Classes/Dialog.ts';
 import { ModelPrefix } from '../Enums/ModelPrefix.ts';
+import { PhysicsObjectShape } from '../Enums/PhysicsObjectShape.ts';
 
 export class GameService {
 	private static _instance: GameService;
@@ -58,7 +59,70 @@ export class GameService {
 				modelId: 1,
 				spawnScale: new Vector3(0.65, 0.65, 0.65).toArray(),
 				spawnPosition: new Vector3(0, -0.1, -10).toArray(),
-				spawnRotation: new Quaternion().toArray()
+				spawnRotation: new Quaternion().toArray(),
+				physicsObjects: [
+					{ name: 'Gate1', shape: PhysicsObjectShape.BOX },
+					{ name: 'Gate2', shape: PhysicsObjectShape.BOX },
+					{ name: 'Gate3', shape: PhysicsObjectShape.BOX },
+					{ name: 'Gate4', shape: PhysicsObjectShape.BOX },
+					{ name: 'Lantern1', shape: PhysicsObjectShape.BOX },
+					{ name: 'Lantern2', shape: PhysicsObjectShape.BOX },
+					{ name: 'Lantern3', shape: PhysicsObjectShape.BOX },
+					{ name: 'Lantern4', shape: PhysicsObjectShape.BOX },
+					{ name: 'Lantern5', shape: PhysicsObjectShape.BOX },
+					{ name: 'Lantern6', shape: PhysicsObjectShape.BOX },
+					{ name: 'Lantern7', shape: PhysicsObjectShape.BOX },
+					{ name: 'Lantern8', shape: PhysicsObjectShape.BOX },
+					{ name: 'Lantern9', shape: PhysicsObjectShape.BOX },
+					{ name: 'Lantern10', shape: PhysicsObjectShape.BOX },
+					{ name: 'Lantern11', shape: PhysicsObjectShape.BOX },
+					{ name: 'Lantern12', shape: PhysicsObjectShape.BOX },
+					{ name: 'Bench1', shape: PhysicsObjectShape.BOX },
+					{ name: 'Bench2', shape: PhysicsObjectShape.BOX },
+					{ name: 'Bench3', shape: PhysicsObjectShape.BOX },
+					{ name: 'Bench4', shape: PhysicsObjectShape.BOX },
+					{ name: 'Bench5', shape: PhysicsObjectShape.BOX },
+					{ name: 'Bench6', shape: PhysicsObjectShape.BOX },
+					{ name: 'Bench7', shape: PhysicsObjectShape.BOX },
+					{ name: 'Bench8', shape: PhysicsObjectShape.BOX },
+					{ name: 'Trash1', shape: PhysicsObjectShape.BOX },
+					{ name: 'Trash2', shape: PhysicsObjectShape.BOX },
+					{ name: 'Trash3', shape: PhysicsObjectShape.BOX },
+					{ name: 'Trash4', shape: PhysicsObjectShape.BOX },
+					{ name: 'Tree1', shape: PhysicsObjectShape.BOX },
+					{ name: 'Tree2', shape: PhysicsObjectShape.BOX },
+					{ name: 'Tree3', shape: PhysicsObjectShape.BOX },
+					{ name: 'Tree4', shape: PhysicsObjectShape.BOX },
+					{ name: 'Tree5', shape: PhysicsObjectShape.BOX },
+					{ name: 'Tree6', shape: PhysicsObjectShape.BOX },
+					{ name: 'Tree7', shape: PhysicsObjectShape.BOX },
+					{ name: 'Bush1', shape: PhysicsObjectShape.SPHERE },
+					{ name: 'Bush2', shape: PhysicsObjectShape.SPHERE },
+					{ name: 'Bush3', shape: PhysicsObjectShape.SPHERE },
+					{ name: 'Bush4', shape: PhysicsObjectShape.SPHERE },
+					{ name: 'Bush5', shape: PhysicsObjectShape.SPHERE },
+					{ name: 'Bush6', shape: PhysicsObjectShape.SPHERE },
+					{ name: 'Bush7', shape: PhysicsObjectShape.SPHERE },
+					{ name: 'Bush8', shape: PhysicsObjectShape.SPHERE },
+					{ name: 'Bush9', shape: PhysicsObjectShape.SPHERE },
+					{ name: 'Bush10', shape: PhysicsObjectShape.SPHERE },
+					{ name: 'Bush11', shape: PhysicsObjectShape.SPHERE },
+					{ name: 'Bush12', shape: PhysicsObjectShape.SPHERE },
+					{ name: 'Bush13', shape: PhysicsObjectShape.SPHERE },
+					{ name: 'Bush14', shape: PhysicsObjectShape.SPHERE },
+					{ name: 'Bush15', shape: PhysicsObjectShape.SPHERE },
+					{ name: 'Bush16', shape: PhysicsObjectShape.SPHERE },
+					{ name: 'Bush17', shape: PhysicsObjectShape.SPHERE },
+					{ name: 'Fence1', shape: PhysicsObjectShape.BOX },
+					{ name: 'Fence2', shape: PhysicsObjectShape.BOX },
+					{ name: 'Fence3', shape: PhysicsObjectShape.BOX },
+					{ name: 'Fence4', shape: PhysicsObjectShape.BOX },
+					{ name: 'Fence5', shape: PhysicsObjectShape.BOX },
+					{ name: 'Fence6', shape: PhysicsObjectShape.BOX },
+					{ name: 'Fence7', shape: PhysicsObjectShape.BOX },
+					{ name: 'Fence8', shape: PhysicsObjectShape.BOX },
+					{ name: 'StatueBase', shape: PhysicsObjectShape.SPHERE }
+				]
 			}
 		});
 		scenesSettings.set(SceneKey.SECOND_AREA, {
@@ -67,7 +131,8 @@ export class GameService {
 				modelId: 2,
 				spawnScale: new Vector3(1, 1, 1).toArray(),
 				spawnPosition: new Vector3(0, 0, 0).toArray(),
-				spawnRotation: new Quaternion().toArray()
+				spawnRotation: new Quaternion().toArray(),
+				physicsObjects: []
 			}
 		});
 		scenesSettings.set(SceneKey.THIRD_AREA, {
@@ -76,7 +141,8 @@ export class GameService {
 				modelId: 3,
 				spawnScale: new Vector3(0.85, 0.85, 0.85).toArray(),
 				spawnPosition: new Vector3(0, 0, 0).toArray(),
-				spawnRotation: new Quaternion().toArray()
+				spawnRotation: new Quaternion().toArray(),
+				physicsObjects: []
 			}
 		});
 

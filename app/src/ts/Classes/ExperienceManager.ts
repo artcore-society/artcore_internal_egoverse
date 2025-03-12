@@ -342,7 +342,8 @@ export default class ExperienceManager {
 			position: new Vec3(0, 0, 0),
 			type: Body.STATIC,
 			collisionFilterGroup: PhysicsCollisionGroup.FLOOR, // Set collision group
-			collisionFilterMask: PhysicsCollisionGroup.CHARACTER | PhysicsCollisionGroup.WALL // This body can only collide with bodies from these groups
+			collisionFilterMask:
+				PhysicsCollisionGroup.CHARACTER | PhysicsCollisionGroup.WALL | PhysicsCollisionGroup.SCENE_OBJECT // This body can only collide with bodies from these groups
 		});
 		floorBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
 		this.physicsWorld.addBody(floorBody);

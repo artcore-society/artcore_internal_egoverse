@@ -30,6 +30,7 @@ export default class BaseCharacter implements IBaseCharacter {
 	public usernameLabel: Object3D | null = null;
 	public modelHeight: number | null = null;
 	public physicsBody: Body | null = null;
+	private physicsCharacterSphereRadius: number;
 
 	constructor(
 		username: string,
@@ -50,6 +51,7 @@ export default class BaseCharacter implements IBaseCharacter {
 		this.animationsMap = new Map();
 		this.model = new Object3D();
 		this.mixer = new AnimationMixer(new Mesh());
+		this.physicsCharacterSphereRadius = 0.9;
 	}
 
 	async init(): Promise<void> {
@@ -174,17 +176,16 @@ export default class BaseCharacter implements IBaseCharacter {
 
 	setupPhysicsBody() {
 		// Add physics
-		const radius = 0.9;
-		const avatarShape = new Sphere(radius);
+		const avatarShape = new Sphere(this.physicsCharacterSphereRadius);
 		this.physicsBody = new Body({
 			mass: 5,
 			shape: avatarShape,
 			collisionFilterGroup: PhysicsCollisionGroup.CHARACTER, // Set collision group
-			collisionFilterMask: PhysicsCollisionGroup.FLOOR | PhysicsCollisionGroup.WALL // This body can only collide with bodies from these groups
+			collisionFilterMask: PhysicsCollisionGroup.FLOOR | PhysicsCollisionGroup.WALL | PhysicsCollisionGroup.SCENE_OBJECT // This body can only collide with bodies from these groups
 		});
 		this.physicsBody.allowSleep = false; // IMPORTANT to keep calculating the collisions => ONLY APPLY HERE
 		this.physicsBody.position.x = this.model.position.x;
-		this.physicsBody.position.y = radius;
+		this.physicsBody.position.y = this.physicsCharacterSphereRadius;
 		this.physicsBody.position.z = this.model.position.z;
 		ExperienceManager.instance.physicsWorld.addBody(this.physicsBody);
 	}
@@ -202,6 +203,7 @@ export default class BaseCharacter implements IBaseCharacter {
 			// Sync the rotation and position of the character model with physics
 			this.physicsBody.quaternion.copy(copyQuaternionToCannon(this.model.quaternion));
 			this.model.position.x = this.physicsBody.position.x;
+			this.physicsBody.position.y = this.physicsCharacterSphereRadius;
 			this.model.position.z = this.physicsBody.position.z;
 		}
 

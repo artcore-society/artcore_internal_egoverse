@@ -4,7 +4,8 @@
 export enum PhysicsCollisionGroup {
 	FLOOR = 1, // 0001 - Represents the floor. Interacts with characters and walls.
 	WALL = 2, // 0010 - Represents walls. Interacts with characters and the floor.
-	CHARACTER = 4 // 0100 - Represents characters. Uses 4 instead of 3 to avoid overlap with other groups.
+	CHARACTER = 4, // 0100 - Represents characters. Uses 4 instead of 3 to avoid overlap with other groups.
+	SCENE_OBJECT = 8 // 1000 - Represents basic scene objects. Can interact with other groups as needed.
 }
 
 // Explanation:

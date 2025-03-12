@@ -4,8 +4,10 @@ import { IPlayer } from '../Interfaces/IPlayer.ts';
 import { SceneKey } from '../Enums/SceneKey.ts';
 import { CameraPov } from '../Enums/CameraPov.ts';
 import { ModelPrefix } from '../Enums/ModelPrefix.ts';
+import { getChildren } from '../Helpers';
 import { SocketEvent } from '../Enums/SocketEvent.ts';
 import { ISceneSettings } from '../Interfaces/ISceneSettings.ts';
+import { Body, Box, Quaternion as CannonQuaternion, Sphere, Vec3 } from 'cannon-es';
 import { ExperienceSocket } from './ExperienceSocket.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { ICameraPovOptions } from '../Interfaces/ICameraPovOptions.ts';
@@ -15,6 +17,7 @@ import {
 	DirectionalLight,
 	Fog,
 	HemisphereLight,
+	Mesh,
 	Object3D,
 	OrthographicCamera,
 	Quaternion,
@@ -26,6 +29,9 @@ import Player from './Player.ts';
 import ExperienceManager from './ExperienceManager.ts';
 import Npc from './Npc.ts';
 import CannonDebugger from 'cannon-es-debugger';
+import { PhysicsCollisionGroup } from '../Enums/PhysicsCollisionGroup.ts';
+import { IPhysicsObjectEntry } from '../Interfaces/IPhysicsObjectEntry.ts';
+import { PhysicsObjectShape } from '../Enums/PhysicsObjectShape.ts';
 
 export default class ExperienceScene implements IExperienceScene {
 	public readonly scene: Scene;
@@ -125,7 +131,62 @@ export default class ExperienceScene implements IExperienceScene {
 
 			// Add to scene
 			this.scene.add(model);
+
+			// Setup scene object physics
+			this.setupSceneObjectsPhysics([...this.settings.environment.physicsObjects]);
 		}
+	}
+
+	private setupSceneObjectsPhysics(objects: Array<IPhysicsObjectEntry>) {
+		objects.forEach((object: IPhysicsObjectEntry) => {
+			const mesh = getChildren(this.scene, [object.name], 'exact')[0] as Mesh;
+
+			if (mesh && mesh.geometry) {
+				// Ensure transformations are up-to-date
+				mesh.updateMatrixWorld(true);
+
+				// Compute bounding box and get size
+				mesh.geometry.computeBoundingBox();
+				const boundingBox = mesh.geometry.boundingBox;
+				const size = new Vector3();
+				boundingBox!.getSize(size);
+
+				// Apply the scale (assuming spawnScale is a Vector3 array [x, y, z])
+				size.multiply(new Vector3(...this.settings.environment.spawnScale));
+
+				// Get world position and quaternion
+				const worldPosition = new Vector3();
+				mesh.getWorldPosition(worldPosition);
+
+				const worldQuaternion = new Quaternion();
+				mesh.getWorldQuaternion(worldQuaternion);
+
+				// Create CANNON body
+				let shape;
+
+				switch (object.shape) {
+					case PhysicsObjectShape.SPHERE:
+						shape = new Sphere(Math.max(size.x, size.y, size.z) / 2); // Better radius calculation
+						break;
+					default:
+						shape = new Box(new Vec3(size.x / 2, size.y / 2, size.z / 2));
+						break;
+				}
+
+				const body = new Body({
+					mass: 0,
+					shape: shape,
+					collisionFilterGroup: PhysicsCollisionGroup.SCENE_OBJECT,
+					collisionFilterMask:
+						PhysicsCollisionGroup.FLOOR | PhysicsCollisionGroup.WALL | PhysicsCollisionGroup.CHARACTER,
+					position: new Vec3(worldPosition.x, size.y / 2, worldPosition.z),
+					quaternion: new CannonQuaternion(worldQuaternion.x, worldQuaternion.y, worldQuaternion.z, worldQuaternion.w)
+				});
+
+				// Add body to physics world
+				ExperienceManager.instance.physicsWorld.addBody(body);
+			}
+		});
 	}
 
 	private setupLighting(): void {
