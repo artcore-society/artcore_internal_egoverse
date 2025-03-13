@@ -154,6 +154,10 @@ export default class ParticleSystem implements IParticleSystem {
 	 * Updates the geometry of the particle system.
 	 */
 	private updateGeometry(): void {
+		if (!this.geometry) {
+			return;
+		}
+
 		const positions: number[] = [];
 		const sizes: number[] = [];
 		const colours: number[] = [];
