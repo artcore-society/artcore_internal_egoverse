@@ -6,8 +6,12 @@ git fetch --prune
 git stash
 git pull origin main
 
-# Pull git lfs changes
+# Fetch and pull git lfs changes
+git lfs fetch
 git lfs pull
+
+# Prune old LFS files
+git lfs prune
 
 # Build the frontend app
 cd ./app
