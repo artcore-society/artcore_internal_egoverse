@@ -13,7 +13,7 @@ export class ExperienceSocket {
 		const { modelId } = useAvatarStore();
 
 		// Create io instance
-		this.socket = io('ws://localhost:3000', {
+		this.socket = io(import.meta.env.VITE_APP_SOCKET_PROXY === 'true' ? '' : 'ws://localhost:3000', {
 			query: {
 				username: ExperienceManager.instance.username ?? 'Default username',
 				modelId: modelId ?? 1,
