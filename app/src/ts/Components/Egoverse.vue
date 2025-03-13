@@ -147,27 +147,16 @@ async function onKeyDown(event: KeyboardEvent) {
 	keysPressed[event.code as KeyboardKey] = true;
 
 	if (keysPressed[KeyboardKey.KeyF]) {
-		// Get particle system
-		const particleSystem = ExperienceManager.instance.activeScene!.currentPlayer!.particleSystem ?? null;
+		// Trigger fart
+		await ExperienceManager.instance.activeScene!.currentPlayer!.fart();
 
-		if (!particleSystem) {
-			return;
-		}
+		// Sync fart with other players
+		ExperienceSocket.emit(SocketEvent.FART, {
+			userId: ExperienceManager.instance.userId,
+			sceneKey: ExperienceManager.instance.activeScene?.sceneKey
+		});
 
-		// Dispatch play audio event
-		EventService.dispatch(CustomEventKey.PLAY_AUDIO, '/assets/audio/fart.mp3');
-
-		// Wait for set duration in seconds
-		await wait(0.2);
-
-		// Make active player particle fart system alive for 1 second
-		particleSystem.isAlive = true;
-
-		// Wait for set duration in seconds
-		await wait(0.2);
-
-		// Reset alive state
-		particleSystem.isAlive = false;
+		return;
 	}
 
 	if (keysPressed[KeyboardKey.KeyT]) {

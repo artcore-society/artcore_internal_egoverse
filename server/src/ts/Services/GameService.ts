@@ -239,6 +239,7 @@ export class GameService {
 		socket.on(SocketEvent.CLIENT_UPDATE_PLAYER, (data) => this.handlePlayerUpdate(socket, player, data));
 		socket.on(SocketEvent.SEND_MESSAGE, (data) => this.handleSendMessage(socket, data));
 		socket.on(SocketEvent.TRIGGER_EMOTE, (data) => this.handleTriggerEmote(socket, data));
+		socket.on(SocketEvent.FART, (data) => this.handleFart(socket, data));
 		socket.on(SocketEvent.DISCONNECT, () => this.handleDisconnect(socket, player));
 	}
 
@@ -351,9 +352,19 @@ export class GameService {
 	 */
 	private handleTriggerEmote(socket: Socket, data: any) {
 		// Broadcast the emote trigger event to all connected clients except the sender
-		socket.broadcast.emit(SocketEvent.TRIGGER_EMOTE, {
+		socket.broadcast.to(data.sceneKey).emit(SocketEvent.TRIGGER_EMOTE, {
 			animationName: data.animationName, // Name of the emote animation to be played
 			userId: data.avatarUserId // User ID of the player performing the emote
+		});
+	}
+
+	/**
+	 * Handles player fart.
+	 */
+	private handleFart(socket: Socket, data: any) {
+		// Broadcast the fart event to all connected clients except the sender
+		socket.broadcast.to(data.sceneKey).emit(SocketEvent.FART, {
+			userId: data.userId // User ID of the player performing the fart
 		});
 	}
 

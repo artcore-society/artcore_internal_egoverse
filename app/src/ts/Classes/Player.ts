@@ -6,6 +6,9 @@ import ExperienceScene from './ExperienceScene.ts';
 import BaseCharacter from './BaseCharacter.ts';
 import PlayerControls from './PlayerControls.ts';
 import ParticleSystem from './ParticleSystem.ts';
+import { EventService } from '../Services/EventService.ts';
+import { wait } from '../Helpers';
+import { CustomEventKey } from '../Enums/CustomEventKey.ts';
 
 export default class Player extends BaseCharacter implements IPlayer {
 	public isCurrent: boolean = false;
@@ -35,10 +38,6 @@ export default class Player extends BaseCharacter implements IPlayer {
 				this.controls.connect();
 			}
 		});
-
-		if (!this.isCurrent) {
-			return;
-		}
 
 		// Setup fart particle effect
 		this.particleSystem = new ParticleSystem({
@@ -79,5 +78,23 @@ export default class Player extends BaseCharacter implements IPlayer {
 
 		// Update the final emit position by adding the rotated offset to the character's position
 		return position.add(offset);
+	}
+
+	public async fart() {
+		if (!this.particleSystem || this.particleSystem.isAlive) {
+			return;
+		}
+
+		// Dispatch play audio event
+		EventService.dispatch(CustomEventKey.PLAY_AUDIO, '/assets/audio/fart.mp3');
+
+		// Make active player particle fart system alive for 1 second
+		this.particleSystem.isAlive = true;
+
+		// Wait for set duration in seconds
+		await wait(0.1);
+
+		// Reset alive state
+		this.particleSystem.isAlive = false;
 	}
 }

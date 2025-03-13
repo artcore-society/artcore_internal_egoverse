@@ -9,5 +9,6 @@ export enum SocketEvent {
 	TRIGGER_EMOTE = 'trigger-emote',
 	FAILED = 'failed',
 	CONNECTION = 'connection',
-	DISCONNECT = 'disconnect'
+	DISCONNECT = 'disconnect',
+	FART = 'fart'
 }

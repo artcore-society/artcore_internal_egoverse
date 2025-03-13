@@ -59,6 +59,7 @@ function onClick(animationName: AnimationName) {
 		// Emit socket event
 		ExperienceSocket.emit(SocketEvent.TRIGGER_EMOTE, {
 			avatarUserId: ExperienceManager.instance.userId,
+			sceneKey: ExperienceManager.instance.activeScene.sceneKey,
 			animationName: animationName
 		});
 	}

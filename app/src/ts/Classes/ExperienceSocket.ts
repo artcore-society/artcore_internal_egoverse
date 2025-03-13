@@ -33,7 +33,7 @@ export class ExperienceSocket {
 		ExperienceSocket.instance.socket.on(event, callback);
 	}
 
-	public static emit(event: SocketEvent, data: unknown) {
+	public static emit(event: SocketEvent, data?: unknown) {
 		ExperienceSocket.instance.socket.emit(event, data);
 	}
 }

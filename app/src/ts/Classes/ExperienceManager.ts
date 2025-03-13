@@ -7,7 +7,7 @@ import { SocketEvent } from '../Enums/SocketEvent.ts';
 import { ThreeLoaders } from './ThreeLoaders.ts';
 import { EventService } from '../Services/EventService.ts';
 import { CustomEventKey } from '../Enums/CustomEventKey.ts';
-import { ISocketUserData } from '../Interfaces/ISocketUserData.ts';
+import { ISocketPlayerJoinData } from '../Interfaces/ISocketPlayerJoinData.ts';
 import { ISocketInitData } from '../Interfaces/ISocketInitData.ts';
 import { ExperienceSocket } from './ExperienceSocket.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
@@ -23,6 +23,7 @@ import Player from './Player.ts';
 import ExperienceScene from './ExperienceScene.ts';
 import Npc from './Npc.ts';
 import Stats from 'stats.js';
+import { ISocketUserData } from '../Interfaces/ISocketUserData.ts';
 
 export default class ExperienceManager {
 	private static _instance: ExperienceManager | null = null;
@@ -145,7 +146,7 @@ export default class ExperienceManager {
 			}
 		});
 
-		ExperienceSocket.on<ISocketUserData>(SocketEvent.PLAYER_JOINED, (data) => {
+		ExperienceSocket.on<ISocketPlayerJoinData>(SocketEvent.PLAYER_JOINED, (data) => {
 			console.log('Player joined', data);
 
 			if (data.id === this.userId) {
@@ -170,7 +171,7 @@ export default class ExperienceManager {
 			);
 		});
 
-		ExperienceSocket.on<ISocketUserData>(SocketEvent.PLAYER_LEFT, (data) => {
+		ExperienceSocket.on<ISocketPlayerJoinData>(SocketEvent.PLAYER_LEFT, (data) => {
 			console.log('Player left', data);
 
 			// Get player
@@ -246,6 +247,25 @@ export default class ExperienceManager {
 
 			// Set emote animation name
 			targetVisitor.controls.playAnimation(data.animationName);
+		});
+
+		ExperienceSocket.on<ISocketUserData>(SocketEvent.FART, async (data) => {
+			console.log('Player farted!', data);
+
+			if (!this.activeScene) {
+				return;
+			}
+
+			// Find the target visitor
+			const targetVisitor = this.activeScene.players[data.userId] ?? null;
+
+			if (!targetVisitor) {
+				console.warn('Target player not found when trying to trigger fart...');
+				return;
+			}
+
+			// Trigger fart
+			await targetVisitor.fart();
 		});
 	}
 	setActiveScene(key: SceneKey): void {
