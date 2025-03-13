@@ -5,11 +5,12 @@ cd subsites/egoverse.websitepreview.be
 git fetch --prune
 git stash
 git pull origin main
-cd ./server
-yarn
-cd ../app
+
+cd ./app
 yarn
 yarn build
 
+cd ../server
+yarn
 npx pm2 restart ./workers/staging-egoverse-socket-server.yaml
 @endtask
