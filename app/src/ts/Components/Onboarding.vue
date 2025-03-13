@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { useAvatarStore } from '../Stores/AvatarStore.ts';
 import AvatarOption from './AvatarOption.vue';
 import PrimaryButton from './PrimaryButton.vue';
-import InputField from './InputField.vue';
+import InputField from './TextInputField.vue';
 
 // Define emits
 const emit = defineEmits<{

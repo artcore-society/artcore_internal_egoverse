@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, withDefaults } from 'vue';
 
 // Define emits
 const emit = defineEmits<{
 	(event: 'update:modelValue', value: string): void;
 }>();
 
-// Define props
-withDefaults(
+// Define props with default values
+const props = withDefaults(
 	defineProps<{
 		modelValue: string;
 		value?: string;
@@ -33,14 +33,14 @@ withDefaults(
 <template>
 	<textarea
 		class="rounded-md border-2 border-amber-100 bg-white px-2 text-black transition-opacity duration-500 focus:border-cyan-600 focus:border-transparent focus:ring-1 focus:ring-cyan-600 focus:outline-none"
-		:class="{ 'opacity-50': disabled }"
-		:value="modelValue"
-		:rows="rows"
-		:cols="cols"
-		:placeholder="placeholder"
-		:disabled="disabled"
-		:readonly="readonly"
-		:maxlength="maxLength"
+		:class="{ 'opacity-50': props.disabled }"
+		:value="props.modelValue"
+		:rows="props.rows"
+		:cols="props.cols"
+		:placeholder="props.placeholder"
+		:disabled="props.disabled"
+		:readonly="props.readonly"
+		:maxlength="props.maxLength"
 		@input="emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)"
 	/>
 </template>

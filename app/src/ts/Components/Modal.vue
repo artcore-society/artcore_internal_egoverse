@@ -53,7 +53,7 @@ function close() {
 	}
 }
 
-function closeOnEscape(event) {
+function closeOnEscape(event: KeyboardEvent) {
 	if (event.key === 'Escape' && props.show) {
 		close();
 	}
@@ -66,7 +66,7 @@ onMounted(() => {
 
 onUnmounted(() => {
 	document.removeEventListener('keydown', closeOnEscape);
-	document.body.style.overflow = null;
+	document.body.classList.remove('overflow-hidden');
 });
 </script>
 

@@ -27,7 +27,7 @@ export class EventService {
 	}
 
 	// Remove a specific listener or all listeners for an event
-	static remove(eventName: CustomEventKey, callback?: (payload?: unknown) => void): void {
+	static remove<T = unknown>(eventName: CustomEventKey, callback: (payload?: T) => void): void {
 		const key = EventService.getKey(eventName);
 		if (!this.events[key]) return;
 

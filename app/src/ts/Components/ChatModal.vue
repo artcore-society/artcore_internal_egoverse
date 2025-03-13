@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { TYPE } from 'vue-toastification';
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, Ref } from 'vue';
 import { useClearToast, useShowToast } from '../Composables/Toastification.ts';
-import InputField from './InputField.vue';
 import PrimaryButton from './PrimaryButton.vue';
 import ExperienceManager from '../Classes/ExperienceManager.ts';
 import Modal from './Modal.vue';
+import TextInputField from './TextInputField.vue';
 
 // Props
 const props = defineProps<{
@@ -21,7 +21,7 @@ const emit = defineEmits<{
 }>();
 
 // Reactive state
-const currentPlayerMessage = ref('');
+const currentPlayerMessage: Ref<string | null> = ref('');
 
 // Methods
 const closeChatModal = () => {
@@ -64,7 +64,7 @@ onMounted(() => {
 });
 
 watch(
-	() => props.chats[props.selectedChatUserId],
+	() => props.chats[props.selectedChatUserId!],
 	() => {
 		scrollToBottom();
 	}
@@ -84,7 +84,7 @@ watch(
 					class="text-center text-lg font-bold"
 				>
 					Chat with
-					{{ ExperienceManager.instance.activeScene.players[selectedChatUserId].username }}
+					{{ ExperienceManager.instance.activeScene.players[selectedChatUserId]?.username }}
 				</div>
 
 				<Transition name="fade" mode="out-in" appear>
@@ -113,7 +113,7 @@ watch(
 			</div>
 
 			<form class="flex flex-col gap-2" @submit.prevent="submitMessage">
-				<InputField v-model="currentPlayerMessage" placeholder="Type message here" type="text" class="w-full" />
+				<TextInputField v-model="currentPlayerMessage" placeholder="Type message here" type="text" class="w-full" />
 
 				<PrimaryButton type="submit"> Submit </PrimaryButton>
 			</form>

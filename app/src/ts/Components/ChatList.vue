@@ -21,7 +21,7 @@ const hasChats = computed(() => Object.keys(props.chats).length > 0);
 	<Transition name="fade" mode="out-in" appear>
 		<div v-if="hasChats" class="absolute bottom-2 left-2 z-10 flex flex-col gap-4">
 			<div
-				v-for="(chat, visitorId) in chats"
+				v-for="visitorId in Object.keys(chats)"
 				:key="visitorId"
 				class="flex min-w-42 flex-col gap-2 rounded-md bg-cyan-400 p-2 text-white shadow-xl"
 			>

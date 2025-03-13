@@ -1,4 +1,5 @@
 import { ModelPrefix } from '../Enums/ModelPrefix.ts';
+import { IPhysicsObjectEntry } from './IPhysicsObjectEntry.ts';
 
 export interface IModelEntry {
 	modelPrefix: ModelPrefix;

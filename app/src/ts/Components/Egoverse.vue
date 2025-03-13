@@ -61,8 +61,8 @@ function setReadyState(): void {
 	isReady.value = true;
 }
 
-function playAudio(src: string) {
-	if (!audio.value) {
+function playAudio(src: string | undefined) {
+	if (!audio.value || !src) {
 		return;
 	}
 
