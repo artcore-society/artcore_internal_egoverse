@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed, ref, Ref } from 'vue';
+import { SocketEvent } from '../Enums/SocketEvent.ts';
 import { IEmoteOption } from '../Interfaces/IEmoteOption';
 import { AnimationName } from '../Enums/AnimationName.ts';
+import { ExperienceSocket } from '../Classes/ExperienceSocket.ts';
+import { computed, ref, Ref } from 'vue';
 import Modal from './Modal.vue';
 import ExperienceManager from '../Classes/ExperienceManager.ts';
-import { ExperienceSocket } from '../Classes/ExperienceSocket.ts';
-import { SocketEvent } from '../Enums/SocketEvent.ts';
 
 // Define emits
 const emit = defineEmits<{

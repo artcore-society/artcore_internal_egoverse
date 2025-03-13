@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { SceneKey } from '../Enums/SceneKey';
+import { CameraPov } from '../Enums/CameraPov.ts';
 import { KeyboardKey } from '../Enums/KeyboardKey.ts';
 import { SocketEvent } from '../Enums/SocketEvent.ts';
 import { EventService } from '../Services/EventService.ts';
@@ -16,8 +17,6 @@ import KeyboardIcon from './Icons/KeyboardIcon.vue';
 import KeybindingsModal from './KeybindingsModal.vue';
 import ChatList from './ChatList.vue';
 import ChatModal from './ChatModal.vue';
-import { CameraPov } from '../Enums/CameraPov.ts';
-import { wait } from '../Helpers';
 
 // Avatar store
 const { username, modelId } = useAvatarStore();

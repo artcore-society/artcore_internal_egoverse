@@ -1,14 +1,14 @@
+import { wait } from '../Helpers';
 import { IPlayer } from '../Interfaces/IPlayer.ts';
 import { ModelPrefix } from '../Enums/ModelPrefix.ts';
+import { EventService } from '../Services/EventService.ts';
+import { CustomEventKey } from '../Enums/CustomEventKey.ts';
 import { Vector3, Quaternion } from 'three';
 import ExperienceCamera from './ExperienceCamera.ts';
 import ExperienceScene from './ExperienceScene.ts';
 import BaseCharacter from './BaseCharacter.ts';
 import PlayerControls from './PlayerControls.ts';
 import ParticleSystem from './ParticleSystem.ts';
-import { EventService } from '../Services/EventService.ts';
-import { wait } from '../Helpers';
-import { CustomEventKey } from '../Enums/CustomEventKey.ts';
 
 export default class Player extends BaseCharacter implements IPlayer {
 	public isCurrent: boolean = false;

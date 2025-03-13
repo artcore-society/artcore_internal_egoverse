@@ -6,6 +6,7 @@ import { IBaseCharacter } from '../Interfaces/IBaseCharacter.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { PhysicsCollisionGroup } from '../Enums/PhysicsCollisionGroup.ts';
 import { copyQuaternionToCannon } from '../Helpers';
+import { CharacterFacingDirection } from '../Enums/CharacterFacingDirection.ts';
 import { AnimationAction, AnimationClip, AnimationMixer, Box3, Mesh, Object3D, Quaternion, Vector3 } from 'three';
 import ExperienceScene from './ExperienceScene.ts';
 import ExperienceManager from './ExperienceManager.ts';
@@ -14,7 +15,6 @@ import NpcControls from './NpcControls.ts';
 import ExperienceCamera from './ExperienceCamera.ts';
 import Player from './Player.ts';
 import Text3D from './Text3D.ts';
-import { CharacterFacingDirection } from '../Enums/CharacterFacingDirection.ts';
 
 export default class BaseCharacter implements IBaseCharacter {
 	public animationsMap: Map<string, AnimationAction>;

@@ -7,14 +7,15 @@ import { SocketEvent } from '../Enums/SocketEvent.ts';
 import { ThreeLoaders } from './ThreeLoaders.ts';
 import { EventService } from '../Services/EventService.ts';
 import { CustomEventKey } from '../Enums/CustomEventKey.ts';
-import { ISocketPlayerJoinData } from '../Interfaces/ISocketPlayerJoinData.ts';
 import { ISocketInitData } from '../Interfaces/ISocketInitData.ts';
+import { ISocketUserData } from '../Interfaces/ISocketUserData.ts';
 import { ExperienceSocket } from './ExperienceSocket.ts';
 import { IExperienceScene } from '../Interfaces/IExperienceScene.ts';
 import { IExtendedObject3D } from '../Interfaces/IExtendedObject3D.ts';
 import { IModelCacheEntry } from '../Interfaces/IModelCacheEntry.ts';
 import { ISocketMessageData } from '../Interfaces/ISocketMessageData.ts';
 import { ISocketSceneStateData } from '../Interfaces/ISocketSceneStateData.ts';
+import { ISocketPlayerJoinData } from '../Interfaces/ISocketPlayerJoinData.ts';
 import { ISocketTriggerEmoteData } from '../Interfaces/ISocketTriggerEmoteData.ts';
 import { ISocketClientUpdatePlayerData } from '../Interfaces/ISocketClientUpdatePlayerData.ts';
 import { Clock, DefaultLoadingManager, LoadingManager, Quaternion, Raycaster, Vector2, Vector3 } from 'three';
@@ -23,7 +24,6 @@ import Player from './Player.ts';
 import ExperienceScene from './ExperienceScene.ts';
 import Npc from './Npc.ts';
 import Stats from 'stats.js';
-import { ISocketUserData } from '../Interfaces/ISocketUserData.ts';
 
 export default class ExperienceManager {
 	private static _instance: ExperienceManager | null = null;
