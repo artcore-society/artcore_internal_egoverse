@@ -6,6 +6,9 @@ git fetch --prune
 git stash
 git pull origin main
 
+# Pull git lfs changes
+git lfs pull
+
 # Build the frontend app
 cd ./app
 yarn
