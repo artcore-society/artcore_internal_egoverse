@@ -1,8 +1,0 @@
-apps:
-  - name: staging-egoverse-socket-server
-    script: yarn
-    exec_mode: fork
-    interpreter: none
-    instances: 1
-    args:
-      - "socket"
