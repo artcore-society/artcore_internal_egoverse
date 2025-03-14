@@ -2,6 +2,9 @@
 
 This repository contains the source code for [Egoverse](https://github.com/dennisego1999/egoverse), a project structured into two main folders: `app` and `server`.
 
+## Important
+When deploying a change, make sure to restart the daemon in Laravel Forge.
+
 ## Node Version
 Make sure you're using the correct Node.js version for the project by running the following in the root of the repository:
 ```sh
