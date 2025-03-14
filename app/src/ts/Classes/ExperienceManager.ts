@@ -422,7 +422,7 @@ export default class ExperienceManager {
 		let hoveredPlayerSocketId: string | null = null;
 
 		for (const [socketId, player] of Object.entries(players)) {
-			if (player.username === characterIntersect.name) {
+			if (player.socketId === characterIntersect.userData['socketId']) {
 				if (!player.isCurrent) {
 					this.hoveredPlayer = player;
 					hoveredPlayerSocketId = socketId;

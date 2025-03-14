@@ -126,9 +126,6 @@ function submitMessage(message: string) {
 			message: message
 		});
 	}
-
-	// Reset selected player
-	ExperienceManager.instance.selectedPlayer.value = null;
 }
 
 function openChatModal(visitorId: string) {
@@ -140,6 +137,7 @@ function openChatModal(visitorId: string) {
 function closeChatModal() {
 	isChatModalVisible.value = false;
 	selectedChatUserId.value = null;
+	ExperienceManager.instance.selectedPlayer.value = null;
 }
 
 async function onKeyDown(event: KeyboardEvent) {

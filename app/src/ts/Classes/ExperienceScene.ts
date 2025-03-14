@@ -312,6 +312,7 @@ export default class ExperienceScene implements IExperienceScene {
 
 		// Create current player and add to players object
 		this.players[ExperienceManager.instance.userId!] = new Player(
+			ExperienceManager.instance.userId!,
 			username,
 			ModelPrefix.PLAYER,
 			modelId,
@@ -344,6 +345,7 @@ export default class ExperienceScene implements IExperienceScene {
 	) {
 		// Create and add visitor to visitors list
 		this.players[userId] = new Player(
+			userId,
 			username,
 			ModelPrefix.PLAYER,
 			modelId,

@@ -11,10 +11,12 @@ import PlayerControls from './PlayerControls.ts';
 import ParticleSystem from './ParticleSystem.ts';
 
 export default class Player extends BaseCharacter implements IPlayer {
+	public socketId: string;
 	public isCurrent: boolean = false;
 	public particleSystem: ParticleSystem | null = null;
 
 	constructor(
+		socketId: string,
 		username: string,
 		modelPrefix: ModelPrefix,
 		modelId: number,
@@ -26,12 +28,19 @@ export default class Player extends BaseCharacter implements IPlayer {
 	) {
 		super(username, modelPrefix, modelId, camera, experienceScene, spawnPosition, spawnRotation);
 
+		this.socketId = socketId;
 		this.isCurrent = isCurrent;
 
 		// Initiate
 		this.init().then(() => {
 			// Setup controls after player is fully initiated
 			this.controls = new PlayerControls(this);
+
+			// Store socket id in model userdata
+			if (this.model) {
+				console.log('SET SOCKET ID');
+				this.model.userData['socketId'] = this.socketId;
+			}
 
 			if (this.isCurrent) {
 				// Make sure controls are connected
