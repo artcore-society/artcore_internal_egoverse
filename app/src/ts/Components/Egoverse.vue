@@ -40,7 +40,8 @@ const keyBindingsData: Ref<Array<{ instruction: string; labels: Array<string>; i
 	{ instruction: 'Jump', labels: ['SPACE'], isCombination: true },
 	{ instruction: 'Toggle key bindings modal', labels: ['SHIFT', '?'], isCombination: true },
 	{ instruction: 'Toggle emote selection', labels: ['T'], isCombination: true },
-	{ instruction: 'Toggle camera pov', labels: ['V'], isCombination: true }
+	{ instruction: 'Toggle camera pov', labels: ['V'], isCombination: true },
+	{ instruction: 'Fart', labels: ['F'], isCombination: true }
 ]);
 const keysPressed: { [key in KeyboardKey]: boolean } = {} as {
 	[key in KeyboardKey]: boolean;
