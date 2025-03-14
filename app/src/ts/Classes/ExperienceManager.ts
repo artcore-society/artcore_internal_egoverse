@@ -385,7 +385,7 @@ export default class ExperienceManager {
 		// Calculate objects intersecting the picking ray
 		const intersects = this.raycaster.intersectObjects(intersectTargets, true);
 
-		// Find the first intersected object that belongs to an player
+		// Find the first intersected object that belongs to a player
 		let characterIntersect: IExtendedObject3D | null = null;
 		for (const intersect of intersects) {
 			let obj: IExtendedObject3D = intersect.object;
