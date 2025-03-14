@@ -22,7 +22,8 @@ export class Scene implements IScene {
 				modelId: 1,
 				spawnRotation: new Quaternion(),
 				spawnPosition: new Vector3(),
-				spawnScale: new Vector3()
+				spawnScale: new Vector3(),
+				physicsObjects: []
 			}
 		};
 		this.players = new Map();

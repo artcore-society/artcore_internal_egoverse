@@ -304,8 +304,11 @@ export class GameService {
 			sceneKey: newSceneKey
 		});
 
-		// Send the updated scene state to the newly joined player.
-		this.io.to(newSceneKey).emit(SocketEvent.SCENE_STATE, newScene.getState(socket.id));
+		// Send the updated scene state to all players in the new scene, not just the newly joined player
+		[...newScene.players.values()].forEach((otherPlayer) => {
+			// Send state to each player with their own `socket.id`
+			this.io.to(otherPlayer.id).emit(SocketEvent.SCENE_STATE, newScene.getState(otherPlayer.id));
+		});
 	}
 
 	/**
